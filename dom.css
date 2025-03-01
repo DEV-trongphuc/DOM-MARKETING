@@ -236,6 +236,10 @@ body {
 }
 .account_item_name {
   font-weight: bold;
+  white-space: nowrap; /* Không cho xuống hàng */
+  overflow: hidden; /* Ẩn phần vượt quá kích thước */
+  text-overflow: ellipsis; /* Hiển thị dấu ... */
+  max-width: 13rem; /* Điều chỉnh độ rộng tối đa tùy ý */
 }
 .account_item_id {
   font-size: 1.2rem;
