@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <link rel="icon" href="./img/domfavicon.png" type="image/png" />
+    <link rel="stylesheet" href="dom.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  </head>
+  <body>
+    <main id="dom" class="">
+      <div class="dom_warning">
+        <p>
+          <i class="fa-solid fa-bolt"></i> <span> View High CPM Adsets </span>
+        </p>
+      </div>
+      <div id="dom_sidebar">
+        <div class="dom_logo">
+          <img
+            src="https://ampersand-reports-dom.netlify.app/DOM-img/DOM_LOGO.png"
+            alt="Dom Marketing Logo"
+          />
+          <i class="fa-regular fa-square-caret-left"></i>
+        </div>
+        <div class="dom_account_view">
+          <div class="dom_account_view_block"></div>
+          <ul></ul>
+        </div>
+        <div class="dom_menu">
+          <span class="dom_menu_text">Main Menu</span>
+          <ul class="dom_main_menu">
+            <li class="active">
+              <i class="fa-solid fa-chart-column"></i> <span> Dashboard</span>
+            </li>
+            <li>
+              <i class="fa-solid fa-chart-pie"></i> <span> Performance</span>
+            </li>
+            <li>
+              <i class="fa-solid fa-money-check"></i> <span> Account Info</span>
+            </li>
+          </ul>
+          <span class="dom_menu_text">Quick Filter</span>
+          <ul class="dom_sub_menu"></ul>
+        </div>
+      </div>
+      <div class="dom_sidebar_overlay"></div>
+      <div id="dom_header">
+        <div class="dom_navbar">
+          <i class="fa-solid fa-bars"></i>
+        </div>
+        <div class="dom_time">
+          <i class="fa-solid fa-calendar-days"></i>
+          <div class="dom_selected time">
+            <span class="dom_selected_text">This Month</span>
+            <i class="fa-solid fa-angle-down"></i>
+            <ul class="dom_select_show time">
+              <li data-date="today">
+                <span class="radio_box"></span> <span>Today</span>
+              </li>
+              <li data-date="yesterday">
+                <span class="radio_box"></span> <span>Yesterday</span>
+              </li>
+              <li data-date="this%5fmonth" class="active">
+                <span class="radio_box"></span> <span>This Month</span>
+              </li>
+              <li data-date="last%5fmonth">
+                <span class="radio_box"></span> <span>Last Month</span>
+              </li>
+              <li data-date="this%5fquarter">
+                <span class="radio_box"></span> <span>This Quarter</span>
+              </li>
+              <li data-date="last%5fquarter">
+                <span class="radio_box"></span> <span>Last Quarter</span>
+              </li>
+              <li data-date="this_year">
+                <span class="radio_box"></span> <span>This Year</span>
+              </li>
+              <li data-date="custom_date" class="custom_item">
+                <span class="radio_box"></span> <span>Custom Date</span>
+                <div class="custom_date">
+                  <p><span>Start</span> <input type="date" id="start" /></p>
+                  <p><span>End</span> <input type="date" id="end" /></p>
+                  <a class="apply_custom_date">Apply</a>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <p id="dom_time_show">01/01/2024</p>
+        </div>
+
+        <div class="dom_user">
+          <p>DOM</p>
+          <img src="" />
+          <ul>
+            <li id="logout">
+              <a>
+                <i class="fa-solid fa-rectangle-list"></i>
+                <span>Accounts</span>
+              </a>
+            </li>
+            <!-- <li>
+              <a href="javascript:;" id="dom_role">
+                <i class="fa-solid fa-feather"></i>
+                <span>DOM Role</span>
+              </a>
+            </li> -->
+            <li>
+              <a href="https://www.facebook.com/turni0" target="_blank">
+                <i class="fa-solid fa-headset"></i>
+                <span>Contact IT</span>
+              </a>
+            </li>
+            <li id="fixapp">
+              <a>
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+                <span>Fix App</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div id="dom_content">
+        <div class="dom_filter_head isViewPerformance">
+          <div class="live-indicator">
+            <span class="live-dot"></span>
+          </div>
+          <h2>Report for</h2>
+          <div class="dom_selected campaign">
+            <span class="dom_selected_text">Data for all campaigns</span>
+            <i class="fa-solid fa-sort-down"></i>
+            <ul class="dom_select_show view"></ul>
+          </div>
+          <div class="dom_selected adset">
+            <span class="dom_selected_text">Data for all adsets</span>
+            <i class="fa-solid fa-sort-down"></i>
+            <ul class="dom_select_show view">
+              <li class="active">
+                <span class="radio_box"></span>
+                <span>Today</span>
+              </li>
+              <li>
+                <span class="radio_box"></span>
+                <span>Yesterday</span>
+              </li>
+              <li>
+                <span class="radio_box"></span>
+                <span>This Month</span>
+              </li>
+              <li>
+                <span class="radio_box"></span>
+                <span> Last Month</span>
+              </li>
+              <li>
+                <span class="radio_box"></span>
+                <span> This Quarter</span>
+              </li>
+              <li>
+                <span class="radio_box"></span>
+                <span> Last Quarter</span>
+              </li>
+              <li>
+                <span class="radio_box"></span>
+                <span> Data Maximum</span>
+              </li>
+              <li>
+                <span class="radio_box"></span>
+                <span> Custom date</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="dom_block spent_chart">
+          <div class="dom_block_item w50">
+            <h2>Cost spent by Optimization Goal</h2>
+            <canvas id="chartSpentType"></canvas>
+          </div>
+          <div class="dom_block_item w50">
+            <div class="dom_switch">
+              <h2>Highest spent</h2>
+              <div class="dom_switch_btns">
+                <p class="active">Campaigns</p>
+                <p>Adsets</p>
+              </div>
+            </div>
+            <ul class="dom_toplist"></ul>
+          </div>
+        </div>
+
+        <div class="dom_total"></div>
+        <div class="dom_block isViewPerformance">
+          <div class="dom_block_item w40">
+            <h2>Top Event Engagement</h2>
+            <ul class="dom_toplist event"></ul>
+          </div>
+          <div class="dom_block_item w30 hidebg dom_performance">
+            <div>
+              <h2>Cost per Mile</h2>
+              <p class="dom_cpm">5.000đ</p>
+            </div>
+            <div>
+              <h2>Reach to 1 result</h2>
+              <p class="dom_rpr">1.000</p>
+            </div>
+          </div>
+          <div class="dom_block_item w30">
+            <div class="dom_frequency">
+              <h2>Frequency</h2>
+
+              <div
+                class="semi-donut margin"
+                style="--percentage: 80; --fill: #ffa900"
+              >
+                <p class="frequency_number">1.8</p>
+              </div>
+              <div class="frequency_number_label">
+                <p>0</p>
+                <p>4</p>
+              </div>
+              <div class="dom_frequency_label">
+                <p>
+                  <b>Impression</b>
+                  <span class="dom_frequency_label_impression">01111100</span>
+                </p>
+                <p>
+                  <b>Reach</b>
+                  <span class="dom_frequency_label_reach">00110111</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="dom_block mainView">
+          <div class="dom_block_item w100">
+            <h2>Cost spent by Optimization Goal</h2>
+            <div class="dom_selected daily">
+              <span class="dom_selected_text">View Spent</span>
+              <i class="fa-solid fa-angle-down"></i>
+              <ul class="dom_select_show daily">
+                <li data-view="Reach">
+                  <span class="radio_box"></span><span>Reach</span>
+                </li>
+                <li data-view="Message Start">
+                  <span class="radio_box"></span><span>Message Start</span>
+                </li>
+                <li data-view="Leads">
+                  <span class="radio_box"></span><span>Leads</span>
+                </li>
+                <li data-view="Post Reactions">
+                  <span class="radio_box"></span><span>Post Reactions</span>
+                </li>
+                <li data-view="Post Engagement">
+                  <span class="radio_box"></span><span>Post Engagement</span>
+                </li>
+                <li data-view="Page Likes">
+                  <span class="radio_box"></span><span>Page Likes</span>
+                </li>
+                <li data-view="Spend" class="active">
+                  <span class="radio_box"></span><span>Spent</span>
+                </li>
+                <li data-view="Link Click">
+                  <span class="radio_box"></span><span>Link Click</span>
+                </li>
+              </ul>
+            </div>
+            <canvas id="chartDaily"></canvas>
+          </div>
+        </div>
+        <div class="dom_table">
+          <div class="dom_table_head">
+            <h2>Detail Data Adset</h2>
+            <div>
+              <input
+                class="dom_search"
+                placeholder="Filter Campaign name & Adset name"
+              />
+              <p class="dom_export_main">
+                Export <i class="fa-solid fa-table"></i>
+              </p>
+            </div>
+          </div>
+          <div class="dom_table_box">
+            <div class="dom_table_container">
+              <table id="main_table">
+                <thead></thead>
+                <tbody></tbody>
+                <tfoot></tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="dom_demographic">
+          <div class="dom_demographic_title">
+            <i class="fa-solid fa-circle-chevron-left"></i>
+            <div>
+              <span>Demographic </span>
+              <span class="dom_demographic_title_item campaign">Campaign</span>
+              <span>-</span>
+              <span class="dom_demographic_title_item adset">Adset</span>
+            </div>
+          </div>
+          <div class="dom_total demographic"></div>
+          <div class="dom_block">
+            <div class="dom_block_item w100">
+              <h2>Hourly Spent & Impression</h2>
+              <canvas id="hourlyChart"></canvas>
+            </div>
+          </div>
+          <div class="dom_block">
+            <div class="dom_block_item w50">
+              <h2>Reach by age and gender</h2>
+              <canvas id="ageGenderChart"></canvas>
+            </div>
+            <div class="dom_block_item w50">
+              <h2>Reach by Region</h2>
+              <canvas id="regionChart"></canvas>
+            </div>
+          </div>
+          <div class="dom_block">
+            <div class="dom_block_item w25">
+              <h2>Reach on Flatform</h2>
+              <canvas id="reachChart"></canvas>
+            </div>
+            <div class="dom_block_item w25">
+              <h2>Reach on Gender</h2>
+              <canvas id="genderChart"></canvas>
+            </div>
+            <div class="dom_block_item w50">
+              <h2>Impression on Device</h2>
+              <ul class="dom_toplist device"></ul>
+            </div>
+          </div>
+        </div>
+        <div class="dom_demographic_overlay"></div>
+      </div>
+      <div id="dom_payment" class="none">
+        <div class="dom_payment_block"></div>
+        <div class="dom_block">
+          <div class="dom_block_item w100">
+            <h2>Advertising by month</h2>
+            <div class="dom_block_item_wrap">
+              <div class="dom_selected monthly">
+                <span class="dom_selected_text">View Spent</span>
+                <i class="fa-solid fa-angle-down"></i>
+                <ul class="dom_select_show monthly">
+                  <li data-view="Reach">
+                    <span class="radio_box"></span><span>Reach</span>
+                  </li>
+                  <li data-view="Message Start">
+                    <span class="radio_box"></span><span>Message Start</span>
+                  </li>
+                  <li data-view="Leads">
+                    <span class="radio_box"></span><span>Leads</span>
+                  </li>
+                  <li data-view="Post Reactions">
+                    <span class="radio_box"></span><span>Post Reactions</span>
+                  </li>
+                  <li data-view="Post Engagement">
+                    <span class="radio_box"></span><span>Post Engagement</span>
+                  </li>
+                  <li data-view="Page Likes">
+                    <span class="radio_box"></span><span>Page Likes</span>
+                  </li>
+                  <li data-view="Spend" class="active">
+                    <span class="radio_box"></span><span>Spent</span>
+                  </li>
+                  <li data-view="Link Click">
+                    <span class="radio_box"></span><span>Link Click</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="dom_selected yearly">
+                <span class="dom_selected_text">2025</span>
+                <i class="fa-solid fa-angle-down"></i>
+                <ul class="dom_select_show yearly"></ul>
+              </div>
+            </div>
+            <canvas id="chartMonthly"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="loading">
+        <span class="loader"></span>
+      </div>
+    </main>
+    <script src="./domvar.js"></script>
+    <script src="dom.js"></script>
+  </body>
+</html>
