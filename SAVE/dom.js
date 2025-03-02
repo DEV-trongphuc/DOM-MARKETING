@@ -2801,7 +2801,7 @@ function renderAccountInfo(data) {
         <p class="account_item_id">${adAccountIdView}</p>
       </div>
      </div>
-    ${accounts.length > 1 && `  <i class="fa-solid fa-sort"></i>`}
+    ${accounts.length > 1 ? `<i class="fa-solid fa-sort"></i>` : ""}
     </div>
   `;
 }
