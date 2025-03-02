@@ -176,19 +176,53 @@ const selecedTextCampaign = document.querySelector(
 const selecedTextAdset = document.querySelector(
   ".dom_selected.adset .dom_selected_text"
 );
+
+const dom_accounts_btn_add = document.querySelector(".dom_accounts_btn_add");
+const dom_accounts_btn_close = document.querySelector(
+  ".dom_accounts_btn_close"
+);
+const accounts_btn = document.querySelector("#accounts_btn");
+const dom_close_add = document.querySelector(".dom_close_add");
+const dom_close_edit = document.querySelector(".dom_close_edit");
+const dom_accounts = document.querySelector(".dom_accounts");
 const dom_sidebar_overlay = document.querySelector(".dom_sidebar_overlay");
+const dom_accounts_list = document.querySelector(".dom_accounts_list");
+const view_report = document.querySelector("#view_report");
+const dom_edit_info = document.querySelector(".dom_edit_info");
+const dom_accounts_overlay = document.querySelector(".dom_accounts_overlay");
+const key_check = document.querySelector("#key_check");
+const key_adset = document.querySelector("#key_adset");
+const confirm_keyword = document.querySelector("#confirm_keyword");
+const dom_key_checkLabel = document.querySelector(".dom_key_check ~ label");
 // RENDER
-let accounts =
-  typeof listAccount !== "undefined" && listAccount.length
-    ? listAccount
-    : (() => {
-        try {
-          return JSON.parse(localStorage.getItem("accounts")) || [];
-        } catch (error) {
-          console.error("Lỗi parse accounts từ localStorage:", error);
-          return [];
-        }
-      })();
+
+let accounts = (() => {
+  try {
+    let localData = localStorage.getItem("accounts");
+
+    if (
+      !localData &&
+      typeof listAccount !== "undefined" &&
+      listAccount.length
+    ) {
+      localStorage.setItem("accounts", JSON.stringify(listAccount));
+      return listAccount;
+    }
+
+    const localAccounts = JSON.parse(localData) || [];
+
+    if (typeof listAccount !== "undefined" && listAccount.length) {
+      return localAccounts.length > listAccount.length
+        ? localAccounts
+        : listAccount;
+    }
+
+    return localAccounts;
+  } catch (error) {
+    console.error("Lỗi parse accounts từ localStorage:", error);
+    return [];
+  }
+})();
 
 if (!accounts.length) {
   window.location.href = "/login.html";
@@ -201,6 +235,7 @@ if (
   accountViewID >= accounts.length
 ) {
   accountViewID = 0; // Nếu không hợp lệ, set về 0
+  localStorage.account_view = "0";
 }
 
 const viewMaster = accounts[accountViewID] || accounts[0] || null; // Nếu vẫn lỗi, lấy accounts[0] hoặc null
@@ -220,6 +255,50 @@ function firstLoad() {
 }
 firstLoad();
 // EVENT
+view_report.addEventListener("click", () => {
+  const adId = document.getElementById("ad_id").value.trim();
+  const accessToken = document.getElementById("access_token").value.trim();
+
+  if (!adId || !accessToken) {
+    alert("Vui lòng nhập đầy đủ Ad ID và Access Token!");
+    return;
+  }
+
+  // Kiểm tra xem có tồn tại trong accounts không
+  const isExist = accounts.some((item) => item.id === adId);
+  if (isExist) {
+    alert("Ad ID đã tồn tại trong danh sách accounts!");
+    return;
+  }
+
+  fetchAdAccountActivities(adId, accessToken);
+});
+
+dom_accounts_btn_add.addEventListener("click", () => {
+  dom_accounts.classList.add("add");
+});
+accounts_btn.addEventListener("click", () => {
+  dom_accounts.classList.add("active");
+});
+dom_accounts_btn_close.addEventListener("click", () => {
+  dom_accounts.classList.remove("active");
+});
+dom_accounts_overlay.addEventListener("click", () => {
+  dom_accounts.classList.remove("active");
+});
+dom_close_add.addEventListener("click", () => {
+  dom_accounts.classList.remove("add");
+});
+dom_close_edit.addEventListener("click", () => {
+  dom_accounts.classList.remove("edit");
+});
+
+document.getElementById("key_check").addEventListener("change", function () {
+  document
+    .querySelector(".dom_key_check ~ label")
+    .classList.toggle("active", this.checked);
+});
+
 dom_account_view_block.addEventListener("click", () => {
   dom_account_view_block.classList.toggle("active");
 });
@@ -359,6 +438,7 @@ document.addEventListener("change", function (event) {
         row.classList.toggle("checked", isChecked);
       }
     });
+    updateFooterOnCheck(tableDataGlobal);
   } else if (event.target.classList.contains("dom_select_row")) {
     const row = event.target.closest("tr");
     if (row) {
@@ -370,9 +450,8 @@ document.addEventListener("change", function (event) {
     const checkedBoxes = document.querySelectorAll(".dom_select_row:checked");
     document.getElementById("dom_select_all").checked =
       allCheckboxes.length > 0 && allCheckboxes.length === checkedBoxes.length;
+    updateFooterOnCheck(tableDataGlobal);
   }
-
-  updateFooterOnCheck(tableDataGlobal);
 });
 apply_custom_date.addEventListener("click", () => {
   const startDateIp = document.getElementById("start").value;
@@ -2756,14 +2835,30 @@ function handleViewDemographic(campaign, adset, id) {
 
 async function fetchAdAccount() {
   let apiUrl = `https://graph.facebook.com/v22.0/act_${adAccountIdView}?fields=balance,age,created_time,id,name,currency,amount_spent,funding_source_details,spend_cap,business,owner,timezone_name&access_token=${accessTokenView}`;
+
   try {
     const response = await fetch(apiUrl);
     const data = await response.json();
+
+    // Kiểm tra nếu có business.id thì fetch avatar của BM
+    if (data.business && data.business.id) {
+      const apiBM = `https://graph.facebook.com/v22.0/${data.business.id}?fields=picture&access_token=${accessTokenView}`;
+      const bmResponse = await fetch(apiBM);
+      const bmData = await bmResponse.json();
+
+      // Gán avatar vào data
+      data.avatar = bmData.picture?.data?.url || null;
+    } else {
+      data.avatar = null;
+    }
+    console.log(data);
+
     renderDomPayment(data);
   } catch (error) {
     console.error("Fetch error:", error.message);
   }
 }
+
 function renderMonthlyinYear() {
   const currentYear = new Date().getFullYear();
   const yearsArray = [currentYear, currentYear - 1, currentYear - 2];
@@ -2784,26 +2879,70 @@ function renderMonthlyinYear() {
   });
 }
 function renderAccountInfo(data) {
-  const name = typeof accName !== "undefined" ? accName : data.name;
-  const avatar =
-    typeof accAvatar !== "undefined" ? accAvatar : "./img/dom_avatar.jpg";
-
-  document.title = `DOM Report - Meta - ${name}`;
-  dom_userP.textContent = name;
-  dom_userIMG.src = avatar;
+  document.title = `DOM Report - Meta - ${data.name}`;
+  dom_userP.textContent = data.name;
+  dom_userIMG.src = data.avatar;
 
   dom_account_view_block.innerHTML = `
     <div class="account_item">
      <div>
-      <img class="account_item_avatar" src="${avatar}">
+      <img class="account_item_avatar" src="${data.avatar}">
       <div class="account_item_info">
-        <p class="account_item_name">${name}</p>
+        <p class="account_item_name">${data.name}</p>
         <p class="account_item_id">${adAccountIdView}</p>
       </div>
      </div>
     ${accounts.length > 1 ? `<i class="fa-solid fa-sort"></i>` : ""}
     </div>
   `;
+}
+
+async function fetchAdAccountActivities(adId, accessToken) {
+  let apiUrl = `https://graph.facebook.com/v22.0/act_${adId}?fields=balance,age,created_time,fb_entity,tax_id,id,name,account_status,currency,amount_spent,funding_source_details,spend_cap,business,owner,timezone_name,disable_reason&access_token=${accessToken}`;
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    if (data.business && data.business.id) {
+      const apiBM = `https://graph.facebook.com/v22.0/${data.business.id}?fields=picture&access_token=${accessTokenView}`;
+      const bmResponse = await fetch(apiBM);
+      const bmData = await bmResponse.json();
+
+      // Gán avatar vào data
+      data.avatar =
+        bmData.picture?.data?.url ||
+        "https://dom-marketing.netlify.app/img/dom_avatar.jpg";
+    } else {
+      data.avatar = "https://dom-marketing.netlify.app/img/dom_avatar.jpg";
+    }
+    if (data.name) {
+      const item = {
+        brand: false,
+        quick: [
+          "Lead Form",
+          "Awareness",
+          "Engagement",
+          "Message",
+          "Traffic",
+          "Pagelike",
+        ],
+        avatar: data.avatar,
+        name: data.name,
+        id: adId,
+        access: accessToken,
+      };
+      accounts = [...accounts, item];
+      localStorage.accounts = JSON.stringify(accounts);
+      renderListAccounts();
+      renderMasterView();
+      alert(`Kết nối thành công với [${data.name}]`);
+      dom_accounts.classList.remove("add");
+    } else {
+      alert("ID hoặc Token không hợp lệ");
+    }
+  } catch (error) {
+    alert("ID hoặc Token không hợp lệ");
+    console.error("Fetch error:", error.message);
+  }
 }
 
 function renderMasterView() {
@@ -2820,6 +2959,125 @@ function renderMasterView() {
     )
     .join("");
 }
+function renderListAccounts() {
+  if (!accounts?.length) return;
+
+  dom_accounts_list.innerHTML = accounts
+    .map(
+      (item, index) => `
+      <div class="dom_accounts_list_item"  data-id="${index}">
+            <div>
+              <img
+                src=${item.avatar}
+              />
+              <p>
+                <span>${item.name}</span>
+                <span>${item.id}</span>
+              </p>
+            </div>
+            <div >
+              <i class="fa-solid fa-pen-to-square account_edit"></i>
+              <i class="fa-solid fa-trash-can account_remove"></i>
+            </div>
+          </div>
+      `
+    )
+    .join("");
+}
+renderListAccounts();
+
+// Lắng nghe sự kiện xóa và chỉnh sửa
+dom_accounts_list.addEventListener("click", (event) => {
+  const target = event.target;
+
+  // Nếu click vào nút xóa
+  if (target.classList.contains("account_remove")) {
+    const parentItem = target.closest(".dom_accounts_list_item");
+    const index = parseInt(parentItem.dataset.id);
+
+    if (confirm("Bạn có chắc muốn xóa tài khoản này không?")) {
+      accounts.splice(index, 1); // Xóa khỏi mảng
+      localStorage.accounts = JSON.stringify(accounts); // Cập nhật localStorage
+      renderListAccounts(); // Render lại danh sách
+    }
+    return;
+  }
+
+  // Nếu click vào nút chỉnh sửa
+  if (target.classList.contains("account_edit")) {
+    dom_accounts.classList.add("edit");
+    const parentItem = target.closest(".dom_accounts_list_item");
+    const index = parseInt(parentItem.dataset.id);
+    const item = accounts[index];
+
+    dom_edit_info.innerHTML = `
+      <img src=${item.avatar} />
+      <p>
+        <span>${item.name}</span>
+        <span>${item.id}</span>
+      </p>
+    `;
+
+    // Cập nhật trạng thái ô checkbox và input từ khóa
+    key_check.checked = !!item.brand;
+    dom_key_checkLabel.classList.toggle("active", item.brand);
+    key_adset.value =
+      Array.isArray(item.quick) && item.brand ? item.quick.join(", ") : "";
+
+    confirm_keyword.dataset.index = index;
+  }
+});
+
+confirm_keyword.addEventListener("click", () => {
+  const index = confirm_keyword.dataset.index;
+  if (index === undefined) return;
+
+  const item = accounts[index];
+
+  if (key_check.checked) {
+    const keywords = key_adset.value
+      .split(",")
+      .map((kw) => kw.trim())
+      .filter((kw) => kw);
+
+    if (!keywords.length) {
+      alert("Vui lòng nhập từ khóa!");
+      return;
+    }
+    if (key_adset.value.trim() === item.quick.join(", ")) {
+      dom_accounts.classList.remove("edit");
+      return;
+    }
+
+    item.quick = keywords;
+    item.requick = keywords;
+    item.brand = true;
+  } else {
+    item.brand = false;
+    item.quick = [
+      "Lead Form",
+      "Awareness",
+      "Engagement",
+      "Message",
+      "Traffic",
+      "Pagelike",
+    ];
+  }
+
+  accounts[index] = item;
+  localStorage.accounts = JSON.stringify(accounts);
+  if (index == accountViewID) {
+    const viewMaster = accounts[index];
+    isBrand = viewMaster.brand;
+    accessTokenView = viewMaster.access;
+    adAccountIdView = viewMaster.id;
+    accAvatar = viewMaster.avatar;
+    quickFilter = viewMaster.quick;
+    firstLoad();
+  }
+  alert("Cập nhật bộ lọc thành công");
+  dom_accounts.classList.remove("edit");
+});
 
 renderMasterView();
 
@@ -2827,7 +3085,7 @@ dom_account_viewUl.addEventListener("click", (event) => {
   const clickedLi = event.target.closest("li"); // Kiểm tra có click vào li hay không
   if (clickedLi) {
     dom_account_view_block.classList.remove("active");
-    if (clickedLi.dataset.id == accountViewID) return;
+    // if (clickedLi.dataset.id == accountViewID) return;
     const viewMaster = accounts[clickedLi.dataset.id];
     isBrand = viewMaster.brand;
     accessTokenView = viewMaster.access;
