@@ -335,23 +335,33 @@ dom_sidebar_overlay.addEventListener("click", () =>
   removeClass(dom_sidebar, "active")
 );
 
+const cpmThresholds = {
+  Awareness: 7000,
+  "Lead Form": 120000,
+  Message: 150000,
+  Engagement: 100000,
+};
+
+// Tạo Set cho từng nhóm mục tiêu
+const goalSets = Object.fromEntries(
+  Object.entries(goalMapping)
+    .filter(([key]) => cpmThresholds[key]) // Lọc chỉ lấy các nhóm có ngưỡng CPM
+    .map(([key, values]) => [key, new Set(values)])
+);
 dom_warning.addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
   isViewHighCPM = true;
-  const awarenessSet = new Set(goalMapping.Awareness);
-  const engagementSet = new Set(goalMapping.Engagement);
+  listHighCPM = dataFullAdset.filter(
+    ({ spend, impressions, optimization_goal }) => {
+      if (!impressions || impressions <= 0) return false; // Tránh lỗi chia cho 0
 
-  listHighCPM = dataFullAdset.filter((item) => {
-    if (!item.impressions || item.impressions <= 0) return false; // Tránh lỗi chia cho 0
+      const cpm = (spend * 1000) / impressions;
 
-    const cpm = (item.spend * 1000) / item.impressions;
-
-    return (
-      (awarenessSet.has(item.optimization_goal) && cpm > 7000) ||
-      (engagementSet.has(item.optimization_goal) && cpm > 100000)
-    );
-  });
-
+      return Object.entries(goalSets).some(
+        ([goal, set]) => set.has(optimization_goal) && cpm > cpmThresholds[goal]
+      );
+    }
+  );
   console.log(listHighCPM);
 
   blockSpentChart.classList.remove("none");
