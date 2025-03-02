@@ -194,9 +194,17 @@ if (!accounts.length) {
   window.location.href = "/login.html";
 }
 console.log(accounts);
+let accountViewID = parseInt(localStorage.getItem("account_view"), 10);
+if (
+  isNaN(accountViewID) ||
+  accountViewID < 0 ||
+  accountViewID >= accounts.length
+) {
+  accountViewID = 0; // Nếu không hợp lệ, set về 0
+}
 
-let accountViewID = localStorage.getItem("account_view") * 1 || 0;
-const viewMaster = accounts[accountViewID];
+const viewMaster = accounts[accountViewID] || accounts[0] || null; // Nếu vẫn lỗi, lấy accounts[0] hoặc null
+
 isBrand = viewMaster.brand;
 accessTokenView = viewMaster.access;
 adAccountIdView = viewMaster.id;
