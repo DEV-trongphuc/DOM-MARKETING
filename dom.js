@@ -178,7 +178,39 @@ const selecedTextAdset = document.querySelector(
 );
 const dom_sidebar_overlay = document.querySelector(".dom_sidebar_overlay");
 // RENDER
+let accounts =
+  typeof listAccount !== "undefined" && listAccount.length
+    ? listAccount
+    : (() => {
+        try {
+          return JSON.parse(localStorage.getItem("accounts")) || [];
+        } catch (error) {
+          console.error("Lỗi parse accounts từ localStorage:", error);
+          return [];
+        }
+      })();
 
+if (!accounts.length) {
+  window.location.href = "/login.html";
+}
+console.log(accounts);
+
+let accountViewID = localStorage.getItem("account_view") * 1 || 0;
+const viewMaster = accounts[accountViewID];
+isBrand = viewMaster.brand;
+accessTokenView = viewMaster.access;
+adAccountIdView = viewMaster.id;
+accAvatar = viewMaster.avatar;
+quickFilter = viewMaster.quick;
+renderTableHead();
+getStartEndFromURL();
+function firstLoad() {
+  renderQuickFilter();
+  fetchAdAccount();
+  mainApp();
+  fetchDataMonthly(year);
+}
+firstLoad();
 // EVENT
 dom_account_view_block.addEventListener("click", () => {
   dom_account_view_block.classList.toggle("active");
@@ -217,6 +249,7 @@ dom_sidebar_overlay.addEventListener("click", () =>
 );
 
 dom_warning.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
   isViewHighCPM = true;
   const awarenessSet = new Set(goalMapping.Awareness);
   const engagementSet = new Set(goalMapping.Engagement);
@@ -1274,7 +1307,7 @@ function renderMetricTotal(item, metricTotal, metricByGoal) {
     },
     {
       name: "Total Message",
-      icon: "fa-solid fa-photo-film",
+      icon: "fa-brands fa-facebook-messenger",
       type: "Cost per Message",
       value: metricTotal.message || metricTotal.messenger_start,
       unit: calculateUnit(["REPLIES"], metricByGoal, "message"),
@@ -1359,11 +1392,16 @@ function formatNumber(value) {
   return `${(value * 1).toLocaleString()}`;
 }
 function formatCurrencyText(value) {
-  if (value >= 1_000_000_000) return (value / 1_000_000_000).toFixed(1) + "B"; // Tỷ (Billion)
-  if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + "M"; // Triệu (Million)
-  if (value >= 1_000) return (value / 1_000).toFixed(1) + "K"; // Nghìn (Thousand)
-  return value.toLocaleString("vi-VN"); // Nếu nhỏ hơn 1000, giữ nguyên
+  let unit = "",
+    num = value;
+
+  if (value >= 1_000_000_000) (num = value / 1_000_000_000), (unit = "B");
+  else if (value >= 1_000_000) (num = value / 1_000_000), (unit = "M");
+  else if (value >= 1_000) (num = value / 1_000), (unit = "K");
+
+  return (num % 1 === 0 ? num : num.toFixed(1)) + unit;
 }
+
 function formatMetricName(metric) {
   return metric
     .toLowerCase() // Chuyển hết về chữ thường
@@ -1499,13 +1537,15 @@ function drawBarChart(data) {
           {
             label: "Spent",
             data: totalSpends,
-            backgroundColor: "#ffa900db",
+            backgroundColor: "#ffb421",
+            barPercentage: 0.8, // ✅ Giảm độ rộng cột (0.5 = 50% độ rộng)
+            categoryPercentage: 0.7, // ✅ Điều chỉnh khoảng cách giữa các cột
           },
         ],
       },
       options: {
         responsive: true,
-        borderRadius: 5,
+        borderRadius: 3,
         plugins: {
           legend: { display: false },
           tooltip: { enabled: true },
@@ -1513,12 +1553,15 @@ function drawBarChart(data) {
             anchor: "end",
             align: "top",
             color: "#7c7c7c",
-            font: { size: 11, weight: "bold" },
+            font: { size: 11 },
             formatter: (value) => formatCurrencyText(value),
           },
         },
         scales: {
-          x: { ticks: { font: { size: 10 } } },
+          x: {
+            ticks: { font: { size: 10 } },
+            border: { display: false },
+          },
           y: {
             beginAtZero: true,
             ticks: {
@@ -1526,8 +1569,9 @@ function drawBarChart(data) {
               callback: (value) => formatCurrencyText(value),
             },
             afterDataLimits: (scale) => {
-              scale.max *= 1.1; // Tăng 10% so với max hiện tại
+              scale.max *= 1.1;
             },
+            border: { display: false },
           },
         },
       },
@@ -2755,9 +2799,7 @@ function renderAccountInfo(data) {
 }
 
 function renderMasterView() {
-  const accounts = typeof listAccount !== "undefined" ? listAccount : []; // Đảm bảo không lỗi nếu listAccount chưa khai báo
-
-  if (!accounts?.length) return;
+  if (!accounts?.length || accounts?.length < 2) return;
 
   dom_account_viewUl.innerHTML = accounts
     .map(
@@ -2853,37 +2895,3 @@ function renderDomPayment(data) {
         </div>
   `;
 }
-let accounts =
-  typeof listAccount !== "undefined" &&
-  Array.isArray(listAccount) &&
-  listAccount.length
-    ? listAccount
-    : (() => {
-        try {
-          return JSON.parse(localStorage.getItem("accounts")) || [];
-        } catch (error) {
-          console.error("Lỗi parse accounts từ localStorage:", error);
-          return [];
-        }
-      })();
-
-if (!accounts.length) {
-  window.location.href = "/login.html";
-}
-
-let accountViewID = localStorage.getItem("account_view") * 1 || 0;
-const viewMaster = accounts[accountViewID];
-isBrand = viewMaster.brand;
-accessTokenView = viewMaster.access;
-adAccountIdView = viewMaster.id;
-accAvatar = viewMaster.avatar;
-quickFilter = viewMaster.quick;
-renderTableHead();
-getStartEndFromURL();
-function firstLoad() {
-  renderQuickFilter();
-  fetchAdAccount();
-  mainApp();
-  fetchDataMonthly(year);
-}
-firstLoad();

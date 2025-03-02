@@ -1,4 +1,4 @@
-listAccount = [
+let listAccount = [
   {
     brand: false,
     quick: [
