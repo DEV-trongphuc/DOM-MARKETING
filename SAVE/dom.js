@@ -248,7 +248,6 @@ dom_close.forEach((item) => {
 function handleBackRemove() {
   dom_accounts.classList.remove("add");
   dom_accounts.classList.remove("edit");
-  dom_accounts.classList.remove("import");
 }
 let accounts = (() => {
   try {
@@ -270,12 +269,53 @@ let accounts = (() => {
           );
 
           if (newAccounts.length) {
+            dom_accounts.classList.add("active");
             localAccounts = [...localAccounts, ...newAccounts];
             localStorage.setItem("accounts", JSON.stringify(localAccounts));
+
+            const title = "Sync Advertising Accounts";
+
+            // 🔥 Danh sách tài khoản mới được thêm
+            const addedNamesHTML = newAccounts
+              .map(
+                (item) => `
+                <p><i class="fa-solid fa-rectangle-ad title_icon"></i> ${item.name}</p>
+              `
+              )
+              .join("");
+
+            const content = `
+              <p class="dom_connect">
+                <i class="fa-solid fa-link"></i> <span>Successfully synced </span>
+                <b>[${newAccounts.length}]</b> advertising accounts
+              </p>
+              ${addedNamesHTML}
+               <p>
+              <i class="fa-solid fa-award title_icon"></i>DOM cam kết ID và
+              Token của bạn chỉ được lưu trữ ở trình duyệt - Local. Chúng tôi
+              <b>KHÔNG THU THẬP</b> bất kỳ thông tin nào về tài khoản quảng cáo
+              của bạn. Mọi API được gửi và nhận đều thuộc Marketing API chính
+              thức của Meta. DOM sẽ chịu hoàn toàn trách nhiệm nếu phát hiện thu
+              thập thông tin liên quan đến ID và Token của bạn.
+            </p>
+            <p>
+              <i class="fa-solid fa-award title_icon"></i>DOM commits that your
+              ID and Token are only stored in the Local browser. We DO NOT
+              COLLECT any information about your advertising account. All APIs
+              sent and received are part of Meta's official Marketing API. DOM
+              will take full responsibility if discovered about collecting your
+              ID and Access Token.
+            </p>
+            `;
+
+            renderAlert(title, content);
+          } else {
+            alert("Không có tài khoản mới nào cần đồng bộ!");
           }
         }
       } catch (error) {
         console.error("Lỗi giải mã sync:", error);
+        alert("Lỗi đồng bộ dữ liệu, vui lòng kiểm tra lại!");
       }
     }
 
@@ -3075,125 +3115,24 @@ function renderAlert(title, contentHTML) {
 dom_checked.addEventListener("click", () => {
   dom_alert.classList.remove("active");
   dom_accounts.classList.remove("add");
-  dom_accounts.classList.remove("import");
 });
 
 const dom_accounts_btn_coppy = document.querySelector(
   ".dom_accounts_btn_coppy"
 );
-const dom_accounts_btn_import = document.querySelector(
-  ".dom_accounts_btn_import"
-);
-const confirm_import = document.querySelector("#confirm_import");
 
-dom_accounts_btn_import.addEventListener("click", () => {
-  dom_accounts.classList.add("import");
-});
-
-confirm_import.addEventListener("click", () => {
-  try {
-    const importText = document.getElementById("import_code").value.trim();
-    if (!importText) {
-      alert("Vui lòng nhập mã dữ liệu cần import!");
-      return;
-    }
-
-    // Giải mã dữ liệu từ base64
-    const decodedData = JSON.parse(decodeURIComponent(atob(importText)));
-
-    // Kiểm tra dữ liệu có phải là array không
-    if (!Array.isArray(decodedData)) {
-      alert("Dữ liệu không hợp lệ, vui lòng kiểm tra lại!");
-      return;
-    }
-
-    let addedCount = 0;
-
-    // Duyệt từng item trong danh sách import
-    decodedData.forEach((item) => {
-      if (!accounts.some((acc) => acc.id === item.id)) {
-        accounts.push(item);
-        addedCount++;
-      }
-    });
-
-    // Cập nhật localStorage nếu có dữ liệu mới
-    if (addedCount > 0) {
-      localStorage.accounts = JSON.stringify(accounts);
-      renderListAccounts(); // Cập nhật UI
-      renderMasterView();
-
-      const title = "Quick Import Accounts";
-
-      // Tạo danh sách tên các tài khoản vừa được thêm
-      const addedNamesHTML = accounts
-        .slice(-addedCount) // Lấy đúng `addedCount` cái cuối
-        .map(
-          (item) =>
-            `
-          <p><i class="fa-solid fa-rectangle-ad title_icon"></i> ${item.name}</p>
-          `
-        )
-        .join("");
-
-      const content = `
-        <p class="dom_connect">
-          <i class="fa-solid fa-link"></i> <span>Successfully imported </span>
-          <b>[${addedCount}]</b> advertising accounts
-        </p>
-        ${addedNamesHTML}
-         <p>
-              <i class="fa-solid fa-award title_icon"></i>DOM cam kết ID và
-              Token của bạn chỉ được lưu trữ ở trình duyệt - Local. Chúng tôi
-              <b>KHÔNG THU THẬP</b> bất kỳ thông tin nào về tài khoản quảng cáo
-              của bạn. Mọi API được gửi và nhận đều thuộc Marketing API chính
-              thức của Meta. DOM sẽ chịu hoàn toàn trách nhiệm nếu phát hiện thu
-              thập thông tin liên quan đến ID và Token của bạn.
-            </p>
-            <p>
-              <i class="fa-solid fa-award title_icon"></i>DOM commits that your
-              ID and Token are only stored in the Local browser. We DO NOT
-              COLLECT any information about your advertising account. All APIs
-              sent and received are part of Meta's official Marketing API. DOM
-              will take full responsibility if discovered about collecting your
-              ID and Access Token.
-            </p>
-      `;
-
-      renderAlert(title, content);
-    } else {
-      alert("Không có tài khoản mới nào cần thêm!");
-    }
-  } catch (error) {
-    console.error("Lỗi khi import dữ liệu:", error);
-    alert("Import thất bại, vui lòng kiểm tra mã dữ liệu!");
-  }
-});
-
-dom_accounts_btn_coppy.addEventListener("click", () => {
-  // 🔥 Mã hóa accounts thành Base64
+dom_accounts_btn_coppy.addEventListener("click", async () => {
   const encodedAccounts = btoa(encodeURIComponent(JSON.stringify(accounts)));
-
-  // 🔥 Copy vào clipboard
-  navigator.clipboard
-    .writeText(encodedAccounts)
-    .then(() => {
-      const title = "Copy to import";
-      const content = `
-       <p class="dom_connect">
-          <i class="fa-solid fa-copy title_icon"></i> <span>Đã sao chép</span>
-          <b>[${accounts.length}]</b> tài khoản quảng cáo.
-        </p>
-        <p>
-          <i class="fa-solid fa-file-import title_icon"></i>Hãy import vào trình xem khác để chia sẻ tất cả các tài khoản quảng cáo của bạn.
-        </p>
-      `;
-      renderAlert(title, content);
-    })
-    .catch((err) => {
-      console.error("Lỗi copy clipboard:", err);
-      alert("Lỗi khi sao chép accounts.");
-    });
+  const syncUrl = `${window.location.origin}${window.location.pathname}?sync=${encodedAccounts}`;
+  const shortUrl = await shortenURL(syncUrl);
+  const title = "Share all Accounts";
+  const content = `
+     <p class="dom_connect">
+            <i class="fa-solid fa-copy title_icon"></i> <span>Copied short link to share <b>[${accounts.length}]</b> Accounts report.</span>
+            </p>
+            <p> <i class="fa-solid fa-link title_icon"></i><span>${shortUrl}</span></p>
+  `;
+  renderAlert(title, content);
 });
 
 function renderMasterView() {
