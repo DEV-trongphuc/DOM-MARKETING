@@ -211,14 +211,7 @@ function atobUrlSafe(str) {
   while (str.length % 4) str += "="; // Đảm bảo đủ padding cho atob()
   return atob(str);
 }
-async function shortenURL(longUrl) {
-  const response = await fetch(
-    `https://is.gd/create.php?format=simple&url=${encodeURIComponent(longUrl)}`
-  );
-  return response.text(); // Trả về link rút gọn
-}
-
-dom_accounts_btn_qr.addEventListener("click", async () => {
+dom_accounts_btn_qr.addEventListener("click", () => {
   // 🔥 Mã hóa dữ liệu thành Base64
   const encodedAccounts = btoaUrlSafe(
     encodeURIComponent(JSON.stringify(accounts))
@@ -227,31 +220,19 @@ dom_accounts_btn_qr.addEventListener("click", async () => {
   // 🔥 Tạo URL chứa `?sync=`
   const syncUrl = `${window.location.origin}${window.location.pathname}?sync=${encodedAccounts}`;
 
-  try {
-    // 🔥 Rút gọn URL
-    const shortUrl = await shortenURL(syncUrl);
-
-    // 🔥 Copy URL vào clipboard
-    const title = "Scan QR to sync";
-    const content = `
+  // 🔥 Copy URL vào clipboard
+  const title = "Scan QR to sync";
+  const content = `
        <p class="dom_connect">
           <i class="fa-solid fa-qrcode title_icon"></i> <span>Quét mã QR và <b>mở bằng trình duyệt</b> </span>
-          để đồng bộ tài khoản quảng cáo.
+để đồng bộ tài khoản quảng cáo.
         </p>
         <p>
-          <img class="dom_alert_qr" src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
-            shortUrl
-          )}" />
+        <img class="dom_alert_qr" src=${`https://api.qrserver.com/v1/create-qr-code/?data=${syncUrl}`}/>
         </p>
       `;
-
-    renderAlert(title, content);
-  } catch (error) {
-    console.error("Lỗi rút gọn URL:", error);
-    alert("Lỗi tạo QR Code, thử lại!");
-  }
+  renderAlert(title, content);
 });
-
 dom_close.forEach((item) => {
   item.addEventListener("click", () => {
     if (accounts.length) {
