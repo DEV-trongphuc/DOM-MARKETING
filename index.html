@@ -24,7 +24,7 @@
       href="https://dom-marketing.netlify.app/img/domfavicon.png"
       type="image/png"
     />
-    <link rel="stylesheet" href="dom.css" />
+    <link rel="stylesheet" href="./SAVE/dom.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   </head>
@@ -417,11 +417,33 @@
           <img src="./img/DOM_LOGO.png" />
           <p>Manager Ad Account</p>
         </div>
-        <p>Your Ad Account</p>
+        <div class="dom_accounts_sync">
+          <p class="dom_accounts_p">Your Ad Account</p>
+        </div>
         <div class="dom_accounts_list"></div>
         <div class="dom_accounts_btns">
           <p class="dom_accounts_btn_close">Close</p>
-          <p class="dom_accounts_btn_add">Add+</p>
+          <div class="dom_accounts_btnsadd">
+            <p>
+              <i
+                class="fa-solid fa-mobile-screen-button dom_accounts_btn_qr"
+                title="Sync to Mobile"
+              ></i>
+            </p>
+            <p>
+              <i
+                class="fa-solid fa-copy dom_accounts_btn_coppy"
+                title="Copy All Accounts"
+              ></i>
+            </p>
+            <p>
+              <i
+                class="fa-solid fa-file-import dom_accounts_btn_import"
+                title="Import All Accounts"
+              ></i>
+            </p>
+            <p class="dom_accounts_btn_add">Add+</p>
+          </div>
         </div>
         <div class="dom_accounts_add">
           <div class="dom_accounts_add_head">
@@ -429,7 +451,7 @@
               class="dom_login_avatar"
               src="https://ampersand-reports-dom.netlify.app/DOM-img/DOM_LOGO.png"
             />
-            <i class="fa-solid fa-circle-chevron-left dom_close_add"></i>
+            <i class="fa-solid fa-circle-chevron-left dom_close"></i>
           </div>
           <div class="dom_form_wrapper">
             <label>
@@ -450,7 +472,7 @@
               class="dom_login_avatar"
               src="https://ampersand-reports-dom.netlify.app/DOM-img/DOM_LOGO.png"
             />
-            <i class="fa-solid fa-circle-chevron-left dom_close_edit"></i>
+            <i class="fa-solid fa-circle-chevron-left dom_close"></i>
           </div>
           <div class="dom_form_wrapper">
             <div class="dom_accounts_list_item">
@@ -469,14 +491,38 @@
             <p id="confirm_keyword">CONFIRM</p>
           </div>
         </div>
+        <div class="dom_accounts_import">
+          <div class="dom_accounts_add_head">
+            <img
+              class="dom_login_avatar"
+              src="https://ampersand-reports-dom.netlify.app/DOM-img/DOM_LOGO.png"
+            />
+            <i class="fa-solid fa-circle-chevron-left dom_close"></i>
+          </div>
+          <div class="dom_form_wrapper">
+            <span>Paste your quick import code (Not link share)</span>
+            <textarea id="import_code"></textarea>
+
+            <p id="confirm_import">IMPORT</p>
+          </div>
+        </div>
       </div>
       <div class="dom_accounts_overlay"></div>
-
+      <div class="dom_alert">
+        <div class="dom_accounts_head">
+          <img src="./img/DOM_LOGO.png" />
+          <p class="dom_alert_title">Terms of use</p>
+        </div>
+        <div class="dom_alert_inner">
+          <div class="dom_alert_content"></div>
+          <p id="dom_checked">CONFIRM</p>
+        </div>
+      </div>
       <div class="loading">
         <span class="loader"></span>
       </div>
     </main>
     <script src="./domvar.js"></script>
-    <script src="dom.js"></script>
+    <script src="./SAVE/dom.js"></script>
   </body>
 </html>
