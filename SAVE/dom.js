@@ -204,26 +204,38 @@ const dom_accounts_p = document.querySelector(".dom_accounts_p");
 const dom_accounts_btn_qr = document.querySelector(".dom_accounts_btn_qr");
 // RENDER
 
-dom_accounts_btn_qr.addEventListener("click", () => {
+async function shortenURL(longUrl) {
+  const response = await fetch(
+    `https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`
+  );
+  return response.text();
+}
+
+dom_accounts_btn_qr.addEventListener("click", async () => {
+  // 🛠 Thêm async ở đây
   // 🔥 Mã hóa dữ liệu thành Base64
   const encodedAccounts = btoa(encodeURIComponent(JSON.stringify(accounts)));
 
   // 🔥 Tạo URL chứa `?sync=`
   const syncUrl = `${window.location.origin}${window.location.pathname}?sync=${encodedAccounts}`;
 
+  // 🔥 Rút gọn link (chờ kết quả)
+  const shortUrl = await shortenURL(syncUrl);
+
   // 🔥 Copy URL vào clipboard
-  const title = "Scan QR to sync";
+  const title = "Scan QR to sync phone";
   const content = `
        <p class="dom_connect">
           <i class="fa-solid fa-qrcode title_icon"></i> <span>Quét mã QR và <b>mở bằng trình duyệt</b> </span>
 để đồng bộ tài khoản quảng cáo.
         </p>
         <p>
-        <img class="dom_alert_qr" src=${`https://api.qrserver.com/v1/create-qr-code/?data=${syncUrl}`}/>
+        <img class="dom_alert_qr" src=${`https://api.qrserver.com/v1/create-qr-code/?data=${shortUrl}`}/>
         </p>
       `;
   renderAlert(title, content);
 });
+
 dom_close.forEach((item) => {
   item.addEventListener("click", () => {
     if (accounts.length) {
@@ -3224,7 +3236,7 @@ function renderListAccounts() {
 renderListAccounts();
 
 // Lắng nghe sự kiện xóa và chỉnh sửa
-dom_accounts_list.addEventListener("click", (event) => {
+dom_accounts_list.addEventListener("click", async (event) => {
   const target = event.target;
 
   // Nếu click vào nút xóa
@@ -3274,19 +3286,24 @@ dom_accounts_list.addEventListener("click", (event) => {
     const encodedData = btoa(encodeURIComponent(JSON.stringify(item)));
     const shareUrl = `${window.location.origin}${window.location.pathname}?act=${encodedData}`;
 
-    // 🔥 Copy vào clipboard
-    navigator.clipboard
-      .writeText(shareUrl)
-      .then(() => {
-        const title = "Share Report";
-        const content = `
+    try {
+      // 🔥 Rút gọn link
+      const shortUrl = await shortenURL(shareUrl);
+
+      // 🔥 Copy vào clipboard
+      await navigator.clipboard.writeText(shortUrl);
+
+      const title = "Share Report";
+      const content = `
          <p class="dom_connect">
-                <i class="fa-solid fa-copy title_icon"></i> <span>Copied link to share <b>[${item.name}]</b> report.</span
-              </p>
-        `;
-        renderAlert(title, content);
-      })
-      .catch((err) => console.error("Lỗi copy URL:", err));
+                <i class="fa-solid fa-copy title_icon"></i> <span>Copied short link to share <b>[${item.name}]</b> report.</span>
+                </p>
+                <p> <i class="fa-solid fa-link title_icon"></i><span>${shortUrl}</span></p>
+      `;
+      renderAlert(title, content);
+    } catch (err) {
+      console.error("Lỗi rút gọn hoặc copy URL:", err);
+    }
   }
 });
 
