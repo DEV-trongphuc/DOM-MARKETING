@@ -67,6 +67,8 @@ let year = 2025;
 let campaignNOW = "";
 let adsetNOW = "";
 let date_preset = "";
+let accessTokenView = "";
+let adAccountIdView = "";
 let selectedViewMonthly = "Spend";
 // CHART VAR
 let chartSpentType = null;
@@ -153,6 +155,10 @@ const dom_userIMG = document.querySelector(".dom_user img");
 const custom_item = document.querySelector(".custom_item");
 const dom_time_show = document.querySelector("#dom_time_show");
 const dom = document.querySelector("#dom");
+const dom_alert = document.querySelector(".dom_alert");
+const dom_checked = document.querySelector("#dom_checked");
+const dom_alert_content = document.querySelector(".dom_alert_content");
+const dom_alert_title = document.querySelector(".dom_alert_title");
 const dom_export_main = document.querySelector(".dom_export_main");
 const apply_custom_date = document.querySelector(".apply_custom_date");
 const selectCampaignList = document.querySelector(
@@ -182,7 +188,7 @@ const dom_accounts_btn_close = document.querySelector(
   ".dom_accounts_btn_close"
 );
 const accounts_btn = document.querySelector("#accounts_btn");
-const dom_close_add = document.querySelector(".dom_close_add");
+const dom_close = document.querySelectorAll(".dom_close");
 const dom_close_edit = document.querySelector(".dom_close_edit");
 const dom_accounts = document.querySelector(".dom_accounts");
 const dom_sidebar_overlay = document.querySelector(".dom_sidebar_overlay");
@@ -194,66 +200,158 @@ const key_check = document.querySelector("#key_check");
 const key_adset = document.querySelector("#key_adset");
 const confirm_keyword = document.querySelector("#confirm_keyword");
 const dom_key_checkLabel = document.querySelector(".dom_key_check ~ label");
+const dom_accounts_p = document.querySelector(".dom_accounts_p");
+const dom_accounts_btn_qr = document.querySelector(".dom_accounts_btn_qr");
 // RENDER
+function btoaUrlSafe(str) {
+  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function atobUrlSafe(str) {
+  str = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (str.length % 4) str += "="; // Đảm bảo đủ padding cho atob()
+  return atob(str);
+}
+async function shortenURL(longUrl) {
+  const response = await fetch(
+    `https://is.gd/create.php?format=simple&url=${encodeURIComponent(longUrl)}`
+  );
+  return response.text(); // Trả về link rút gọn
+}
 
+dom_accounts_btn_qr.addEventListener("click", async () => {
+  // 🔥 Mã hóa dữ liệu thành Base64
+  const encodedAccounts = btoaUrlSafe(
+    encodeURIComponent(JSON.stringify(accounts))
+  );
+
+  // 🔥 Tạo URL chứa `?sync=`
+  const syncUrl = `${window.location.origin}${window.location.pathname}?sync=${encodedAccounts}`;
+
+  try {
+    // 🔥 Rút gọn URL
+    const shortUrl = await shortenURL(syncUrl);
+
+    // 🔥 Copy URL vào clipboard
+    const title = "Scan QR to sync";
+    const content = `
+       <p class="dom_connect">
+          <i class="fa-solid fa-qrcode title_icon"></i> <span>Quét mã QR và <b>mở bằng trình duyệt</b> </span>
+          để đồng bộ tài khoản quảng cáo.
+        </p>
+        <p>
+          <img class="dom_alert_qr" src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
+            shortUrl
+          )}" />
+        </p>
+      `;
+
+    renderAlert(title, content);
+  } catch (error) {
+    console.error("Lỗi rút gọn URL:", error);
+    alert("Lỗi tạo QR Code, thử lại!");
+  }
+});
+
+dom_close.forEach((item) => {
+  item.addEventListener("click", () => {
+    if (accounts.length) {
+      handleBackRemove();
+    }
+  });
+});
+function handleBackRemove() {
+  dom_accounts.classList.remove("add");
+  dom_accounts.classList.remove("edit");
+  dom_accounts.classList.remove("import");
+}
 let accounts = (() => {
   try {
     let localData = localStorage.getItem("accounts");
+    let localAccounts = localData ? JSON.parse(localData) : [];
 
-    if (
-      !localData &&
-      typeof listAccount !== "undefined" &&
-      listAccount.length
-    ) {
-      localStorage.setItem("accounts", JSON.stringify(listAccount));
-      return listAccount;
-    }
+    // 🟢 Lấy tham số từ URL, bỏ tracking `utm_*` và `zarsrc`
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedSync = urlParams.get("sync")?.split("&")[0]; // Chỉ lấy phần đầu trước `&utm_*`
 
-    const localAccounts = JSON.parse(localData) || [];
+    if (encodedSync) {
+      try {
+        const syncAccounts = JSON.parse(
+          decodeURIComponent(atobUrlSafe(encodedSync))
+        );
 
-    if (typeof listAccount !== "undefined" && listAccount.length) {
-      return localAccounts.length > listAccount.length
-        ? localAccounts
-        : listAccount;
+        if (Array.isArray(syncAccounts) && syncAccounts.length) {
+          const existingIds = new Set(localAccounts.map((acc) => acc.id));
+          const newAccounts = syncAccounts.filter(
+            (acc) => !existingIds.has(acc.id)
+          );
+
+          if (newAccounts.length) {
+            localAccounts = [...localAccounts, ...newAccounts];
+            localStorage.setItem("accounts", JSON.stringify(localAccounts));
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi giải mã sync:", error);
+      }
     }
 
     return localAccounts;
   } catch (error) {
-    console.error("Lỗi parse accounts từ localStorage:", error);
+    console.error("Lỗi parse accounts:", error);
     return [];
   }
 })();
 
+// 🟢 Nếu không có accounts thì chuyển hướng sang login hoặc hiển thị giao diện thêm tài khoản
 if (!accounts.length) {
-  window.location.href = "/login.html";
+  // window.location.href = "/login.html";
+  dom_accounts.classList.add("active");
+  dom_accounts.classList.add("add");
 }
-console.log(accounts);
+
+// 🟢 Lấy ID từ localStorage (mặc định là 0 nếu không hợp lệ)
 let accountViewID = parseInt(localStorage.getItem("account_view"), 10);
 if (
   isNaN(accountViewID) ||
   accountViewID < 0 ||
   accountViewID >= accounts.length
 ) {
-  accountViewID = 0; // Nếu không hợp lệ, set về 0
-  localStorage.account_view = "0";
+  accountViewID = 0;
+  localStorage.setItem("account_view", "0");
 }
 
-const viewMaster = accounts[accountViewID] || accounts[0] || null; // Nếu vẫn lỗi, lấy accounts[0] hoặc null
+// 🟢 Kiểm tra URL xem có `act` không
+const urlParams = new URLSearchParams(window.location.search);
+const encodedAct = urlParams.get("act");
 
-isBrand = viewMaster.brand;
-accessTokenView = viewMaster.access;
-adAccountIdView = viewMaster.id;
-accAvatar = viewMaster.avatar;
-quickFilter = viewMaster.quick;
-renderTableHead();
-getStartEndFromURL();
-function firstLoad() {
-  renderQuickFilter();
-  fetchAdAccount();
-  mainApp();
-  fetchDataMonthly(year);
+let viewMaster = accounts[accountViewID] || accounts[0] || null;
+
+if (encodedAct) {
+  try {
+    // 🔥 Giải mã dữ liệu từ `act`
+    const actObject = JSON.parse(decodeURIComponent(atob(encodedAct)));
+
+    if (actObject && actObject.id) {
+      // 🔍 Tìm tài khoản có ID trùng khớp
+      const existingAccount = accounts.find((acc) => acc.id === actObject.id);
+
+      if (existingAccount) {
+        viewMaster = existingAccount;
+      } else {
+        accounts.push(actObject);
+        localStorage.setItem("accounts", JSON.stringify(accounts));
+        viewMaster = actObject;
+        handleBackRemove();
+        dom_accounts.classList.remove("active");
+      }
+    }
+  } catch (error) {
+    console.error("Lỗi giải mã act từ URL:", error);
+  }
 }
-firstLoad();
+
+console.log("viewMaster:", viewMaster);
+
 // EVENT
 view_report.addEventListener("click", () => {
   const adId = document.getElementById("ad_id").value.trim();
@@ -270,6 +368,7 @@ view_report.addEventListener("click", () => {
     alert("Ad ID đã tồn tại trong danh sách accounts!");
     return;
   }
+  console.log(adId, accessToken);
 
   fetchAdAccountActivities(adId, accessToken);
 });
@@ -281,16 +380,10 @@ accounts_btn.addEventListener("click", () => {
   dom_accounts.classList.add("active");
 });
 dom_accounts_btn_close.addEventListener("click", () => {
-  dom_accounts.classList.remove("active");
+  accounts.length && dom_accounts.classList.remove("active");
 });
 dom_accounts_overlay.addEventListener("click", () => {
-  dom_accounts.classList.remove("active");
-});
-dom_close_add.addEventListener("click", () => {
-  dom_accounts.classList.remove("add");
-});
-dom_close_edit.addEventListener("click", () => {
-  dom_accounts.classList.remove("edit");
+  accounts.length && dom_accounts.classList.remove("active");
 });
 
 document.getElementById("key_check").addEventListener("change", function () {
@@ -2908,12 +3001,13 @@ function renderAccountInfo(data) {
 }
 
 async function fetchAdAccountActivities(adId, accessToken) {
+  loading.classList.add("active");
   let apiUrl = `https://graph.facebook.com/v22.0/act_${adId}?fields=balance,age,created_time,fb_entity,tax_id,id,name,account_status,currency,amount_spent,funding_source_details,spend_cap,business,owner,timezone_name,disable_reason&access_token=${accessToken}`;
   try {
     const response = await fetch(apiUrl);
     const data = await response.json();
     if (data.business && data.business.id) {
-      const apiBM = `https://graph.facebook.com/v22.0/${data.business.id}?fields=picture&access_token=${accessTokenView}`;
+      const apiBM = `https://graph.facebook.com/v22.0/${data.business.id}?fields=picture&access_token=${accessToken}`;
       const bmResponse = await fetch(apiBM);
       const bmData = await bmResponse.json();
 
@@ -2942,10 +3036,42 @@ async function fetchAdAccountActivities(adId, accessToken) {
       };
       accounts = [...accounts, item];
       localStorage.accounts = JSON.stringify(accounts);
+
+      const viewMaster = item;
+      isBrand = viewMaster.brand;
+      accessTokenView = viewMaster.access;
+      adAccountIdView = viewMaster.id;
+      accAvatar = viewMaster.avatar;
+      quickFilter = viewMaster.quick;
+      firstLoad();
       renderListAccounts();
       renderMasterView();
-      alert(`Kết nối thành công với [${data.name}]`);
-      dom_accounts.classList.remove("add");
+      accountViewID = accounts.length - 1;
+      localStorage.account_view = JSON.stringify(accountViewID);
+      const title = "Terms of use";
+      const content = `
+       <p class="dom_connect">
+              <i class="fa-solid fa-link"></i> <span>Connected to </span
+              ><b>[${data.name}]</b>
+            </p>
+            <p>
+              <i class="fa-solid fa-award title_icon"></i>DOM cam kết ID và
+              Token của bạn chỉ được lưu trữ ở trình duyệt - Local. Chúng tôi
+              <b>KHÔNG THU THẬP</b> bất kỳ thông tin nào về tài khoản quảng cáo
+              của bạn. Mọi API được gửi và nhận đều thuộc Marketing API chính
+              thức của Meta. DOM sẽ chịu hoàn toàn trách nhiệm nếu phát hiện thu
+              thập thông tin liên quan đến ID và Token của bạn.
+            </p>
+            <p>
+              <i class="fa-solid fa-award title_icon"></i>DOM commits that your
+              ID and Token are only stored in the Local browser. We DO NOT
+              COLLECT any information about your advertising account. All APIs
+              sent and received are part of Meta's official Marketing API. DOM
+              will take full responsibility if discovered about collecting your
+              ID and Access Token.
+            </p>
+      `;
+      renderAlert(title, content);
     } else {
       alert("ID hoặc Token không hợp lệ");
     }
@@ -2953,7 +3079,138 @@ async function fetchAdAccountActivities(adId, accessToken) {
     alert("ID hoặc Token không hợp lệ");
     console.error("Fetch error:", error.message);
   }
+  loading.classList.remove("active");
 }
+
+function renderAlert(title, contentHTML) {
+  dom_alert.classList.add("active");
+  dom_alert_title.textContent = title;
+  dom_alert_content.innerHTML = contentHTML;
+}
+
+dom_checked.addEventListener("click", () => {
+  dom_alert.classList.remove("active");
+  dom_accounts.classList.remove("add");
+  dom_accounts.classList.remove("import");
+});
+
+const dom_accounts_btn_coppy = document.querySelector(
+  ".dom_accounts_btn_coppy"
+);
+const dom_accounts_btn_import = document.querySelector(
+  ".dom_accounts_btn_import"
+);
+const confirm_import = document.querySelector("#confirm_import");
+
+dom_accounts_btn_import.addEventListener("click", () => {
+  dom_accounts.classList.add("import");
+});
+
+confirm_import.addEventListener("click", () => {
+  try {
+    const importText = document.getElementById("import_code").value.trim();
+    if (!importText) {
+      alert("Vui lòng nhập mã dữ liệu cần import!");
+      return;
+    }
+
+    // Giải mã dữ liệu từ base64
+    const decodedData = JSON.parse(decodeURIComponent(atob(importText)));
+
+    // Kiểm tra dữ liệu có phải là array không
+    if (!Array.isArray(decodedData)) {
+      alert("Dữ liệu không hợp lệ, vui lòng kiểm tra lại!");
+      return;
+    }
+
+    let addedCount = 0;
+
+    // Duyệt từng item trong danh sách import
+    decodedData.forEach((item) => {
+      if (!accounts.some((acc) => acc.id === item.id)) {
+        accounts.push(item);
+        addedCount++;
+      }
+    });
+
+    // Cập nhật localStorage nếu có dữ liệu mới
+    if (addedCount > 0) {
+      localStorage.accounts = JSON.stringify(accounts);
+      renderListAccounts(); // Cập nhật UI
+      renderMasterView();
+
+      const title = "Quick Import Accounts";
+
+      // Tạo danh sách tên các tài khoản vừa được thêm
+      const addedNamesHTML = accounts
+        .slice(-addedCount) // Lấy đúng `addedCount` cái cuối
+        .map(
+          (item) =>
+            `
+          <p><i class="fa-solid fa-rectangle-ad title_icon"></i> ${item.name}</p>
+          `
+        )
+        .join("");
+
+      const content = `
+        <p class="dom_connect">
+          <i class="fa-solid fa-link"></i> <span>Successfully imported </span>
+          <b>[${addedCount}]</b> advertising accounts
+        </p>
+        ${addedNamesHTML}
+         <p>
+              <i class="fa-solid fa-award title_icon"></i>DOM cam kết ID và
+              Token của bạn chỉ được lưu trữ ở trình duyệt - Local. Chúng tôi
+              <b>KHÔNG THU THẬP</b> bất kỳ thông tin nào về tài khoản quảng cáo
+              của bạn. Mọi API được gửi và nhận đều thuộc Marketing API chính
+              thức của Meta. DOM sẽ chịu hoàn toàn trách nhiệm nếu phát hiện thu
+              thập thông tin liên quan đến ID và Token của bạn.
+            </p>
+            <p>
+              <i class="fa-solid fa-award title_icon"></i>DOM commits that your
+              ID and Token are only stored in the Local browser. We DO NOT
+              COLLECT any information about your advertising account. All APIs
+              sent and received are part of Meta's official Marketing API. DOM
+              will take full responsibility if discovered about collecting your
+              ID and Access Token.
+            </p>
+      `;
+
+      renderAlert(title, content);
+    } else {
+      alert("Không có tài khoản mới nào cần thêm!");
+    }
+  } catch (error) {
+    console.error("Lỗi khi import dữ liệu:", error);
+    alert("Import thất bại, vui lòng kiểm tra mã dữ liệu!");
+  }
+});
+
+dom_accounts_btn_coppy.addEventListener("click", () => {
+  // 🔥 Mã hóa accounts thành Base64
+  const encodedAccounts = btoa(encodeURIComponent(JSON.stringify(accounts)));
+
+  // 🔥 Copy vào clipboard
+  navigator.clipboard
+    .writeText(encodedAccounts)
+    .then(() => {
+      const title = "Copy to import";
+      const content = `
+       <p class="dom_connect">
+          <i class="fa-solid fa-copy title_icon"></i> <span>Đã sao chép</span>
+          <b>[${accounts.length}]</b> tài khoản quảng cáo.
+        </p>
+        <p>
+          <i class="fa-solid fa-file-import title_icon"></i>Hãy import vào trình xem khác để chia sẻ tất cả các tài khoản quảng cáo của bạn.
+        </p>
+      `;
+      renderAlert(title, content);
+    })
+    .catch((err) => {
+      console.error("Lỗi copy clipboard:", err);
+      alert("Lỗi khi sao chép accounts.");
+    });
+});
 
 function renderMasterView() {
   if (!accounts?.length || accounts?.length < 2) return;
@@ -2970,8 +3227,7 @@ function renderMasterView() {
     .join("");
 }
 function renderListAccounts() {
-  if (!accounts?.length) return;
-
+  dom_accounts_p.textContent = `Your Ad Account: ${accounts.length}`;
   dom_accounts_list.innerHTML = accounts
     .map(
       (item, index) => `
@@ -2986,8 +3242,9 @@ function renderListAccounts() {
               </p>
             </div>
             <div >
-              <i class="fa-solid fa-pen-to-square account_edit"></i>
-              <i class="fa-solid fa-trash-can account_remove"></i>
+              <i class="fa-solid fa-pen-to-square account_edit" title="Edit Ad Accout"></i>
+              <i class="fa-solid fa-share-nodes account_share" title="Share Report Account"></i>
+              <i class="fa-solid fa-trash-can account_remove" title="Disconnect Account"></i>
             </div>
           </div>
       `
@@ -3009,6 +3266,7 @@ dom_accounts_list.addEventListener("click", (event) => {
       accounts.splice(index, 1); // Xóa khỏi mảng
       localStorage.accounts = JSON.stringify(accounts); // Cập nhật localStorage
       renderListAccounts(); // Render lại danh sách
+      renderMasterView();
     }
     return;
   }
@@ -3035,6 +3293,30 @@ dom_accounts_list.addEventListener("click", (event) => {
       Array.isArray(item.quick) && item.brand ? item.quick.join(", ") : "";
 
     confirm_keyword.dataset.index = index;
+    return;
+  }
+  if (target.classList.contains("account_share")) {
+    const parentItem = target.closest(".dom_accounts_list_item");
+    const index = parseInt(parentItem.dataset.id);
+    const item = accounts[index];
+
+    // 🔥 Mã hóa: JSON → URI Component → Base64
+    const encodedData = btoa(encodeURIComponent(JSON.stringify(item)));
+    const shareUrl = `${window.location.origin}${window.location.pathname}?act=${encodedData}`;
+
+    // 🔥 Copy vào clipboard
+    navigator.clipboard
+      .writeText(shareUrl)
+      .then(() => {
+        const title = "Share Report";
+        const content = `
+         <p class="dom_connect">
+                <i class="fa-solid fa-copy title_icon"></i> <span>Copied link to share <b>[${item.name}]</b> report.</span
+              </p>
+        `;
+        renderAlert(title, content);
+      })
+      .catch((err) => console.error("Lỗi copy URL:", err));
   }
 });
 
@@ -3170,4 +3452,22 @@ function renderDomPayment(data) {
           </div>
         </div>
   `;
+}
+if (accounts.length) {
+  isBrand = viewMaster.brand;
+  accessTokenView = viewMaster.access;
+  adAccountIdView = viewMaster.id;
+  accAvatar = viewMaster.avatar;
+  quickFilter = viewMaster.quick;
+}
+renderTableHead();
+getStartEndFromURL();
+function firstLoad() {
+  renderQuickFilter();
+  fetchAdAccount();
+  mainApp();
+  fetchDataMonthly(year);
+}
+if (accounts.length) {
+  firstLoad();
 }
