@@ -286,7 +286,7 @@ let accounts = (() => {
 
             const content = `
               <p class="dom_connect">
-                <i class="fa-solid fa-link"></i> <span>Successfully synced </span>
+                <i class="fa-solid fa-link"></i> <span>Successfully connected </span>
                 <b>[${newAccounts.length}]</b> advertising accounts
               </p>
               ${addedNamesHTML}
