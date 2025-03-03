@@ -205,9 +205,11 @@ const dom_accounts_btn_qr = document.querySelector(".dom_accounts_btn_qr");
 // RENDER
 
 async function shortenURL(longUrl) {
+  loading.classList.add("active");
   const response = await fetch(
     `https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`
   );
+  loading.classList.remove("active");
   return response.text();
 }
 
