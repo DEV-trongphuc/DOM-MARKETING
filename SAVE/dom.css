@@ -1389,8 +1389,8 @@ input[type="checkbox"]:checked::before {
   gap: 1rem;
 }
 .dom_alert_qr {
-  width: 20rem;
-  margin: 1rem auto;
+  width: 22rem;
+  margin: 0rem auto;
 }
 .dom_alert_content p {
   line-height: 1.5;

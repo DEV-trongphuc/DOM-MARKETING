@@ -203,19 +203,10 @@ const dom_key_checkLabel = document.querySelector(".dom_key_check ~ label");
 const dom_accounts_p = document.querySelector(".dom_accounts_p");
 const dom_accounts_btn_qr = document.querySelector(".dom_accounts_btn_qr");
 // RENDER
-function btoaUrlSafe(str) {
-  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-function atobUrlSafe(str) {
-  str = str.replace(/-/g, "+").replace(/_/g, "/");
-  while (str.length % 4) str += "="; // Đảm bảo đủ padding cho atob()
-  return atob(str);
-}
+
 dom_accounts_btn_qr.addEventListener("click", () => {
   // 🔥 Mã hóa dữ liệu thành Base64
-  const encodedAccounts = btoaUrlSafe(
-    encodeURIComponent(JSON.stringify(accounts))
-  );
+  const encodedAccounts = btoa(encodeURIComponent(JSON.stringify(accounts)));
 
   // 🔥 Tạo URL chứa `?sync=`
   const syncUrl = `${window.location.origin}${window.location.pathname}?sync=${encodedAccounts}`;
@@ -252,13 +243,11 @@ let accounts = (() => {
 
     // 🟢 Lấy tham số từ URL, bỏ tracking `utm_*` và `zarsrc`
     const urlParams = new URLSearchParams(window.location.search);
-    const encodedSync = urlParams.get("sync")?.split("&")[0]; // Chỉ lấy phần đầu trước `&utm_*`
+    const encodedSync = urlParams.get("sync")?.split("&")[0].replace(/\/$/, "");
 
     if (encodedSync) {
       try {
-        const syncAccounts = JSON.parse(
-          decodeURIComponent(atobUrlSafe(encodedSync))
-        );
+        const syncAccounts = JSON.parse(decodeURIComponent(atob(encodedSync)));
 
         if (Array.isArray(syncAccounts) && syncAccounts.length) {
           const existingIds = new Set(localAccounts.map((acc) => acc.id));
