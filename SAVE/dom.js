@@ -3621,10 +3621,10 @@ confirm_keyword.addEventListener("click", () => {
     quickFilter = viewMaster.quick;
     firstLoad();
   }
-  const title = "Filter by keywords";
+  const title = "Update Filter";
   const content = `
  <p class="dom_connect">
-        <i class="fa-solid fa-key title_icon"></i> Filter default according to optimization goal
+        <i class="fa-solid fa-key title_icon"></i> Quick Filter updated successfully!!! 
       </p>
 `;
   renderAlert(title, content);

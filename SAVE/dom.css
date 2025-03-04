@@ -1371,7 +1371,7 @@ input[type="checkbox"]:checked::before {
   border: 1px solid rgba(0, 0, 0, 0.5);
   outline: 2px solid transparent;
 }
-.dom_form_wrapper label input:focus {
+.dom_form_wrapper label input[type="text"]:focus {
   outline: 2px solid var(--mainClr);
   border: 1px solid transparent;
 }
@@ -1418,6 +1418,15 @@ input[type="checkbox"]:checked::before {
   flex-direction: row !important;
   align-items: center;
   gap: 1rem;
+}
+.dom_add_id > p span:last-child {
+  font-size: 1rem;
+  font-weight: normal;
+}
+.dom_add_id > p {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 .dom_key_check > span {
   font-size: 1.4rem;
@@ -1649,6 +1658,10 @@ input[type="checkbox"]:checked::before {
 }
 .dom_accounts_add_head i {
   cursor: pointer;
+  transition: 0.3s;
+}
+.dom_accounts_add_head i:hover {
+  color: var(--mainClr);
 }
 .dom_accounts_list {
   height: 25rem;
@@ -1659,15 +1672,7 @@ input[type="checkbox"]:checked::before {
 .dom_accounts_list::-webkit-scrollbar {
   width: 6px;
 }
-#import_code {
-  height: 20rem;
-  border-radius: 5px;
-  padding: 1rem;
-}
-#import_code:focus {
-  outline: 1px solid var(--mainClr);
-  border: none;
-}
+
 .dom_accounts_add,
 .dom_accounts_import,
 .dom_accounts_edit {
@@ -1745,6 +1750,7 @@ input[type="checkbox"]:checked::before {
   display: flex;
   justify-content: space-between;
   margin-top: 2rem;
+  align-items: center;
 }
 .dom_accounts_sync {
   display: flex;
@@ -1793,7 +1799,7 @@ input[type="checkbox"]:checked::before {
   color: var(--mainClr);
   border: 1px solid var(--mainClr);
   background-color: transparent;
-  padding: 1rem 2.5rem;
+  padding: 1rem 1.5rem;
   box-shadow: 0 0 3px var(--shadow02);
   border-radius: 5px;
 }
