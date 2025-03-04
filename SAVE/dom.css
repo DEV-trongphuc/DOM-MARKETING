@@ -1412,7 +1412,8 @@ input[type="checkbox"]:checked::before {
   font-size: 1.5rem;
   letter-spacing: 1px;
 }
-.dom_key_check {
+.dom_key_check,
+.dom_add_id {
   display: flex;
   flex-direction: row !important;
   align-items: center;
@@ -1426,9 +1427,56 @@ input[type="checkbox"]:checked::before {
   pointer-events: none;
 }
 
+.dom_key_check ~ label input {
+  background-color: #e2e2e2;
+}
+
+.dom_key_check ~ label.active input {
+  background: white;
+}
 .dom_key_check ~ label.active {
   opacity: 1;
   pointer-events: all;
+}
+.dom_add_id > span {
+  font-size: 1.4rem;
+}
+.dom_confirm {
+  justify-content: space-between;
+  align-items: center;
+  display: none;
+}
+.dom_alert.confirm .dom_confirm {
+  display: flex;
+}
+.dom_alert.confirm #dom_checked {
+  display: none !important;
+}
+.dom_confirm p {
+  padding: 1.5rem 4rem;
+  background-color: var(--mainClr);
+  border-radius: 5px;
+  box-shadow: 0 0 5px var(--shadow02);
+  cursor: pointer;
+  font-weight: bold;
+}
+.dom_confirm p:first-child {
+  background-color: #f4f4f4;
+}
+.dom_add_id ~ label {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.dom_add_id ~ label input {
+  background-color: #e2e2e2;
+}
+
+.dom_add_id ~ label.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.dom_add_id ~ label.active input {
+  background: white;
 }
 .dom_post {
   width: 95vw;
@@ -1749,7 +1797,8 @@ input[type="checkbox"]:checked::before {
   box-shadow: 0 0 3px var(--shadow02);
   border-radius: 5px;
 }
-.dom_accounts_overlay {
+.dom_accounts_overlay,
+.dom_alert_overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -1768,6 +1817,11 @@ input[type="checkbox"]:checked::before {
 .dom_alert.active,
 .dom_accounts.active,
 .dom_accounts.active ~ .dom_accounts_overlay {
+  opacity: 1;
+  pointer-events: all;
+  scale: 1;
+}
+.dom_alert.active ~ .dom_alert_overlay {
   opacity: 1;
   pointer-events: all;
   scale: 1;

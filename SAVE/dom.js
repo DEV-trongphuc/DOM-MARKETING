@@ -216,8 +216,9 @@ async function shortenURL(longUrl) {
 dom_accounts_btn_qr.addEventListener("click", async () => {
   // 🛠 Thêm async ở đây
   // 🔥 Mã hóa dữ liệu thành Base64
-  const encodedAccounts = btoa(encodeURIComponent(JSON.stringify(accounts)));
-
+  const encodedAccounts = LZString.compressToEncodedURIComponent(
+    JSON.stringify(accounts)
+  );
   // 🔥 Tạo URL chứa `?sync=`
   const syncUrl = `${window.location.origin}${window.location.pathname}?sync=${encodedAccounts}`;
 
@@ -260,7 +261,10 @@ let accounts = (() => {
 
     if (encodedSync) {
       try {
-        const syncAccounts = JSON.parse(decodeURIComponent(atob(encodedSync)));
+        // 🔥 Giải mã đúng cách bằng LZString
+        const decodedString =
+          LZString.decompressFromEncodedURIComponent(encodedSync);
+        const syncAccounts = JSON.parse(decodedString);
 
         if (Array.isArray(syncAccounts) && syncAccounts.length) {
           const existingIds = new Set(localAccounts.map((acc) => acc.id));
@@ -310,12 +314,24 @@ let accounts = (() => {
 
             renderAlert(title, content);
           } else {
-            alert("Không có tài khoản mới nào cần đồng bộ!");
+            const title = "Sync accounts";
+            const content = `
+ <p class="dom_connect">
+        <i class="fa-solid fa-triangle-exclamation title_icon"></i> There are no new accounts to sync
+      </p>
+`;
+            renderAlert(title, content);
           }
         }
       } catch (error) {
         console.error("Lỗi giải mã sync:", error);
-        alert("Lỗi đồng bộ dữ liệu, vui lòng kiểm tra lại!");
+        const title = "Something Error";
+        const content = `
+       <p class="dom_connect">
+              <i class="fa-solid fa-triangle-exclamation title_icon"></i> Access Token is wrong or Meta API server is interrupted, please try again!
+            </p>
+      `;
+        renderAlert(title, content);
       }
     }
 
@@ -353,7 +369,9 @@ let viewMaster = accounts[accountViewID] || accounts[0] || null;
 if (encodedAct) {
   try {
     // 🔥 Giải mã dữ liệu từ `act`
-    const actObject = JSON.parse(decodeURIComponent(atob(encodedAct)));
+    const decodedString =
+      LZString.decompressFromEncodedURIComponent(encodedAct);
+    const actObject = JSON.parse(decodedString);
 
     if (actObject && actObject.id) {
       // 🔍 Tìm tài khoản có ID trùng khớp
@@ -378,23 +396,73 @@ console.log("viewMaster:", viewMaster);
 
 // EVENT
 view_report.addEventListener("click", () => {
-  const adId = document.getElementById("ad_id").value.trim();
+  const add_id = document.querySelector("#add_id");
+  console.log(add_id.checked);
   const accessToken = document.getElementById("access_token").value.trim();
+  if (add_id.checked) {
+    const adId = document.getElementById("ad_id").value.trim();
 
-  if (!adId || !accessToken) {
-    alert("Vui lòng nhập đầy đủ Ad ID và Access Token!");
-    return;
+    if (!adId || !accessToken) {
+      const title = "Wrong input";
+      const content = `
+   <p class="dom_connect">
+          <i class="fa-solid fa-keyboard title_icon"></i> Please enter full Ad ID and Access Token!
+        </p>
+  `;
+      renderAlert(title, content);
+      return;
+    }
+
+    // Kiểm tra xem có tồn tại trong accounts không
+    const isExist = accounts.some((item) => item.id === adId);
+    if (isExist) {
+      const title = "Already exists";
+      const content = `
+     <p class="dom_connect">
+            <i class="fa-solid fa-rectangle-ad title_icon"></i> Ad ID already exists in the accounts list!
+          </p>
+    `;
+      renderAlert(title, content);
+      return;
+    }
+    fetchAdAccountActivities(adId, accessToken);
+  } else {
+    if (!accessToken) {
+      const title = "Wrong input";
+      const content = `
+     <p class="dom_connect">
+            <i class="fa-solid fa-keyboard title_icon"></i> Please enter an Access Token!
+          </p>
+    `;
+      renderAlert(title, content);
+      return;
+    }
+    const title = "Connect all Accounts";
+    const content = `
+     <p class="dom_connect">
+            <i class="fa-solid fa-link"></i> <span>Connected to </span
+            ><b>[Connect ALL the accounts you manage]</b>
+          </p>
+          <p>
+            <i class="fa-solid fa-award title_icon"></i>DOM cam kết ID và
+            Token của bạn chỉ được lưu trữ ở trình duyệt - Local. Chúng tôi
+            <b>KHÔNG THU THẬP</b> bất kỳ thông tin nào về tài khoản quảng cáo
+            của bạn. Mọi API được gửi và nhận đều thuộc Marketing API chính
+            thức của Meta. DOM sẽ chịu hoàn toàn trách nhiệm nếu phát hiện thu
+            thập thông tin liên quan đến ID và Token của bạn.
+          </p>
+          <p>
+            <i class="fa-solid fa-award title_icon"></i>DOM commits that your
+            ID and Token are only stored in the Local browser. We DO NOT
+            COLLECT any information about your advertising account. All APIs
+            sent and received are part of Meta's official Marketing API. DOM
+            will take full responsibility if discovered about collecting your
+            ID and Access Token.
+          </p>
+    `;
+    renderAlertWithCallback(title, content, () => fetchAdAccounts(accessToken));
   }
-
-  // Kiểm tra xem có tồn tại trong accounts không
-  const isExist = accounts.some((item) => item.id === adId);
-  if (isExist) {
-    alert("Ad ID đã tồn tại trong danh sách accounts!");
-    return;
-  }
-  console.log(adId, accessToken);
-
-  fetchAdAccountActivities(adId, accessToken);
+  return;
 });
 
 dom_accounts_btn_add.addEventListener("click", () => {
@@ -413,6 +481,11 @@ dom_accounts_overlay.addEventListener("click", () => {
 document.getElementById("key_check").addEventListener("change", function () {
   document
     .querySelector(".dom_key_check ~ label")
+    .classList.toggle("active", this.checked);
+});
+document.getElementById("add_id").addEventListener("change", function () {
+  document
+    .querySelector(".dom_add_id ~ label")
     .classList.toggle("active", this.checked);
 });
 
@@ -585,7 +658,14 @@ apply_custom_date.addEventListener("click", () => {
   const endDateIp = document.getElementById("end").value;
 
   if (!startDateIp || !endDateIp) {
-    alert("Please select both start and end dates.");
+    const title = "Custome date";
+    const content = `
+   <p class="dom_connect">
+          <i class="fa-solid fa-calendar-days title_icon"></i> Please select both start and end dates.
+        </p>
+  `;
+    renderAlert(title, content);
+
     return;
   }
 
@@ -596,12 +676,24 @@ apply_custom_date.addEventListener("click", () => {
   maxPastDate.setMonth(currentDate.getMonth() - 37); // Lùi lại 37 tháng
 
   if (startDateObj > endDateObj) {
-    alert("Start date cannot be later than the end date.");
+    const title = "Custome date";
+    const content = `
+   <p class="dom_connect">
+          <i class="fa-solid fa-calendar-days title_icon"></i> Start date cannot be later than the end date.
+        </p>
+  `;
+    renderAlert(title, content);
     return;
   }
 
   if (startDateObj < maxPastDate) {
-    alert("Start date cannot be older than 37 months from TODAY.");
+    const title = "Custome date";
+    const content = `
+   <p class="dom_connect">
+          <i class="fa-solid fa-calendar-days title_icon"></i> Start date cannot be older than 37 months from TODAY.
+        </p>
+  `;
+    renderAlert(title, content);
     return;
   }
 
@@ -738,6 +830,116 @@ function showPaymentTab() {
 }
 // FUNCTION
 // Fetch Function
+
+async function getUserId(accessToken) {
+  const url = `https://graph.facebook.com/v22.0/me?fields=id&access_token=${accessToken}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok)
+      throw new Error(`Lỗi API: ${response.status} - ${response.statusText}`);
+
+    const data = await response.json();
+    return data.id;
+  } catch (error) {
+    console.error("Lỗi khi lấy User ID:", error.message);
+    return null;
+  }
+}
+
+async function fetchAdAccounts(accessToken) {
+  loading.classList.add("active");
+  const userId = await getUserId(accessToken);
+  if (!userId) {
+    loading.classList.remove("active");
+    renderAlert(
+      "Error",
+      "<p>Access Token không hợp lệ hoặc hết hạn. Vui lòng kiểm tra lại.</p>"
+    );
+    return [];
+  }
+
+  const url = `https://graph.facebook.com/v22.0/${userId}/adaccounts?fields=id&access_token=${accessToken}`;
+  let addedAccounts = []; // Danh sách tài khoản mới thêm
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      loading.classList.remove("active");
+      renderAlert(
+        "Error",
+        `<p>Access Token không hợp lệ hoặc hết hạn. Vui lòng kiểm tra lại.</p>`
+      );
+      throw new Error(`Lỗi API: ${response.status} - ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const adAccounts = data.data || [];
+
+    const newAccounts = adAccounts.filter(
+      (acc) => !accounts.some((item) => item.id === acc.id.replace("act_", ""))
+    );
+
+    const fetchPromises = newAccounts.map((acc) =>
+      fetchAdAccountInfoAndAdd(acc.id.replace("act_", ""), accessToken)
+    );
+
+    // Chờ tất cả request hoàn thành
+    const results = await Promise.all(fetchPromises);
+    loading.classList.remove("active");
+    addedAccounts = results.filter((acc) => acc !== null);
+
+    if (addedAccounts.length > 0) {
+      const title = "Sync Advertising Accounts";
+
+      // 🔥 Danh sách tài khoản mới được thêm
+      const addedNamesHTML = addedAccounts
+        .map(
+          (item) => `
+          <p><i class="fa-solid fa-rectangle-ad title_icon"></i> ${item.name}</p>
+        `
+        )
+        .join("");
+
+      const content = `
+        <p class="dom_connect">
+          <i class="fa-solid fa-link"></i> <span>Successfully connected </span>
+          <b>[${addedAccounts.length}]</b> advertising accounts
+        </p>
+        ${addedNamesHTML}
+        <p>
+          <i class="fa-solid fa-award title_icon"></i>DOM cam kết ID và
+          Token của bạn chỉ được lưu trữ ở trình duyệt - Local. Chúng tôi
+          <b>KHÔNG THU THẬP</b> bất kỳ thông tin nào về tài khoản quảng cáo
+          của bạn. Mọi API được gửi và nhận đều thuộc Marketing API chính
+          thức của Meta. DOM sẽ chịu hoàn toàn trách nhiệm nếu phát hiện thu
+          thập thông tin liên quan đến ID và Token của bạn.
+        </p>
+        <p>
+          <i class="fa-solid fa-award title_icon"></i>DOM commits that your
+          ID and Token are only stored in the Local browser. We DO NOT
+          COLLECT any information about your advertising account. All APIs
+          sent and received are part of Meta's official Marketing API. DOM
+          will take full responsibility if discovered about collecting your
+          ID and Access Token.
+        </p>
+      `;
+
+      renderAlert(title, content);
+      renderListAccounts();
+      renderMasterView();
+    } else {
+      renderAlert(
+        "Sync Advertising Accounts",
+        "<p>Không có tài khoản mới nào được thêm.</p>"
+      );
+    }
+  } catch (error) {
+    loading.classList.remove("active");
+    console.error("Lỗi khi fetch Ad Accounts:", error.message);
+  }
+}
+
 async function fetchData(start, end) {
   loading.classList.add("active");
   let apiUrl = `https://graph.facebook.com/v22.0/act_${adAccountIdView}/insights?level=adset&fields=campaign_name,adset_name,adset_id,spend,impressions,reach,actions,optimization_goal&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&time_range={"since":"${start}","until":"${end}"}&access_token=${accessTokenView}&limit=1000`;
@@ -3024,6 +3226,52 @@ function renderAccountInfo(data) {
   `;
 }
 
+async function fetchAdAccountInfoAndAdd(adId, accessToken) {
+  let apiUrl = `https://graph.facebook.com/v22.0/act_${adId}?fields=id,name,account_status,currency,amount_spent,business&access_token=${accessToken}`;
+
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (!data.name) return null; // Nếu không có name thì token sai hoặc tài khoản không hợp lệ
+
+    // Lấy avatar nếu có Business Manager
+    let avatar = "https://dom-marketing.netlify.app/img/dom_avatar.jpg";
+    if (data.business?.id) {
+      const apiBM = `https://graph.facebook.com/v22.0/${data.business.id}?fields=picture&access_token=${accessToken}`;
+      const bmResponse = await fetch(apiBM);
+      const bmData = await bmResponse.json();
+      avatar = bmData.picture?.data?.url || avatar;
+    }
+
+    // Tạo object tài khoản
+    const item = {
+      brand: false,
+      quick: [
+        "Lead Form",
+        "Awareness",
+        "Engagement",
+        "Message",
+        "Traffic",
+        "Pagelike",
+      ],
+      avatar: avatar,
+      name: data.name,
+      id: adId,
+      access: accessToken,
+    };
+
+    // Lưu vào danh sách
+    accounts.push(item);
+    localStorage.accounts = JSON.stringify(accounts);
+
+    return item; // Trả về tài khoản vừa thêm
+  } catch (error) {
+    console.error(`Lỗi khi fetch thông tin tài khoản ${adId}:`, error.message);
+    return null; // Lỗi khi thêm
+  }
+}
+
 async function fetchAdAccountActivities(adId, accessToken) {
   loading.classList.add("active");
   let apiUrl = `https://graph.facebook.com/v22.0/act_${adId}?fields=balance,age,created_time,fb_entity,tax_id,id,name,account_status,currency,amount_spent,funding_source_details,spend_cap,business,owner,timezone_name,disable_reason&access_token=${accessToken}`;
@@ -3097,13 +3345,60 @@ async function fetchAdAccountActivities(adId, accessToken) {
       `;
       renderAlert(title, content);
     } else {
-      alert("ID hoặc Token không hợp lệ");
+      const title = "Invalid";
+      const content = `
+ <p class="dom_connect">
+        <i class="fa-solid fa-triangle-exclamation title_icon"></i> Invalid ID or Token
+      </p>
+`;
+      renderAlert(title, content);
     }
   } catch (error) {
-    alert("ID hoặc Token không hợp lệ");
+    const title = "Invalid";
+    const content = `
+ <p class="dom_connect">
+        <i class="fa-solid fa-triangle-exclamation title_icon"></i> Invalid ID or Token
+      </p>
+`;
+    renderAlert(title, content);
     console.error("Fetch error:", error.message);
   }
   loading.classList.remove("active");
+}
+const btnOk = document.querySelector("#confirm_ok");
+const btnCancel = document.querySelector("#confirm_close");
+
+function renderAlertWithCallback(
+  title,
+  contentHTML,
+  onConfirm,
+  confirm_close,
+  confirm_ok
+) {
+  dom_alert.classList.add("active");
+  dom_alert.classList.add("confirm");
+  dom_alert_title.textContent = title;
+  dom_alert_content.innerHTML = contentHTML;
+
+  btnOk.onclick = null;
+  btnCancel.onclick = null;
+
+  btnOk.onclick = () => {
+    if (typeof onConfirm === "function") onConfirm();
+    dom_alert.classList.remove("active");
+    dom_alert.classList.remove("confirm");
+  };
+
+  btnCancel.onclick = () => {
+    dom_alert.classList.remove("active");
+    dom_alert.classList.remove("confirm");
+  };
+  if (confirm_close) {
+    btnCancel.textContent = confirm_close;
+  }
+  if (confirm_ok) {
+    btnOk.textContent = confirm_ok;
+  }
 }
 
 function renderAlert(title, contentHTML) {
@@ -3122,8 +3417,11 @@ const dom_accounts_btn_coppy = document.querySelector(
 );
 
 dom_accounts_btn_coppy.addEventListener("click", async () => {
-  const encodedAccounts = btoa(encodeURIComponent(JSON.stringify(accounts)));
-  const syncUrl = `${window.location.origin}${window.location.pathname}?sync=${encodedAccounts}`;
+  const compressed = LZString.compressToEncodedURIComponent(
+    JSON.stringify(accounts)
+  );
+  const syncUrl = `${window.location.origin}${window.location.pathname}?sync=${compressed}`;
+
   const shortUrl = await shortenURL(syncUrl);
   const title = "Share all Accounts";
   const content = `
@@ -3167,7 +3465,7 @@ function renderListAccounts() {
             <div >
               <i class="fa-solid fa-pen-to-square account_edit" title="Edit Ad Accout"></i>
               <i class="fa-solid fa-share-nodes account_share" title="Share Report Account"></i>
-              <i class="fa-solid fa-trash-can account_remove" title="Disconnect Account"></i>
+              <i class="fa-solid fa-trash-can account_remove" title="Stop connecting Account"></i>
             </div>
           </div>
       `
@@ -3185,12 +3483,26 @@ dom_accounts_list.addEventListener("click", async (event) => {
     const parentItem = target.closest(".dom_accounts_list_item");
     const index = parseInt(parentItem.dataset.id);
 
-    if (confirm("Bạn có chắc muốn xóa tài khoản này không?")) {
-      accounts.splice(index, 1); // Xóa khỏi mảng
-      localStorage.accounts = JSON.stringify(accounts); // Cập nhật localStorage
-      renderListAccounts(); // Render lại danh sách
-      renderMasterView();
-    }
+    const title = "Stop connecting";
+    const content = `
+     <p class="dom_connect">
+            <i class="fa-solid fa-link-slash"></i> <span> Stop connecting to  </span
+            ><b>[${accounts[index].name}]</b> account
+          </p>
+    `;
+    renderAlertWithCallback(
+      title,
+      content,
+      () => {
+        accounts.splice(index, 1); // Xóa khỏi mảng
+        localStorage.accounts = JSON.stringify(accounts); // Cập nhật localStorage
+        renderListAccounts(); // Render lại danh sách
+        renderMasterView();
+      },
+      "Cancel",
+      "Disconnect"
+    );
+
     return;
   }
 
@@ -3224,7 +3536,9 @@ dom_accounts_list.addEventListener("click", async (event) => {
     const item = accounts[index];
 
     // 🔥 Mã hóa: JSON → URI Component → Base64
-    const encodedData = btoa(encodeURIComponent(JSON.stringify(item)));
+    const encodedData = LZString.compressToEncodedURIComponent(
+      JSON.stringify(item)
+    );
     const shareUrl = `${window.location.origin}${window.location.pathname}?act=${encodedData}`;
 
     try {
@@ -3253,6 +3567,10 @@ confirm_keyword.addEventListener("click", () => {
   if (index === undefined) return;
 
   const item = accounts[index];
+  if (!item.brand && !key_check.checked) {
+    dom_accounts.classList.remove("edit");
+    return;
+  }
 
   if (key_check.checked) {
     const keywords = key_adset.value
@@ -3261,7 +3579,15 @@ confirm_keyword.addEventListener("click", () => {
       .filter((kw) => kw);
 
     if (!keywords.length) {
-      alert("Vui lòng nhập từ khóa!");
+      const title = "Filter by keywords";
+      const content = `
+     <p class="dom_connect">
+            <i class="fa-solid fa-key title_icon"></i> Please enter keywords to create Quick Filter, separated by ","
+          </p>
+          <p>Ex: Keyword A, Keyword B, Keyword C</p>
+          <p>Your campaign <b>MUST</b> have a name/rename to contains keywords</p>
+    `;
+      renderAlert(title, content);
       return;
     }
     if (key_adset.value.trim() === item.quick.join(", ")) {
@@ -3295,7 +3621,13 @@ confirm_keyword.addEventListener("click", () => {
     quickFilter = viewMaster.quick;
     firstLoad();
   }
-  alert("Cập nhật bộ lọc thành công");
+  const title = "Filter by keywords";
+  const content = `
+ <p class="dom_connect">
+        <i class="fa-solid fa-key title_icon"></i> Filter default according to optimization goal
+      </p>
+`;
+  renderAlert(title, content);
   dom_accounts.classList.remove("edit");
 });
 
