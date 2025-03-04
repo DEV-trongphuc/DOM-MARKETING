@@ -18,6 +18,7 @@
       rel="stylesheet"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
 
     <link
       rel="icon"
@@ -455,14 +456,19 @@
           </div>
           <div class="dom_form_wrapper">
             <label>
-              <span>Ad ID</span>
-              <input type="text" id="ad_id" />
-            </label>
-            <label>
               <span>Access Token</span>
               <input type="text" id="access_token" />
             </label>
             <a href="#">Hướng dẫn lấy Access Token</a>
+            <label class="dom_add_id" for="add_id">
+              <input type="checkbox" id="add_id" />
+              <span>Add by Ad Account ID</span>
+            </label>
+            <label>
+              <span>Ad ID</span>
+              <input type="text" id="ad_id" />
+            </label>
+
             <p id="view_report">CONFIRM</p>
           </div>
         </div>
@@ -516,8 +522,13 @@
         <div class="dom_alert_inner">
           <div class="dom_alert_content"></div>
           <p id="dom_checked">CONFIRM</p>
+          <div class="dom_confirm">
+            <p id="confirm_close">Connect an ID</p>
+            <p id="confirm_ok">Continute Connect All</p>
+          </div>
         </div>
       </div>
+      <div class="dom_alert_overlay"></div>
       <div class="loading">
         <span class="loader"></span>
       </div>
