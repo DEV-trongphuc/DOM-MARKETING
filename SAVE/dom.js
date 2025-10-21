@@ -948,6 +948,7 @@ async function fetchData(start, end) {
   let nextUrl = apiUrl;
 
   try {
+    // 🔹 Lấy toàn bộ adset insights
     while (nextUrl) {
       const res = await fetch(nextUrl);
       if (!res.ok) throw new Error(`Network error: ${res.statusText}`);
@@ -957,28 +958,17 @@ async function fetchData(start, end) {
       nextUrl = data.paging?.next || null;
     }
 
-    // ⚡️ Tạo mảng promise để chạy song song
-    const promises = allData.map((item) =>
-      fetchAdPostsByAdset(item.adset_id, accessTokenView)
+    console.log(`📦 Tổng số adset: ${allData.length}`);
+
+    // 🔹 Gọi batch theo nhóm 40
+    const allWithPosts = await fetchAdPostsByAdsetBatch(
+      allData,
+      accessTokenView,
+      40
     );
 
-    // ⚡️ Đợi tất cả cùng lúc
-    const results = await Promise.allSettled(promises);
-
-    // ⚡️ Gắn dữ liệu vào item tương ứng
-    for (let i = 0; i < allData.length; i++) {
-      const res = results[i];
-      if (res.status === "fulfilled") {
-        allData[i].posts = res.value.posts;
-        allData[i].status = res.value.status;
-      } else {
-        allData[i].posts = [];
-        allData[i].status = "Unknown";
-      }
-    }
-
-    console.log("✅ All data ready:", allData);
-    return allData;
+    console.log("✅ All data ready:", allWithPosts);
+    return allWithPosts;
   } catch (err) {
     console.error("Fetch error:", err);
     return [];
@@ -3897,29 +3887,67 @@ if (accounts.length) {
 //   return allPosts;
 // }
 
-async function fetchAdPostsByAdset(adsetId, accessToken) {
-  const url = `https://graph.facebook.com/v24.0/${adsetId}/ads?fields=id,name,effective_status,creative{effective_object_story_id,instagram_permalink_url,thumbnail_url}&access_token=${accessToken}`;
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.error) {
-      console.error("Lỗi lấy ads:", data.error.message);
-      return { posts: [], status: "Unknown" };
-    }
+async function fetchAdPostsByAdsetBatch(adsets, accessToken, batchSize = 40) {
+  const results = [];
 
-    const ads = data.data || [];
-    const posts = ads.map((ad) => ({
-      facebook_post_url: ad.creative?.effective_object_story_id
-        ? `https://facebook.com/${ad.creative.effective_object_story_id}`
-        : null,
-      instagram_post_url: ad.creative?.instagram_permalink_url || null,
-      thumbnail_url: ad.creative?.thumbnail_url || null, // 👈 thêm dòng này
+  for (let i = 0; i < adsets.length; i += batchSize) {
+    const batch = adsets.slice(i, i + batchSize);
+
+    // ⚡ Tạo mảng batch request (tối đa 50 request/lượt, ta dùng 40 cho an toàn)
+    const fbBatch = batch.map((a) => ({
+      method: "GET",
+      relative_url: `${a.adset_id}/ads?fields=id,name,effective_status,creative{effective_object_story_id,instagram_permalink_url,thumbnail_url}`,
     }));
 
-    const status = ads[0]?.effective_status?.toUpperCase() || "UNKNOWN";
-    return { posts, status };
-  } catch (e) {
-    console.error("Fetch ad posts error:", e);
-    return { posts: [], status: "Unknown" };
+    try {
+      const res = await fetch(`https://graph.facebook.com/v24.0`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_token: accessToken,
+          batch: fbBatch,
+        }),
+      });
+
+      const batchData = await res.json();
+
+      // ⚙️ Gán lại vào từng adset
+      batch.forEach((adset, idx) => {
+        const body = batchData[idx]?.body
+          ? JSON.parse(batchData[idx].body)
+          : null;
+        if (!body || body.error) {
+          adset.posts = [];
+          adset.status = "Unknown";
+          return;
+        }
+
+        const ads = body.data || [];
+        adset.posts = ads.map((ad) => ({
+          facebook_post_url: ad.creative?.effective_object_story_id
+            ? `https://facebook.com/${ad.creative.effective_object_story_id}`
+            : null,
+          instagram_post_url: ad.creative?.instagram_permalink_url || null,
+          thumbnail_url: ad.creative?.thumbnail_url || null,
+        }));
+        adset.status = ads[0]?.effective_status?.toUpperCase() || "UNKNOWN";
+      });
+
+      results.push(...batch);
+      console.log(
+        `✅ Batch ${i / batchSize + 1} done (${batch.length} adsets)`
+      );
+    } catch (err) {
+      console.error("❌ Lỗi batch:", err);
+      results.push(
+        ...batch.map((a) => ({
+          ...a,
+          posts: [],
+          status: "Unknown",
+        }))
+      );
+    }
   }
+
+  return results;
 }
