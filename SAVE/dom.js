@@ -1441,6 +1441,7 @@ function renderTopAdset(data) {
 function renderTableHead() {
   const columns = [
     '<input type="checkbox" id="dom_select_all">',
+    "Thumb",
     "Campaign Name",
     "Adset Name",
     "Status",
@@ -1577,6 +1578,13 @@ function processData(data, isCache) {
     tbodyRows[index] = `
       <tr data-id="${index}" data-campaign="${campaign_name}" data-adset="${adset_name}">
         <td><input type="checkbox" class="dom_select_row" data-id="${index}"></td>
+    <td class="thumbnail_cell">
+  ${
+    posts[0]?.thumbnail_url
+      ? `<img src="${posts[0].thumbnail_url}" alt="thumb" style="width:60px;height:60px;object-fit:cover;border-radius:3px;">`
+      : `<span style="opacity:.5;">Không có ảnh</span>`
+  }
+</td>
         <td>${campaign_name}</td>
         <td>${adset_name}</td>
         <td class="status ${statusClass}">${statusText}</td>
@@ -1658,7 +1666,7 @@ function updateFooterOnCheck(tableData) {
     }
   }
 
-  let footerHTML = `<tr><td colspan="6"><strong>${
+  let footerHTML = `<tr><td colspan="7"><strong>${
     isAllSelected
       ? `Total ${allRows.length} Row`
       : `Total x${checkedRows.length} Selected Row`
@@ -3890,7 +3898,7 @@ if (accounts.length) {
 // }
 
 async function fetchAdPostsByAdset(adsetId, accessToken) {
-  const url = `https://graph.facebook.com/v22.0/${adsetId}/ads?fields=id,name,effective_status,creative{effective_object_story_id,instagram_permalink_url}&access_token=${accessToken}`;
+  const url = `https://graph.facebook.com/v24.0/${adsetId}/ads?fields=id,name,effective_status,creative{effective_object_story_id,instagram_permalink_url,thumbnail_url}&access_token=${accessToken}`;
   try {
     const res = await fetch(url);
     const data = await res.json();
@@ -3898,18 +3906,17 @@ async function fetchAdPostsByAdset(adsetId, accessToken) {
       console.error("Lỗi lấy ads:", data.error.message);
       return { posts: [], status: "Unknown" };
     }
-    console.log(data);
+
     const ads = data.data || [];
     const posts = ads.map((ad) => ({
       facebook_post_url: ad.creative?.effective_object_story_id
         ? `https://facebook.com/${ad.creative.effective_object_story_id}`
         : null,
       instagram_post_url: ad.creative?.instagram_permalink_url || null,
+      thumbnail_url: ad.creative?.thumbnail_url || null, // 👈 thêm dòng này
     }));
 
-    // ⚡️ Lấy status đầu tiên (thường các ads trong adset cùng trạng thái)
     const status = ads[0]?.effective_status?.toUpperCase() || "UNKNOWN";
-
     return { posts, status };
   } catch (e) {
     console.error("Fetch ad posts error:", e);
