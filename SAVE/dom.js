@@ -942,33 +942,48 @@ async function fetchAdAccounts(accessToken) {
 
 async function fetchData(start, end) {
   loading.classList.add("active");
-  let apiUrl = `https://graph.facebook.com/v22.0/act_${adAccountIdView}/insights?level=adset&fields=campaign_name,adset_name,adset_id,spend,impressions,reach,actions,optimization_goal&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&time_range={"since":"${start}","until":"${end}"}&access_token=${accessTokenView}&limit=1000`;
+  const apiUrl = `https://graph.facebook.com/v22.0/act_${adAccountIdView}/insights?level=adset&fields=campaign_name,adset_name,adset_id,spend,impressions,reach,actions,optimization_goal&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&time_range={"since":"${start}","until":"${end}"}&access_token=${accessTokenView}&limit=1000`;
 
   let allData = [];
   let nextUrl = apiUrl;
+
   try {
     while (nextUrl) {
-      const response = await fetch(nextUrl);
+      const res = await fetch(nextUrl);
+      if (!res.ok) throw new Error(`Network error: ${res.statusText}`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      allData.push(...(data.data || []));
+      nextUrl = data.paging?.next || null;
+    }
 
-      if (!response.ok) {
-        throw new Error(`Network error: ${response.statusText}`);
+    // ⚡️ Tạo mảng promise để chạy song song
+    const promises = allData.map((item) =>
+      fetchAdPostsByAdset(item.adset_id, accessTokenView)
+    );
+
+    // ⚡️ Đợi tất cả cùng lúc
+    const results = await Promise.allSettled(promises);
+
+    // ⚡️ Gắn dữ liệu vào item tương ứng
+    for (let i = 0; i < allData.length; i++) {
+      const res = results[i];
+      if (res.status === "fulfilled") {
+        allData[i].posts = res.value.posts;
+        allData[i].status = res.value.status;
+      } else {
+        allData[i].posts = [];
+        allData[i].status = "Unknown";
       }
-      const data = await response.json();
-      if (data.error) {
-        console.error("Error from API:", data.error.message);
-        return;
-      }
-      allData = [...allData, ...(data.data || [])];
-      nextUrl = data.paging && data.paging.next ? data.paging.next : null;
     }
-    console.log(allData);
-    for (const item of allData) {
-      const posts = await fetchAdPostsByAdset(item.adset_id, accessTokenView);
-      item.posts = posts; // ⬅️ gắn luôn vào adset
-    }
+
+    console.log("✅ All data ready:", allData);
     return allData;
-  } catch (error) {
-    console.error("Fetch error:", error);
+  } catch (err) {
+    console.error("Fetch error:", err);
+    return [];
+  } finally {
+    loading.classList.remove("active");
   }
 }
 async function fetchDataDaily(start, end) {
@@ -1464,7 +1479,6 @@ function measureExecutionTime(fn, ...args) {
   console.log(`⏳ Execution time: ${(end - start).toFixed(4)} ms`);
   return result; // Trả về kết quả của hàm gốc
 }
-
 function processData(data, isCache) {
   const campaignTotal = Object.create(null);
   const optimizationTotal = Object.create(null);
@@ -1474,11 +1488,10 @@ function processData(data, isCache) {
   const tableData = new Array(data.length);
   const tbodyRows = new Array(data.length);
 
-  // 🔹 Lấy ngày hôm nay (so sánh đến ngày, bỏ giờ)
-  const today = new Date().toISOString().slice(0, 10);
-
+  // 🔹 Chuẩn bị tổng hợp ban đầu
   for (const key of goalMappingMap.keys()) optimizationTotal[key] = 0;
 
+  // 🔹 Duyệt toàn bộ data
   for (let index = 0, len = data.length; index < len; index++) {
     const item = data[index];
     const {
@@ -1489,12 +1502,14 @@ function processData(data, isCache) {
       reach = 0,
       impressions = 0,
       actions = [],
-      date_stop = null, // ⬅️ thêm thuộc tính ngày kết thúc
+      posts = [],
+      status = "UNKNOWN", // ⬅️ Lấy status có sẵn từ API
     } = item;
 
     const spend = +rawSpend || 0;
     campaignTotal[campaign_name] = (campaignTotal[campaign_name] || 0) + spend;
 
+    // 🔹 Tổng hợp theo brand hoặc goal
     if (isBrand && isCache) {
       for (const brand of quickFilterSet) {
         if (campaign_name.toLowerCase().includes(brand.toLowerCase())) {
@@ -1511,11 +1526,13 @@ function processData(data, isCache) {
       }
     }
 
+    // 🔹 Ánh xạ hành động
     const actionMap = new Map(
       actions.map((a) => [a.action_type, a.value || 0])
     );
 
-    tableData[index] = {
+    // 🔹 Chuẩn hóa dữ liệu từng dòng
+    const row = {
       id: index,
       campaign_name,
       adset_name,
@@ -1529,79 +1546,65 @@ function processData(data, isCache) {
       ),
     };
 
-    tableData[index].result = resultMapping[optimization_goal]
-      ? tableData[index][resultMapping[optimization_goal]] || 0
+    // 🔹 Tính các chỉ số
+    row.result = resultMapping[optimization_goal]
+      ? row[resultMapping[optimization_goal]] || 0
       : 0;
 
-    const result = tableData[index].result;
-    tableData[index].frequency =
-      reach > 0 ? (impressions / reach).toFixed(2) : "0";
-    tableData[index].cpm =
-      impressions > 0 ? ((spend * 1000) / impressions) | 0 : "0";
-    tableData[index].cpr = (spend / (result || 1)).toFixed(
+    const result = row.result;
+    row.frequency = reach > 0 ? (impressions / reach).toFixed(2) : "0";
+    row.cpm = impressions > 0 ? ((spend * 1000) / impressions) | 0 : "0";
+    row.cpr = (spend / (result || 1)).toFixed(
       spend / (result || 1) > 50 ? 0 : 1
     );
 
-    // 🔹 Xác định trạng thái dựa vào ngày dừng và chi tiêu
-    const isActive =
-      (!date_stop || date_stop >= today) && spend > 0 ? "Active" : "Inactive";
-    tableData[index].status = isActive;
+    // 🔹 Hiển thị status nguyên văn, chỉ ACTIVE mới thêm class
+    const statusText = status || "UNKNOWN";
+    const statusClass = statusText === "ACTIVE" ? "active" : "";
+    row.status = statusText;
+
+    // 🔹 Render HTML cho từng dòng
+    const fbPost = posts.find((p) => p.facebook_post_url);
+    const igPost = posts.find((p) => p.instagram_post_url);
+    const postLinkHTML = fbPost
+      ? `<a href="${fbPost.facebook_post_url}" target="_blank" class="btn-view fb" title="Xem bài trên Facebook">
+            <i class="fa-solid fa-eye"></i></a>`
+      : igPost
+      ? `<a href="${igPost.instagram_post_url}" target="_blank" class="btn-view ig" title="Xem bài trên Instagram">
+            <i class="fa-solid fa-eye"></i></a>`
+      : `<span style="opacity:.5;">Không có bài</span>`;
 
     tbodyRows[index] = `
       <tr data-id="${index}" data-campaign="${campaign_name}" data-adset="${adset_name}">
         <td><input type="checkbox" class="dom_select_row" data-id="${index}"></td>
         <td>${campaign_name}</td>
         <td>${adset_name}</td>
- 
-
-
-          <td class="status ${isActive === "Active" ? "active" : "inactive"}">
-  ${isActive}
-</td>
-  <td class="post_links">
-  ${(() => {
-    const posts = data[index].posts || [];
-    const fbPost = posts.find((p) => p.facebook_post_url);
-    const igPost = posts.find((p) => p.instagram_post_url);
-
-    if (fbPost) {
-      return `<a href="${fbPost.facebook_post_url}" target="_blank" class="btn-view fb" title="Xem bài trên Facebook">
-                  <i class="fa-solid fa-eye"></i>
-                </a>`;
-    } else if (igPost) {
-      return `<a href="${igPost.instagram_post_url}" target="_blank" class="btn-view ig" title="Xem bài trên Instagram">
-                  <i class="fa-solid fa-eye"></i>
-                </a>`;
-    } else {
-      return `<span style="opacity:.5;">Không có bài</span>`;
-    }
-  })()}
-</td>
+        <td class="status ${statusClass}">${statusText}</td>
+        <td class="post_links">${postLinkHTML}</td>
         <td class="view_insights"><i class="fa-solid fa-magnifying-glass-chart"></i></td>
-      
-        <td>${formatNumber(tableData[index].spend)} ₫</td>
-       
-        <td>${formatNumber(tableData[index].reach)}</td>
-        <td>${formatNumber(tableData[index].impressions)}</td>
-        <td>${formatNumber(tableData[index].result)}</td>
-        <td>${formatNumber(tableData[index].cpr)} ₫</td>
-        <td>${formatMetricName(tableData[index].optimization_goal)}</td>
-        <td>${tableData[index].frequency}</td>
-        <td>${formatNumber(tableData[index].follows) || 0}</td>
-        <td>${formatNumber(tableData[index].reactions) || 0}</td>
-        <td>${tableData[index].messenger_start || 0}</td>
-        <td>${tableData[index].lead || 0}</td>
-        <td>${formatNumber(tableData[index].cpm)} ₫</td>
-        <td>${formatNumber(tableData[index].post_engagement) || 0}</td>
-        <td>${formatNumber(tableData[index].page_engagement) || 0}</td>
-        <td>${formatNumber(tableData[index].video_view) || 0}</td>
-        <td>${formatNumber(tableData[index].photo_view) || 0}</td>
-        <td>${tableData[index].comments || 0}</td>
-        <td>${tableData[index].post_save || 0}</td>
-        <td>${tableData[index].share || 0}</td>
-        <td>${formatNumber(tableData[index].link_click) || 0}</td>
-      
+        <td>${formatNumber(row.spend)} ₫</td>
+        <td>${formatNumber(row.reach)}</td>
+        <td>${formatNumber(row.impressions)}</td>
+        <td>${formatNumber(row.result)}</td>
+        <td>${formatNumber(row.cpr)} ₫</td>
+        <td>${formatMetricName(row.optimization_goal)}</td>
+        <td>${row.frequency}</td>
+        <td>${formatNumber(row.follows) || 0}</td>
+        <td>${formatNumber(row.reactions) || 0}</td>
+        <td>${row.messenger_start || 0}</td>
+        <td>${row.lead || 0}</td>
+        <td>${formatNumber(row.cpm)} ₫</td>
+        <td>${formatNumber(row.post_engagement) || 0}</td>
+        <td>${formatNumber(row.page_engagement) || 0}</td>
+        <td>${formatNumber(row.video_view) || 0}</td>
+        <td>${formatNumber(row.photo_view) || 0}</td>
+        <td>${row.comments || 0}</td>
+        <td>${row.post_save || 0}</td>
+        <td>${row.share || 0}</td>
+        <td>${formatNumber(row.link_click) || 0}</td>
       </tr>`;
+
+    tableData[index] = row;
   }
 
   return {
@@ -1613,6 +1616,7 @@ function processData(data, isCache) {
     tbodyHTML: tbodyRows.join(""),
   };
 }
+
 async function getPostsFromAdset(adsetId, accessToken) {
   const adsRes = await fetch(
     `https://graph.facebook.com/v22.0/${adsetId}/ads?fields=id,name,creative{effective_object_story_id,object_story_spec{page_id,link_data,message,link}},status&access_token=${accessToken}
@@ -3311,6 +3315,7 @@ function renderAccountInfo(data) {
   document.title = `DOM Report - Meta - ${data.name}`;
   dom_userP.textContent = data.name;
   dom_userIMG.src = data.avatar;
+  console.log(data.avatar);
 
   dom_account_view_block.innerHTML = `
     <div class="account_item">
@@ -3535,12 +3540,13 @@ dom_accounts_btn_coppy.addEventListener("click", async () => {
 
 function renderMasterView() {
   if (!accounts?.length || accounts?.length < 2) return;
+  console.log(accounts);
 
   dom_account_viewUl.innerHTML = accounts
     .map(
       (item, index) => `
         <li data-id="${index}">
-          <img src="${item.avatar}" />
+          <img src="https://dom-marketing.netlify.app/img/dom_avatar.jpg" />
           <p><span>${item.name}</span> <span>${item.id}</span></p>
         </li>
       `
@@ -3884,20 +3890,29 @@ async function fetchPostsFromAdsets(insightsData) {
 }
 
 async function fetchAdPostsByAdset(adsetId, accessToken) {
-  const adsUrl = `https://graph.facebook.com/v22.0/${adsetId}/ads?fields=id,name,creative{effective_object_story_id,instagram_permalink_url}&access_token=${accessToken}`;
-  const adsRes = await fetch(adsUrl);
-  const adsData = await adsRes.json();
+  const url = `https://graph.facebook.com/v22.0/${adsetId}/ads?fields=id,name,status,creative{effective_object_story_id,instagram_permalink_url}&access_token=${accessToken}`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.error) {
+      console.error("Lỗi lấy ads:", data.error.message);
+      return { posts: [], status: "Unknown" };
+    }
 
-  if (adsData.error) {
-    console.error("Lỗi lấy ads:", adsData.error.message);
-    return [];
+    const ads = data.data || [];
+    const posts = ads.map((ad) => ({
+      facebook_post_url: ad.creative?.effective_object_story_id
+        ? `https://facebook.com/${ad.creative.effective_object_story_id}`
+        : null,
+      instagram_post_url: ad.creative?.instagram_permalink_url || null,
+    }));
+
+    // ⚡️ Lấy status đầu tiên (thường các ads trong adset cùng trạng thái)
+    const status = ads[0]?.status?.toUpperCase() || "UNKNOWN";
+
+    return { posts, status };
+  } catch (e) {
+    console.error("Fetch ad posts error:", e);
+    return { posts: [], status: "Unknown" };
   }
-
-  const ads = adsData.data.map((ad) => ({
-    facebook_post_url: ad.creative?.effective_object_story_id
-      ? `https://facebook.com/${ad.creative.effective_object_story_id}`
-      : null,
-    instagram_post_url: ad.creative?.instagram_permalink_url || null,
-  }));
-  return ads;
 }
