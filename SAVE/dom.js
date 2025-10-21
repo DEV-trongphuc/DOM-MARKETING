@@ -3837,60 +3837,60 @@ function firstLoad() {
 if (accounts.length) {
   firstLoad();
 }
-async function fetchPostsFromAdsets(insightsData) {
-  const allPosts = [];
+// async function fetchPostsFromAdsets(insightsData) {
+//   const allPosts = [];
 
-  for (const item of insightsData) {
-    const adsetId = item.adset_id;
-    const adsetName = item.adset_name;
-    const campaignName = item.campaign_name;
+//   for (const item of insightsData) {
+//     const adsetId = item.adset_id;
+//     const adsetName = item.adset_name;
+//     const campaignName = item.campaign_name;
 
-    try {
-      // Lấy danh sách quảng cáo trong adset
-      const adsUrl = `https://graph.facebook.com/v22.0/${adsetId}/ads?fields=id,name,creative{effective_object_story_id,object_story_spec{link_data,message,page_id}}&access_token=${accessTokenView}`;
-      const adsRes = await fetch(adsUrl);
-      const adsData = await adsRes.json();
+//     try {
+//       // Lấy danh sách quảng cáo trong adset
+//       const adsUrl = `https://graph.facebook.com/v22.0/${adsetId}/ads?fields=id,name,effective_status,creative{effective_object_story_id,object_story_spec{link_data,message,page_id}}&access_token=${accessTokenView}`;
+//       const adsRes = await fetch(adsUrl);
+//       const adsData = await adsRes.json();
 
-      if (adsData.error) {
-        console.error(
-          `❌ Lỗi khi lấy ads trong adset ${adsetId}:`,
-          adsData.error.message
-        );
-        continue;
-      }
+//       if (adsData.error) {
+//         console.error(
+//           `❌ Lỗi khi lấy ads trong adset ${adsetId}:`,
+//           adsData.error.message
+//         );
+//         continue;
+//       }
 
-      for (const ad of adsData.data || []) {
-        const creative = ad.creative;
-        const storyId = creative?.effective_object_story_id;
+//       for (const ad of adsData.data || []) {
+//         const creative = ad.creative;
+//         const storyId = creative?.effective_object_story_id;
 
-        // Nếu quảng cáo có bài post gốc
-        if (storyId) {
-          const postUrl = `https://www.facebook.com/${storyId}`;
-          const message = creative?.object_story_spec?.link_data?.message || "";
-          const pageId = creative?.object_story_spec?.page_id || "";
+//         // Nếu quảng cáo có bài post gốc
+//         if (storyId) {
+//           const postUrl = `https://www.facebook.com/${storyId}`;
+//           const message = creative?.object_story_spec?.link_data?.message || "";
+//           const pageId = creative?.object_story_spec?.page_id || "";
 
-          allPosts.push({
-            ad_id: ad.id,
-            ad_name: ad.name,
-            adset_id: adsetId,
-            adset_name: adsetName,
-            campaign_name: campaignName,
-            page_id: pageId,
-            message,
-            post_url: postUrl,
-          });
-        }
-      }
-    } catch (error) {
-      console.error(`⚠️ Lỗi fetch bài post từ adset ${adsetId}:`, error);
-    }
-  }
+//           allPosts.push({
+//             ad_id: ad.id,
+//             ad_name: ad.name,
+//             adset_id: adsetId,
+//             adset_name: adsetName,
+//             campaign_name: campaignName,
+//             page_id: pageId,
+//             message,
+//             post_url: postUrl,
+//           });
+//         }
+//       }
+//     } catch (error) {
+//       console.error(`⚠️ Lỗi fetch bài post từ adset ${adsetId}:`, error);
+//     }
+//   }
 
-  return allPosts;
-}
+//   return allPosts;
+// }
 
 async function fetchAdPostsByAdset(adsetId, accessToken) {
-  const url = `https://graph.facebook.com/v22.0/${adsetId}/ads?fields=id,name,status,creative{effective_object_story_id,instagram_permalink_url}&access_token=${accessToken}`;
+  const url = `https://graph.facebook.com/v22.0/${adsetId}/ads?fields=id,name,effective_status,creative{effective_object_story_id,instagram_permalink_url}&access_token=${accessToken}`;
   try {
     const res = await fetch(url);
     const data = await res.json();
@@ -3898,7 +3898,7 @@ async function fetchAdPostsByAdset(adsetId, accessToken) {
       console.error("Lỗi lấy ads:", data.error.message);
       return { posts: [], status: "Unknown" };
     }
-
+    console.log(data);
     const ads = data.data || [];
     const posts = ads.map((ad) => ({
       facebook_post_url: ad.creative?.effective_object_story_id
@@ -3908,7 +3908,7 @@ async function fetchAdPostsByAdset(adsetId, accessToken) {
     }));
 
     // ⚡️ Lấy status đầu tiên (thường các ads trong adset cùng trạng thái)
-    const status = ads[0]?.status?.toUpperCase() || "UNKNOWN";
+    const status = ads[0]?.effective_status?.toUpperCase() || "UNKNOWN";
 
     return { posts, status };
   } catch (e) {
