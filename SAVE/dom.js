@@ -961,6 +961,11 @@ async function fetchData(start, end) {
       allData = [...allData, ...(data.data || [])];
       nextUrl = data.paging && data.paging.next ? data.paging.next : null;
     }
+    console.log(allData);
+    for (const item of allData) {
+      const posts = await fetchAdPostsByAdset(item.adset_id, accessTokenView);
+      item.posts = posts; // ⬅️ gắn luôn vào adset
+    }
     return allData;
   } catch (error) {
     console.error("Fetch error:", error);
@@ -1423,6 +1428,8 @@ function renderTableHead() {
     '<input type="checkbox" id="dom_select_all">',
     "Campaign Name",
     "Adset Name",
+    "Status",
+    "Post Link",
     "Insights",
     "Cost Spent",
     "Reach",
@@ -1465,9 +1472,11 @@ function processData(data, isCache) {
   const quickFilterSet = new Set(quickFilter);
   const goalMappingMap = new Map(Object.entries(goalMapping));
   const tableData = new Array(data.length);
-  const tbodyRows = new Array(data.length); // Dùng mảng thay vì += string
+  const tbodyRows = new Array(data.length);
 
-  // Khởi tạo giá trị mặc định cho optimizationTotal
+  // 🔹 Lấy ngày hôm nay (so sánh đến ngày, bỏ giờ)
+  const today = new Date().toISOString().slice(0, 10);
+
   for (const key of goalMappingMap.keys()) optimizationTotal[key] = 0;
 
   for (let index = 0, len = data.length; index < len; index++) {
@@ -1480,9 +1489,10 @@ function processData(data, isCache) {
       reach = 0,
       impressions = 0,
       actions = [],
+      date_stop = null, // ⬅️ thêm thuộc tính ngày kết thúc
     } = item;
-    const spend = +rawSpend || 0;
 
+    const spend = +rawSpend || 0;
     campaignTotal[campaign_name] = (campaignTotal[campaign_name] || 0) + spend;
 
     if (isBrand && isCache) {
@@ -1500,11 +1510,11 @@ function processData(data, isCache) {
         }
       }
     }
+
     const actionMap = new Map(
       actions.map((a) => [a.action_type, a.value || 0])
     );
 
-    // Tạo Map để truy xuất action nhanh hơn
     tableData[index] = {
       id: index,
       campaign_name,
@@ -1523,49 +1533,75 @@ function processData(data, isCache) {
       ? tableData[index][resultMapping[optimization_goal]] || 0
       : 0;
 
-    const result = tableData[index].result; // Cache lại để tính cpr nhanh hơn
-
+    const result = tableData[index].result;
     tableData[index].frequency =
       reach > 0 ? (impressions / reach).toFixed(2) : "0";
-
     tableData[index].cpm =
-      impressions > 0 ? ((spend * 1000) / impressions) | 0 : "0"; // Dùng | 0 thay toFixed(0)
-
+      impressions > 0 ? ((spend * 1000) / impressions) | 0 : "0";
     tableData[index].cpr = (spend / (result || 1)).toFixed(
       spend / (result || 1) > 50 ? 0 : 1
     );
 
-    // Thêm vào tbodyRows thay vì += string
-    tbodyRows[
-      index
-    ] = `<tr data-id="${index}" data-campaign="${campaign_name}" data-adset="${adset_name}">
-      <td><input type="checkbox" class="dom_select_row" data-id="${index}"></td>
-      <td>${campaign_name}</td>
-      <td>${adset_name}</td>
-      <td class="view_insights">
-        <i class="fa-solid fa-magnifying-glass-chart"></i>
-      </td>
-      <td>${formatNumber(tableData[index].spend)} ₫</td>
-      <td>${formatNumber(tableData[index].reach)}</td>
-      <td>${formatNumber(tableData[index].impressions)}</td>
-      <td>${formatNumber(tableData[index].result)}</td>
-      <td>${formatNumber(tableData[index].cpr)} ₫</td>
-      <td>${formatMetricName(tableData[index].optimization_goal)}</td>
-      <td>${tableData[index].frequency}</td>
-      <td>${formatNumber(tableData[index].follows) || 0}</td>
-      <td>${formatNumber(tableData[index].reactions) || 0}</td>
-      <td>${tableData[index].messenger_start || 0}</td>
-      <td>${tableData[index].lead || 0}</td>
-      <td>${formatNumber(tableData[index].cpm)} ₫</td>
-      <td>${formatNumber(tableData[index].post_engagement) || 0}</td>
-      <td>${formatNumber(tableData[index].page_engagement) || 0}</td>
-      <td>${formatNumber(tableData[index].video_view) || 0}</td>
-      <td>${formatNumber(tableData[index].photo_view) || 0}</td>
-      <td>${tableData[index].comments || 0}</td>
-      <td>${tableData[index].post_save || 0}</td>
-      <td>${tableData[index].share || 0}</td>
-      <td>${formatNumber(tableData[index].link_click) || 0}</td>
-    </tr>`;
+    // 🔹 Xác định trạng thái dựa vào ngày dừng và chi tiêu
+    const isActive =
+      (!date_stop || date_stop >= today) && spend > 0 ? "Active" : "Inactive";
+    tableData[index].status = isActive;
+
+    tbodyRows[index] = `
+      <tr data-id="${index}" data-campaign="${campaign_name}" data-adset="${adset_name}">
+        <td><input type="checkbox" class="dom_select_row" data-id="${index}"></td>
+        <td>${campaign_name}</td>
+        <td>${adset_name}</td>
+ 
+
+
+          <td class="status ${isActive === "Active" ? "active" : "inactive"}">
+  ${isActive}
+</td>
+  <td class="post_links">
+  ${(() => {
+    const posts = data[index].posts || [];
+    const fbPost = posts.find((p) => p.facebook_post_url);
+    const igPost = posts.find((p) => p.instagram_post_url);
+
+    if (fbPost) {
+      return `<a href="${fbPost.facebook_post_url}" target="_blank" class="btn-view fb" title="Xem bài trên Facebook">
+                  <i class="fa-solid fa-eye"></i>
+                </a>`;
+    } else if (igPost) {
+      return `<a href="${igPost.instagram_post_url}" target="_blank" class="btn-view ig" title="Xem bài trên Instagram">
+                  <i class="fa-solid fa-eye"></i>
+                </a>`;
+    } else {
+      return `<span style="opacity:.5;">Không có bài</span>`;
+    }
+  })()}
+</td>
+        <td class="view_insights"><i class="fa-solid fa-magnifying-glass-chart"></i></td>
+      
+        <td>${formatNumber(tableData[index].spend)} ₫</td>
+       
+        <td>${formatNumber(tableData[index].reach)}</td>
+        <td>${formatNumber(tableData[index].impressions)}</td>
+        <td>${formatNumber(tableData[index].result)}</td>
+        <td>${formatNumber(tableData[index].cpr)} ₫</td>
+        <td>${formatMetricName(tableData[index].optimization_goal)}</td>
+        <td>${tableData[index].frequency}</td>
+        <td>${formatNumber(tableData[index].follows) || 0}</td>
+        <td>${formatNumber(tableData[index].reactions) || 0}</td>
+        <td>${tableData[index].messenger_start || 0}</td>
+        <td>${tableData[index].lead || 0}</td>
+        <td>${formatNumber(tableData[index].cpm)} ₫</td>
+        <td>${formatNumber(tableData[index].post_engagement) || 0}</td>
+        <td>${formatNumber(tableData[index].page_engagement) || 0}</td>
+        <td>${formatNumber(tableData[index].video_view) || 0}</td>
+        <td>${formatNumber(tableData[index].photo_view) || 0}</td>
+        <td>${tableData[index].comments || 0}</td>
+        <td>${tableData[index].post_save || 0}</td>
+        <td>${tableData[index].share || 0}</td>
+        <td>${formatNumber(tableData[index].link_click) || 0}</td>
+      
+      </tr>`;
   }
 
   return {
@@ -1574,8 +1610,29 @@ function processData(data, isCache) {
     optimizationTotal,
     brandTotal,
     tableData,
-    tbodyHTML: tbodyRows.join(""), // Nối mảng thay vì += từng dòng
+    tbodyHTML: tbodyRows.join(""),
   };
+}
+async function getPostsFromAdset(adsetId, accessToken) {
+  const adsRes = await fetch(
+    `https://graph.facebook.com/v22.0/${adsetId}/ads?fields=id,name,creative{effective_object_story_id,object_story_spec{page_id,link_data,message,link}},status&access_token=${accessToken}
+`
+  );
+  const adsData = await adsRes.json();
+
+  const posts = [];
+  for (const ad of adsData.data || []) {
+    const storyId = ad.creative?.effective_object_story_id;
+    if (storyId) {
+      const postRes = await fetch(
+        `https://graph.facebook.com/v21.0/${storyId}?fields=id,permalink_url,message,created_time&access_token=${accessToken}`
+      );
+      const postData = await postRes.json();
+      posts.push({ ad_id: ad.id, ...postData });
+    }
+  }
+
+  return posts;
 }
 
 function updateFooterOnCheck(tableData) {
@@ -1597,7 +1654,7 @@ function updateFooterOnCheck(tableData) {
     }
   }
 
-  let footerHTML = `<tr><td colspan="4"><strong>${
+  let footerHTML = `<tr><td colspan="6"><strong>${
     isAllSelected
       ? `Total ${allRows.length} Row`
       : `Total x${checkedRows.length} Selected Row`
@@ -3161,7 +3218,6 @@ function handleViewDemographic(campaign, adset, id) {
     fetchFunctions[key](apiUrl);
   });
 }
-
 async function fetchAdAccount() {
   let apiUrl = `https://graph.facebook.com/v22.0/act_${adAccountIdView}?fields=balance,age,created_time,id,name,currency,amount_spent,funding_source_details,spend_cap,business,owner,timezone_name&access_token=${accessTokenView}`;
 
@@ -3185,6 +3241,50 @@ async function fetchAdAccount() {
     renderDomPayment(data);
   } catch (error) {
     console.error("Fetch error:", error.message);
+  }
+}
+// 🧩 Hàm mở rộng để lấy link bài quảng cáo trong adset_id
+async function fetchCreativePostsFromAdset(adsetId, accessToken) {
+  try {
+    // 1️⃣ Lấy danh sách ads trong adset
+    const adsUrl = `https://graph.facebook.com/v22.0/${adsetId}/ads?fields=id,name,creative{effective_object_story_id,object_story_id,name}&access_token=${accessToken}`;
+    const adsRes = await fetch(adsUrl);
+    const adsData = await adsRes.json();
+
+    if (!adsData.data || adsData.data.length === 0) {
+      console.warn("Không tìm thấy quảng cáo nào trong adset này.");
+      return [];
+    }
+
+    const results = [];
+
+    // 2️⃣ Với mỗi ad, lấy bài post tương ứng (nếu có story_id)
+    for (const ad of adsData.data) {
+      const storyId =
+        ad.creative?.effective_object_story_id ||
+        ad.creative?.object_story_id ||
+        null;
+
+      if (!storyId) continue;
+
+      const postUrl = `https://graph.facebook.com/v22.0/${storyId}?fields=id,permalink_url,message,created_time&access_token=${accessToken}`;
+      const postRes = await fetch(postUrl);
+      const postData = await postRes.json();
+
+      results.push({
+        ad_id: ad.id,
+        ad_name: ad.name,
+        story_id: storyId,
+        post_url: postData.permalink_url || null,
+        message: postData.message || "",
+        created_time: postData.created_time || "",
+      });
+    }
+
+    return results;
+  } catch (err) {
+    console.error("❌ Lỗi khi lấy creative posts:", err);
+    return [];
   }
 }
 
@@ -3730,4 +3830,74 @@ function firstLoad() {
 }
 if (accounts.length) {
   firstLoad();
+}
+async function fetchPostsFromAdsets(insightsData) {
+  const allPosts = [];
+
+  for (const item of insightsData) {
+    const adsetId = item.adset_id;
+    const adsetName = item.adset_name;
+    const campaignName = item.campaign_name;
+
+    try {
+      // Lấy danh sách quảng cáo trong adset
+      const adsUrl = `https://graph.facebook.com/v22.0/${adsetId}/ads?fields=id,name,creative{effective_object_story_id,object_story_spec{link_data,message,page_id}}&access_token=${accessTokenView}`;
+      const adsRes = await fetch(adsUrl);
+      const adsData = await adsRes.json();
+
+      if (adsData.error) {
+        console.error(
+          `❌ Lỗi khi lấy ads trong adset ${adsetId}:`,
+          adsData.error.message
+        );
+        continue;
+      }
+
+      for (const ad of adsData.data || []) {
+        const creative = ad.creative;
+        const storyId = creative?.effective_object_story_id;
+
+        // Nếu quảng cáo có bài post gốc
+        if (storyId) {
+          const postUrl = `https://www.facebook.com/${storyId}`;
+          const message = creative?.object_story_spec?.link_data?.message || "";
+          const pageId = creative?.object_story_spec?.page_id || "";
+
+          allPosts.push({
+            ad_id: ad.id,
+            ad_name: ad.name,
+            adset_id: adsetId,
+            adset_name: adsetName,
+            campaign_name: campaignName,
+            page_id: pageId,
+            message,
+            post_url: postUrl,
+          });
+        }
+      }
+    } catch (error) {
+      console.error(`⚠️ Lỗi fetch bài post từ adset ${adsetId}:`, error);
+    }
+  }
+
+  return allPosts;
+}
+
+async function fetchAdPostsByAdset(adsetId, accessToken) {
+  const adsUrl = `https://graph.facebook.com/v22.0/${adsetId}/ads?fields=id,name,creative{effective_object_story_id,instagram_permalink_url}&access_token=${accessToken}`;
+  const adsRes = await fetch(adsUrl);
+  const adsData = await adsRes.json();
+
+  if (adsData.error) {
+    console.error("Lỗi lấy ads:", adsData.error.message);
+    return [];
+  }
+
+  const ads = adsData.data.map((ad) => ({
+    facebook_post_url: ad.creative?.effective_object_story_id
+      ? `https://facebook.com/${ad.creative.effective_object_story_id}`
+      : null,
+    instagram_post_url: ad.creative?.instagram_permalink_url || null,
+  }));
+  return ads;
 }
