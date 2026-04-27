@@ -703,10 +703,14 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function fetchAdAccountInfo() {
-  const url = `${BASE_URL}/act_${ACCOUNT_ID}?fields=id,funding_source_details,name,balance,amount_spent,business_name,business_street,business_street2,business_city,business_state,business_zip,business_country_code,tax_id&access_token=${META_TOKEN}`;
+  const url = `${BASE_URL}/act_${ACCOUNT_ID}?fields=id,currency,funding_source_details,name,balance,amount_spent,business_name,business_street,business_street2,business_city,business_state,business_zip,business_country_code,tax_id&access_token=${META_TOKEN}`;
 
   try {
     const data = await fetchJSON(url);
+
+    if (data && data.currency && window.GLOBAL_CURRENCY !== data.currency) {
+        window.GLOBAL_CURRENCY = data.currency;
+    }
 
     // Lấy thông tin cần thiết từ dữ liệu trả về
     const balance = data.balance || 0;

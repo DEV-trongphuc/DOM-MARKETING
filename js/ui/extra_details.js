@@ -385,8 +385,12 @@ async function loadExtraPlatformPositions() {
             return;
         }
         if (!ACCOUNT_ID) throw new Error("ACCOUNT_ID is required");
-        const url = `${BASE_URL}/act_${ACCOUNT_ID}/insights?fields=spend&breakdowns=publisher_platform,platform_position&time_range={"since":"${startDate}","until":"${endDate}"}&access_token=${META_TOKEN}`;
+        const url = `${BASE_URL}/act_${ACCOUNT_ID}/insights?fields=spend,account_currency&breakdowns=publisher_platform,platform_position&time_range={"since":"${startDate}","until":"${endDate}"}&access_token=${META_TOKEN}`;
         const data = await fetchJSON(url);
+        if (data && data.data && data.data.length > 0) {
+             const ac = data.data[0].account_currency;
+             if (ac && window.GLOBAL_CURRENCY !== ac) window.GLOBAL_CURRENCY = ac;
+        }
         renderExtraPlatformPositions(data.data || []);
     } catch (err) {
         console.error("Error fetching platform positions:", err);

@@ -1,9 +1,9 @@
-
+﻿
 function renderCampaignView(data) {
   const wrap = document.querySelector(".view_campaign_box");
   if (!wrap || !Array.isArray(data)) return;
 
-  // ✅ Auto-clear selections khi render lại (do filter/search thay đổi)
+  // âœ… Auto-clear selections khi render láº¡i (do filter/search thay Ä‘á»•i)
   const selBar = document.getElementById("selection_summary_bar");
   if (selBar) selBar.style.display = "none";
   const headerCb = document.getElementById("select_all_cb");
@@ -20,23 +20,23 @@ function renderCampaignView(data) {
   let totalAdsCount = 0;
   let activeAdsCount = 0;
 
-  // ==== ⭐ TỐI ƯU 1: Vòng lặp tiền xử lý (Pre-processing) ====
-  // Tính toán cờ `isActive` và số lượng active MỘT LẦN.
-  // Thêm các thuộc tính tạm thời (transient) vào object `data`
+  // ==== â­ Tá»I Æ¯U 1: VÃ²ng láº·p tiá»n xá»­ lÃ½ (Pre-processing) ====
+  // TÃ­nh toÃ¡n cá» `isActive` vÃ  sá»‘ lÆ°á»£ng active Má»˜T Láº¦N.
+  // ThÃªm cÃ¡c thuá»™c tÃ­nh táº¡m thá»i (transient) vÃ o object `data`
   for (let i = 0; i < data.length; i++) {
     const c = data[i];
     const adsets = c.adsets || [];
-    c._isActive = false; // Cờ tạm thời cho campaign
-    c._activeAdsetCount = 0; // Cờ tạm thời cho số adset active
+    c._isActive = false; // Cá» táº¡m thá»i cho campaign
+    c._activeAdsetCount = 0; // Cá» táº¡m thá»i cho sá»‘ adset active
     totalAdsetCount += adsets.length;
 
     for (let j = 0; j < adsets.length; j++) {
       const as = adsets[j];
-      // Tính toán trạng thái và số lượng ads active cho adset
+      // TÃ­nh toÃ¡n tráº¡ng thÃ¡i vÃ  sá»‘ lÆ°á»£ng ads active cho adset
       as._activeAdsCount = 0;
       as._isActive = false;
 
-      // ==== ⭐ Sắp xếp ads (active lên trước, rồi theo spend) — dùng copy để không mutate as.ads gốc ====
+      // ==== â­ Sáº¯p xáº¿p ads (active lÃªn trÆ°á»›c, rá»“i theo spend) â€” dÃ¹ng copy Ä‘á»ƒ khÃ´ng mutate as.ads gá»‘c ====
       const ads = (as.ads || []).slice().sort((a, b) => {
         const aIsActive = a.status?.toLowerCase() === activeLower;
         const bIsActive = b.status?.toLowerCase() === activeLower;
@@ -46,7 +46,7 @@ function renderCampaignView(data) {
       as._sortedAds = ads;
       // ==========================================================================================
 
-      // Duyệt qua các ads và tính toán trạng thái active của adset
+      // Duyá»‡t qua cÃ¡c ads vÃ  tÃ­nh toÃ¡n tráº¡ng thÃ¡i active cá»§a adset
       for (let k = 0; k < ads.length; k++) {
         totalAdsCount++;
         if (ads[k].status?.toLowerCase() === activeLower) {
@@ -56,28 +56,28 @@ function renderCampaignView(data) {
         }
       }
 
-      // Nếu adset active, cập nhật trạng thái của campaign
+      // Náº¿u adset active, cáº­p nháº­t tráº¡ng thÃ¡i cá»§a campaign
       if (as._isActive) {
         c._isActive = true;
         c._activeAdsetCount++;
-        activeAdsetCount++; // Đếm số adset active trong tổng
+        activeAdsetCount++; // Äáº¿m sá»‘ adset active trong tá»•ng
       }
-    } // <-- Hết vòng lặp adset (j)
+    } // <-- Háº¿t vÃ²ng láº·p adset (j)
 
-    // ==== ⭐ Sắp xếp adset trong campaign — dùng copy để không mutate c.adsets gốc ====
+    // ==== â­ Sáº¯p xáº¿p adset trong campaign â€” dÃ¹ng copy Ä‘á»ƒ khÃ´ng mutate c.adsets gá»‘c ====
     c._sortedAdsets = adsets.slice().sort((a, b) => {
       if (a._isActive !== b._isActive) return b._isActive - a._isActive;
       return b.spend - a.spend;
     });
     // ====================================================================================
 
-    // Nếu campaign có ít nhất 1 adset active, campaign được đánh dấu là active
+    // Náº¿u campaign cÃ³ Ã­t nháº¥t 1 adset active, campaign Ä‘Æ°á»£c Ä‘Ã¡nh dáº¥u lÃ  active
     if (c._isActive) {
       activeCampaignCount++;
     }
   }
 
-  // === Cập nhật UI tổng active (dùng cờ đã tính) ===
+  // === Cáº­p nháº­t UI tá»•ng active (dÃ¹ng cá» Ä‘Ã£ tÃ­nh) ===
   const activeCpEls = document.querySelectorAll(".dom_active_cp");
   if (activeCpEls.length >= 2) {
     // Campaign
@@ -105,16 +105,16 @@ function renderCampaignView(data) {
     }
   }
 
-  // === ⭐ Sắp xếp (Sort) — dùng copy để không mutate _ALL_CAMPAIGNS gốc ===
+  // === â­ Sáº¯p xáº¿p (Sort) â€” dÃ¹ng copy Ä‘á»ƒ khÃ´ng mutate _ALL_CAMPAIGNS gá»‘c ===
   const renderData = data.slice().sort((a, b) => {
     if (a._isActive !== b._isActive) return b._isActive - a._isActive;
     return b.spend - a.spend;
   });
 
-  // === ⭐ TỐI ƯU 3: Render (dùng cờ đã tính) ===
+  // === â­ Tá»I Æ¯U 3: Render (dÃ¹ng cá» Ä‘Ã£ tÃ­nh) ===
   const htmlBuffer = [];
 
-  // ⭐ TỐI ƯU: Tính activeMetas MỘT LẦN ngoài vòng lặp thay vì mỗi campaign
+  // â­ Tá»I Æ¯U: TÃ­nh activeMetas Má»˜T Láº¦N ngoÃ i vÃ²ng láº·p thay vÃ¬ má»—i campaign
   const activeMetas = ACTIVE_COLUMNS.map(id => {
     const meta = METRIC_REGISTRY[id];
     if (meta) return meta;
@@ -127,7 +127,7 @@ function renderCampaignView(data) {
     const c = renderData[i];
     const adsets = c._sortedAdsets || c.adsets;
 
-    // ── Smart Badges: tính CPR trung bình campaign ──
+    // â”€â”€ Smart Badges: tÃ­nh CPR trung bÃ¬nh campaign â”€â”€
     const _badgesOn = window._smartBadgesEnabled !== false;
     let _campAvgCpr = null;
     if (_badgesOn && adsets && adsets.length > 1) {
@@ -137,19 +137,23 @@ function renderCampaignView(data) {
       _campAvgCpr = _validCpr.length ? _validCpr.reduce((s, v) => s + v, 0) / _validCpr.length : null;
     }
 
-    // Dùng cờ `_isActive` và `_activeAdsetCount` đã tính
+    // DÃ¹ng cá» `_isActive` vÃ  `_activeAdsetCount` Ä‘Ã£ tÃ­nh
     const hasActiveAdset = c._isActive;
     const activeAdsetCountForDisplay = c._activeAdsetCount;
 
     const campaignStatusClass = hasActiveAdset ? "active" : "inactive";
     const campaignStatusText = hasActiveAdset
-      ? `<div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
-           <span style="width:1rem;height:1rem;border-radius:50%;background:green;flex-shrink:0;"></span>
-           <span>${activeAdsetCountForDisplay} ACTIVE</span>
+      ? `<div style="width: 100%; display: flex; align-items: center; padding: 0 3rem; box-sizing: border-box;">
+           <div style="display: flex; align-items: center; gap: 0.8rem;">
+             <span style="width:1rem;height:1rem;border-radius:50%;background:green;flex-shrink:0;"></span>
+             <span>${activeAdsetCountForDisplay} ACTIVE</span>
+           </div>
          </div>`
-      : `<div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
-           <span style="width:1rem;height:1rem;border-radius:50%;background:#a1a1a1;flex-shrink:0;"></span>
-           <span>INACTIVE</span>
+      : `<div style="width: 100%; display: flex; align-items: center; padding: 0 3rem; box-sizing: border-box;">
+           <div style="display: flex; align-items: center; gap: 0.8rem;">
+             <span style="width:1rem;height:1rem;border-radius:50%;background:#a1a1a1;flex-shrink:0;"></span>
+             <span>INACTIVE</span>
+           </div>
          </div>`;
 
     const firstGoal = adsets?.[0]?.optimization_goal || "";
@@ -176,7 +180,7 @@ function renderCampaignView(data) {
       return activeMetas.map(meta => {
         if (isMixed && (meta.id === "result" || meta.id === "cpr")) return `<div class="ad_metric ad_${meta.id}">-</div>`;
         const val = getMetricValue(item, meta.id);
-        const tooltipAttr = meta.type === "custom" ? `data-tooltip="Công thức: ${meta.formula}"` : "";
+        const tooltipAttr = meta.type === "custom" ? `data-tooltip="CÃ´ng thá»©c: ${meta.formula}"` : "";
         return `<div class="ad_metric ad_${meta.id}" ${tooltipAttr}>${formatMetric(val, meta.format)}</div>`;
       }).join("");
     };
@@ -207,12 +211,12 @@ function renderCampaignView(data) {
           <div class="campaign_view"><i class="fa-solid fa-angle-down"></i></div>
         </div>`);
 
-    // === Render adset (dùng cờ đã tính) ===
+    // === Render adset (dÃ¹ng cá» Ä‘Ã£ tÃ­nh) ===
     for (let j = 0; j < adsets.length; j++) {
       const as = adsets[j];
       const ads = as._sortedAds || as.ads;
 
-      // Dùng cờ `_isActive` và `_activeAdsCount` đã tính
+      // DÃ¹ng cá» `_isActive` vÃ  `_activeAdsCount` Ä‘Ã£ tÃ­nh
       const hasActiveAd = as._isActive;
       const activeAdsCount = as._activeAdsCount;
 
@@ -245,14 +249,16 @@ function renderCampaignView(data) {
         value = `<span class="status-value">COMPLETE</span>`;
 
         adsetStatusText = `
-          <div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
-            <span style="width:1rem;height:1rem;border-radius:50%;background:#a1a1a1;flex-shrink:0;"></span>
-            <div style="display:flex;flex-direction:column;">
-              ${label}
-              ${value}
-              ${timeText ? `<span class="status-date" style="margin-top:0.4rem;">${timeText}</span>` : ""}
-            </div>
-          </div>
+          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 3rem; box-sizing: border-box;">
+  <div style="display: flex; align-items: center; gap: 0.8rem;">
+    <span style="width:1rem;height:1rem;border-radius:50%;background:#a1a1a1;flex-shrink:0;"></span>
+    <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+      ${label}
+      ${value}
+    </div>
+  </div>
+  ${timeText ? `<span class="status-date" style="text-align: right; white-space: nowrap; margin-left: 1rem;">${timeText}</span>` : ""}
+</div>
         `;
       } else if (hasActiveAd && (dailyBudget > 0 || lifetimeBudget > 0)) {
         adsetStatusClass = "active budget";
@@ -270,22 +276,26 @@ function renderCampaignView(data) {
         }
 
         adsetStatusText = `
-          <div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
-            <span style="width:1rem;height:1rem;border-radius:50%;background:green;flex-shrink:0;"></span>
-            <div style="display:flex;flex-direction:column;">
-              ${label}
-              ${value}
-              ${timeText ? `<span class="status-date" style="margin-top:0.4rem;">${timeText}</span>` : ""}
-            </div>
-          </div>
+          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 3rem; box-sizing: border-box;">
+  <div style="display: flex; align-items: center; gap: 0.8rem;">
+    <span style="width:1rem;height:1rem;border-radius:50%;background:green;flex-shrink:0;"></span>
+    <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+      ${label}
+      ${value}
+    </div>
+  </div>
+  ${timeText ? `<span class="status-date" style="text-align: right; white-space: nowrap; margin-left: 1rem;">${timeText}</span>` : ""}
+</div>
         `;
       } else if (hasActiveAd) {
         adsetStatusClass = "active";
         adsetStatusText = `
-          <div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
-            <span style="width:1rem;height:1rem;border-radius:50%;background:green;flex-shrink:0;"></span>
-            <span>ACTIVE</span>
-          </div>
+          <div style="width: 100%; display: flex; align-items: center; padding: 0 3rem; box-sizing: border-box;">
+  <div style="display: flex; align-items: center; gap: 0.8rem;">
+    <span style="width:1rem;height:1rem;border-radius:50%;background:green;flex-shrink:0;"></span>
+    <span>ACTIVE</span>
+  </div>
+</div>
         `;
       } else {
         if (startDateFmt && endDateFmt) {
@@ -303,20 +313,22 @@ function renderCampaignView(data) {
         value = `<span class="status-value">INACTIVE</span>`;
 
         adsetStatusText = `
-          <div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
-            <span style="width:1rem;height:1rem;border-radius:50%;background:#a1a1a1;flex-shrink:0;"></span>
-            <div style="display:flex;flex-direction:column;">
-              ${label}
-              ${value}
-              ${timeText ? `<span class="status-date" style="margin-top:0.4rem;">${timeText}</span>` : ""}
-            </div>
-          </div>
+          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 3rem; box-sizing: border-box;">
+  <div style="display: flex; align-items: center; gap: 0.8rem;">
+    <span style="width:1rem;height:1rem;border-radius:50%;background:#a1a1a1;flex-shrink:0;"></span>
+    <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+      ${label}
+      ${value}
+    </div>
+  </div>
+  ${timeText ? `<span class="status-date" style="text-align: right; white-space: nowrap; margin-left: 1rem;">${timeText}</span>` : ""}
+</div>
         `;
       }
 
 
       const adsHtml = new Array(ads.length);
-      // Tính CPR trung bình ads trong adset này (cho badge cấp ad)
+      // TÃ­nh CPR trung bÃ¬nh ads trong adset nÃ y (cho badge cáº¥p ad)
       const _adValidCprs = ads.map(ad => ad.result > 0 ? ad.spend / ad.result : null).filter(v => v !== null);
       const _adAvgCpr = _adValidCprs.length > 1 ? _adValidCprs.reduce((s, v) => s + v, 0) / _adValidCprs.length : null;
       for (let k = 0; k < ads.length; k++) {
@@ -343,7 +355,7 @@ function renderCampaignView(data) {
             const adStatus = (ad.status || '').toLowerCase();
             const b = [];
             if (adCpr !== null && _adAvgCpr !== null && adCpr < _adAvgCpr * 0.70 && adStatus === 'active')
-              b.push(`<span class="dom_smart_badge badge_scale" title="CPR vượt trội"><i class="fa-solid fa-bolt"></i> Scale</span>`);
+              b.push(`<span class="dom_smart_badge badge_scale" title="CPR vÆ°á»£t trá»™i"><i class="fa-solid fa-bolt"></i> Scale</span>`);
             else if (adCpr !== null && _adAvgCpr !== null && adCpr < _adAvgCpr * 0.80)
               b.push(`<span class="dom_smart_badge badge_best" title="Best Performance"><i class="fa-solid fa-star"></i> Best Performance</span>`);
             if (adCpr !== null && _adAvgCpr !== null && adCpr > _adAvgCpr * 1.30)
@@ -383,9 +395,11 @@ function renderCampaignView(data) {
               </a>
             </div>
             <div class="ad_status ${isActive ? "active" : "inactive"}">
-              <div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
-                <span style="width:1rem;height:1rem;border-radius:50%;background:${isActive ? 'green' : '#a1a1a1'};flex-shrink:0;"></span>
-                <span>${ad.status}</span>
+              <div style="width: 100%; display: flex; align-items: center; padding: 0 3rem; box-sizing: border-box;">
+                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                  <span style="width:1rem;height:1rem;border-radius:50%;background:${isActive ? 'green' : '#a1a1a1'};flex-shrink:0;"></span>
+                  <span>${ad.status}</span>
+                </div>
               </div>
             </div>
             ${renderCells(ad)}
@@ -427,17 +441,17 @@ function renderCampaignView(data) {
           const asSpend = +as.spend || 0;
           const badges = [];
           if (asCpr !== null && _campAvgCpr !== null && asCpr < _campAvgCpr * 0.70 && isAdsetActive)
-            badges.push(`<span class="dom_smart_badge badge_scale" title="CPR vượt trội ≥30% — nên scale"><i class="fa-solid fa-bolt"></i> Scale</span>`);
+            badges.push(`<span class="dom_smart_badge badge_scale" title="CPR vÆ°á»£t trá»™i â‰¥30% â€” nÃªn scale"><i class="fa-solid fa-bolt"></i> Scale</span>`);
           else if (asCpr !== null && _campAvgCpr !== null && asCpr < _campAvgCpr * 0.80)
-            badges.push(`<span class="dom_smart_badge badge_best" title="Best Performance — CPR thấp hơn TB ≥20%"><i class="fa-solid fa-star"></i> Best Performance</span>`);
+            badges.push(`<span class="dom_smart_badge badge_best" title="Best Performance â€” CPR tháº¥p hÆ¡n TB â‰¥20%"><i class="fa-solid fa-star"></i> Best Performance</span>`);
           if (asCpr !== null && _campAvgCpr !== null && asCpr > _campAvgCpr * 1.30)
-            badges.push(`<span class="dom_smart_badge badge_review" title="CPR cao hơn TB ≥30% — cần xem xét"><i class="fa-solid fa-circle-exclamation"></i> Review</span>`);
+            badges.push(`<span class="dom_smart_badge badge_review" title="CPR cao hÆ¡n TB â‰¥30% â€” cáº§n xem xÃ©t"><i class="fa-solid fa-circle-exclamation"></i> Review</span>`);
           if (asResult > 0 && asResult < 50 && isAdsetActive)
-            badges.push(`<span class="dom_smart_badge badge_learning" title="<50 results — giai đoạn học"><i class="fa-solid fa-graduation-cap"></i> Learning</span>`);
+            badges.push(`<span class="dom_smart_badge badge_learning" title="<50 results â€” giai Ä‘oáº¡n há»c"><i class="fa-solid fa-graduation-cap"></i> Learning</span>`);
           if (asFreq > 3.5)
-            badges.push(`<span class="dom_smart_badge badge_fatigue" title="Frequency ${asFreq.toFixed(1)} — creative có thể mệt"><i class="fa-solid fa-battery-quarter"></i> Fatigue</span>`);
+            badges.push(`<span class="dom_smart_badge badge_fatigue" title="Frequency ${asFreq.toFixed(1)} â€” creative cÃ³ thá»ƒ má»‡t"><i class="fa-solid fa-battery-quarter"></i> Fatigue</span>`);
           if (asSpend === 0 && isAdsetActive)
-            badges.push(`<span class="dom_smart_badge badge_stale" title="Active nhưng không có spend"><i class="fa-solid fa-ban"></i> No spend</span>`);
+            badges.push(`<span class="dom_smart_badge badge_stale" title="Active nhÆ°ng khÃ´ng cÃ³ spend"><i class="fa-solid fa-ban"></i> No spend</span>`);
           return badges.join('');
         })()}
                   <i class="fa-regular fa-copy ad_copy_id" 
@@ -507,7 +521,7 @@ function renderCampaignView(data) {
       <div class="ad_status">Status</div>
       ${headerMetas.map(m => {
       const icon = m.isCustom ? `<i class="fa-solid fa-flask" style="font-size: 1rem; color: #f59e0b; margin-right: 0.5rem;"></i> ` : '';
-      const tooltip = m.isCustom ? `data-tooltip="Công thức: ${m.formula}"` : '';
+      const tooltip = m.isCustom ? `data-tooltip="CÃ´ng thá»©c: ${m.formula}"` : '';
       return `<div class="ad_metric ad_${m.id}" ${tooltip}>${icon}${m.label}</div>`;
     }).join("")}
       <div class="campaign_view">Insight</div>
@@ -535,9 +549,12 @@ function buildGoalSpendData(data) {
     });
   });
 
-  // Chuẩn hóa sang dạng dataset Chart.js
+  // Chuáº©n hÃ³a sang dáº¡ng dataset Chart.js
   const labels = Object.keys(goalSpendMap);
   const values = Object.values(goalSpendMap);
 
   return { labels, values };
 }
+
+
+
