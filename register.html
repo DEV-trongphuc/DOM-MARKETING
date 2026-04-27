@@ -526,6 +526,19 @@
         let userData = { email: '', name: '', slug: '', token: '', accounts: [] };
 
         window.onload = function() {
+            // Tự động kiểm tra phiên đăng nhập
+            try {
+                const s = JSON.parse(localStorage.getItem("dom_auth_v1") || 'null');
+                const SESSION_TTL = 30 * 24 * 60 * 60 * 1000;
+                if (s && s.u && s.u.email && s.ts && (Date.now() - s.ts < SESSION_TTL)) {
+                    userData.email = s.u.email;
+                    document.getElementById('reg_email').value = s.u.email;
+                    nextStep(2);
+                } else if (s && !s.ts) {
+                    localStorage.removeItem("dom_auth_v1");
+                }
+            } catch(e) {}
+
             // Cài đặt Client ID cho Google OAuth
             if (!window.APP_CONFIG.GOOGLE_CLIENT_ID) {
                 document.getElementById('google_error_text').style.display = 'block';
