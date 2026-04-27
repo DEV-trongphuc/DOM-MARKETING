@@ -125,16 +125,16 @@ window.renderAdLibraryCurrentPage = function() {
               <i class="fa-solid fa-coins" style="color:#f59e0b;"></i> ${spendFormatted}
             </div>
           </div>
-          <div class="ad_library_iframe_wrap" style="position:relative; height: 350px; overflow: hidden;" id="ad_lib_wrap_${ad.ad_id}" data-ad-id="${ad.ad_id}" data-thumb="${ad.thumbnail}" data-post="${ad.post_url}">
-             <div class="ad_lib_iframe_content" style="width:100%; height:100%; pointer-events:none;">
+          <div class="ad_library_iframe_wrap" style="position:relative; height: 400px; overflow-y: auto; overflow-x: hidden;" id="ad_lib_wrap_${ad.ad_id}" data-ad-id="${ad.ad_id}" data-thumb="${ad.thumbnail}" data-post="${ad.post_url}">
+             <div class="ad_lib_iframe_content" style="width:100%; min-height:100%;">
                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#f1f5f9; flex-direction:column; gap: 1rem; z-index:1;">
                  <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; color:#cbd5e1;"></i>
                  <span style="color:#94a3b8; font-size: 0.9rem; font-weight:500;">Đang tải nội dung...</span>
                </div>
              </div>
-             <!-- Overlay to capture click without preventing scroll (if pointer-events was auto on iframe, but we disable pointer events on iframe so it just acts as a thumbnail) -->
-             <div style="position:absolute; inset:0; z-index:2; cursor:pointer;" onclick="window._openAdIframeModal('${ad.ad_id}')">
-               <div style="position:absolute; top: 1rem; right: 1rem; width: 3.2rem; height: 3.2rem; background: rgba(0,0,0,0.5); border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #fff; font-size: 1.4rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">
+             <!-- Expand Button (only covers the top-right corner) -->
+             <div style="position:absolute; top: 0.8rem; right: 0.8rem; z-index:10; cursor:pointer;" onclick="window._openAdIframeModal('${ad.ad_id}')">
+               <div style="width: 2.8rem; height: 2.8rem; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #fff; font-size: 1.2rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(15,23,42,0.9)'" onmouseout="this.style.background='rgba(15,23,42,0.6)'" title="Phóng to">
                  <i class="fa-solid fa-expand"></i>
                </div>
              </div>
@@ -280,17 +280,24 @@ window._openAdIframeModal = function(adId) {
     modal.style.cssText = "position:fixed;inset:0;background:rgba(15,23,42,0.85);backdrop-filter:blur(6px);z-index:999999;display:flex;align-items:center;justify-content:center;animation:aiModalFadeIn .3s ease-out forwards;";
     modal.innerHTML = `
       <div class="ai_modal_box" style="width:min(600px, 95vw);height:85vh;background:#fff;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;position:relative;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
-        <button onclick="document.getElementById('ad_iframe_modal').style.display='none'" style="position:absolute;top:1.2rem;right:1.2rem;width:3.6rem;height:3.6rem;border-radius:50%;border:none;background:#f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;color:#64748b;font-size:1.6rem;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="document.getElementById('ad_iframe_modal').classList.remove('active'); setTimeout(() => document.getElementById('ad_iframe_modal').style.display='none', 300);" style="position:absolute;top:1.2rem;right:1.2rem;width:3.6rem;height:3.6rem;border-radius:50%;border:none;background:#f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;color:#64748b;font-size:1.6rem;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'"><i class="fa-solid fa-xmark"></i></button>
         <div id="ad_iframe_modal_content" style="flex:1;overflow-y:auto;position:relative;background:#f8fafc;padding:2rem 0;"></div>
       </div>
     `;
     document.body.appendChild(modal);
     modal.addEventListener("click", (e) => {
-      if (e.target === modal) modal.style.display = 'none';
+      if (e.target === modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.style.display = 'none', 300);
+      }
     });
   }
   
   modal.style.display = "flex";
+  // Force reflow before adding active class for CSS transition
+  void modal.offsetWidth;
+  modal.classList.add("active");
+  
   const contentDest = document.getElementById("ad_iframe_modal_content");
   contentDest.innerHTML = iframeHtml;
   
