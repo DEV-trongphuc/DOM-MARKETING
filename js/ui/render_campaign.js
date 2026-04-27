@@ -454,7 +454,7 @@ function renderCampaignView(data) {
                     data-impressions="${as.impressions}"
                     data-result="${as.result}"
                     data-cpr="${getMetricValue(as, 'cpr')}"
-                    data-thumbs="${encodeURIComponent(JSON.stringify((as.ads || []).slice(0, 3).map(a => a.thumbnail || '').filter(Boolean)))}"
+                    data-thumbs="${encodeURIComponent(JSON.stringify((as.ads || []).slice(0, 3).map(a => a.thumbnail || '').filter(t => t && !t.startsWith('data:image/gif'))))}"
                     title="Xem insight adset"
                     onclick="event.stopPropagation();const b=this.closest('.adset_item').querySelector('.adset_insight_btn');if(b)handleAdsetInsightClick(b);"
                     style="display:inline-flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;border-radius:8px;background:#f1f5f9;color:#64748b;cursor:pointer;flex-shrink:0;opacity:0;transition:opacity 0.15s;font-size:1.1rem;"
@@ -478,7 +478,7 @@ function renderCampaignView(data) {
               data-impressions="${as.impressions}"
               data-result="${as.result}"
               data-cpr="${getMetricValue(as, 'cpr')}"
-              data-thumbs="${encodeURIComponent(JSON.stringify((as.ads || []).slice(0, 3).map(a => a.thumbnail || '').filter(Boolean)))}"
+              data-thumbs="${encodeURIComponent(JSON.stringify((as.ads || []).slice(0, 3).map(a => a.thumbnail || '').filter(t => t && !t.startsWith('data:image/gif'))))}"
               title="Xem insight adset">
               <i class="fa-solid fa-magnifying-glass-chart"></i>
             </div>
