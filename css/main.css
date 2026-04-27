@@ -224,8 +224,7 @@ body {
 }
 
 html {
-  font-size: 60%;
-  /* default 10px */
+  font-size: 62.5%; /* default 10px (62.5% of 16px) */
   scroll-behavior: smooth;
   overflow: hidden;
   scrollbar-gutter: stable;
@@ -248,40 +247,37 @@ html {
   transform: rotate(30deg);
 }
 
+/* Lớn hơn 1800px nhưng vẫn cần scale nhẹ */
+@media (max-width: 1800px) {
+  html {
+    font-size: 58%; /* ~9.3px */
+  }
+}
+
+/* Laptop 15.6 inch ~ 1536px width */
+@media (max-width: 1600px) {
+  html {
+    font-size: 54%; /* ~8.6px */
+  }
+}
+
 /* Laptop 14 inch ~ 1366px width */
 @media (max-width: 1400px) {
   html {
-    font-size: 50%;
-    /* 12px */
-  }
-}
-
-@media (max-width: 1700px) {
-  html {
-    font-size: 50%;
-    /* 12px */
-  }
-}
-
-@media (max-width: 1800px) {
-  html {
-    font-size: 45%;
-    /* 12px */
+    font-size: 50%; /* 8px */
   }
 }
 
 /* Laptop nhỏ hơn 1280px */
 @media (max-width: 1280px) {
   html {
-    font-size: 40%;
-    /* 12px */
+    font-size: 45%; /* 7.2px */
   }
 }
 
 @media (max-width: 1080px) {
   html {
-    font-size: 30%;
-    /* 12px */
+    font-size: 40%; /* 6.4px */
   }
 }
 

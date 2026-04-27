@@ -1,25 +1,30 @@
 function shareCurrentView() {
   const url = new URL(window.location.href);
-  url.searchParams.set("since", startDate || "");
-  url.searchParams.set("until", endDate || "");
+  url.search = ""; // Xóa query params gốc (nếu có) để link cực kỳ sạch
 
-  if (CURRENT_CAMPAIGN_FILTER && CURRENT_CAMPAIGN_FILTER.toUpperCase() !== "RESET") {
-    url.searchParams.set("brand", CURRENT_CAMPAIGN_FILTER);
-  } else {
-    url.searchParams.delete("brand");
+  let basePath = url.pathname;
+  const params = new URLSearchParams();
+  if (typeof startDate !== 'undefined' && startDate) params.set("since", startDate);
+  if (typeof endDate !== 'undefined' && endDate) params.set("until", endDate);
+
+  if (typeof CURRENT_CAMPAIGN_FILTER !== 'undefined' && CURRENT_CAMPAIGN_FILTER && CURRENT_CAMPAIGN_FILTER.toUpperCase() !== "RESET") {
+    params.set("brand", CURRENT_CAMPAIGN_FILTER);
   }
+
+  url.search = params.toString();
+  url.hash = "";
 
   const shareUrl = url.toString();
   navigator.clipboard.writeText(shareUrl)
     .then(() => showToast("🔗 Link copied! Date range & brand filter included.", 3000))
     .catch(() => prompt("Copy this link:", shareUrl));
-
-  window.history.replaceState({}, "", shareUrl);
 }
 
 // Auto-restore state from URL params on load
 (function restoreStateFromURL() {
-  const params = new URLSearchParams(window.location.search);
+  let paramString = window.location.search;
+  
+  const params = new URLSearchParams(paramString);
   const since  = params.get("since");
   const until  = params.get("until");
   const brand  = params.get("brand");

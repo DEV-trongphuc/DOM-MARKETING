@@ -23,12 +23,58 @@ window.toggleSmartBadges = function (btn) {
   if (window.lastRenderData) renderCampaignTable(window.lastRenderData);
 };
 
-// Đợi cả hai: token Meta đã resolve VÀ user đã đăng nhập Google
-const _startPromises = [
-  window._tokenReady instanceof Promise ? window._tokenReady : Promise.resolve(),
-  window._authReady  instanceof Promise ? window._authReady  : Promise.resolve(),
-];
-Promise.all(_startPromises).then(() => main());
+// Đợi router khởi tạo xong mới chạy main()
+async function bootstrapSaaS() {
+  const routerReady = await SAAS_ROUTER.init();
+  if (!routerReady) return; // Nếu là trang admin hoặc lỗi tenant, dừng lại
+
+  console.log("[STARTUP] Cho xac thuc Google...");
+  // 1. Phải chờ Auth xong trước (để lấy Token/Accounts từ auth_check nếu có)
+  if (window._authReady instanceof Promise) await window._authReady;
+  console.log("[STARTUP] Xac thuc hoan tat. Chuan bi trich xuat Token...");
+
+  // 1.5. Chạy initAccountSelector để nạp đúng targetToken từ cấu trúc multi-token vào APP_CONFIG.META_TOKEN
+  if (typeof initAccountSelector === 'function') {
+      await initAccountSelector();
+  }
+  console.log("[STARTUP] Token hien tai trong cau hinh:", window.APP_CONFIG.META_TOKEN ? "Co token" : "Khong co token");
+
+  // 2. Sau khi Auth xong, mới kiểm tra Token xem có hợp lệ hay không
+  let tokenOk = true;
+  if (typeof window.initTokenCheck === 'function') {
+    tokenOk = await window.initTokenCheck();
+  }
+
+  if (!tokenOk) {
+    console.warn("[STARTUP] Token khong hop le hoac bi thieu, ngung load dashboard (Hien Modal).");
+    return;
+  }
+
+  // 2.5 Kiểm tra xem có Ad Account nào được chọn không
+  if (!window.ACCOUNT_ID || window.ACCOUNT_ID === "" || window.ACCOUNT_ID === "---") {
+    console.warn("[STARTUP] Khong co Ad Account nao duoc chon, hien thi Modal quan ly tai khoan.");
+    if (typeof openAccountManagerModal === 'function') {
+        openAccountManagerModal();
+    }
+    // Dọn dẹp giao diện trống
+    const db = document.querySelector(".dom_dashboard");
+    if (db) {
+        db.innerHTML = `<div style="text-align:center; padding: 10rem 0; width: 100%; color: #94a3b8; font-family: sans-serif;">
+            <i class="fa-solid fa-folder-open" style="font-size: 5rem; color: #cbd5e1; margin-bottom: 2rem;"></i>
+            <h2 style="font-size: 1.5rem; color: #64748b; font-weight: 600;">Chưa có tài khoản quảng cáo nào được kết nối.</h2>
+            <p style="margin-top: 0.5rem; font-size: 1.2rem;">Vui lòng thêm tài khoản để tiếp tục.</p>
+        </div>`;
+    }
+    return;
+  }
+
+  console.log("[STARTUP] Token OK, khoi chay Dashboard!");
+  // 3. Khởi chạy Dashboard
+  main();
+}
+
+
+bootstrapSaaS();
 
 // Callback khi user nhập token mới từ modal → reload toàn bộ dữ liệu
 window._afterTokenResolved = function () {

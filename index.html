@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <script>
     (function () {
-      var APP_VERSION = "v10.0"; // Tăng chuỗi này lên khi có bản cập nhật mới
+      var APP_VERSION = "v21.0"; // Tăng chuỗi này lên khi có bản cập nhật mới
       var localVer = localStorage.getItem("dom_app_version");
       if (localVer !== APP_VERSION) {
         if (window.location.search.indexOf("dom_cache_bust") === -1) {
@@ -16,6 +16,10 @@
       }
     })();
   </script>
+  <!-- Central Configuration -->
+  <script src="./lib/config_env.js?v=12"></script>
+  <!-- SaaS Router -->
+  <script src="./js/core/router.js?v=3"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DOM META REPORTS</title>
   <!-- <link rel="stylesheet" href="css/main.css" /> -->
@@ -24,7 +28,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="icon" href="https://dom-marketing.netlify.app/domfavicon.png" type="image/png" />
+  <link rel="icon" href="http://localhost:3000/imgs/ICON.png" type="image/png" />
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -266,13 +270,24 @@
   <section id="dom" class="flex">
     <div class="dom_sidebar box_shadow flex">
       <div class="dom_logo">
-        <div style="display:inline-flex; align-items:center; gap:0.7rem; position:relative; cursor:pointer;"
+        <div style="display:inline-flex; align-items:center; gap:1.2rem; position:relative; cursor:pointer;"
           onmouseenter="this.querySelector('button').style.opacity='1'; this.querySelector('button').style.transform='scale(1.12)'"
           onmouseleave="this.querySelector('button').style.opacity='0'; this.querySelector('button').style.transform='scale(1)'">
-          <img id="sidebar_logo" src="https://ampersand-reports-dom.netlify.app/DOM-img/DOM_LOGO.png"
-            alt="DOM Report Logo" />
+          <img id="sidebar_logo" src="http://localhost:3000/imgs/ICON.png" alt="DOM Report Logo"
+            style="width: 4.8rem; height: 4.8rem; object-fit: contain; flex-shrink: 0;" />
+
+          <div style="display: flex; flex-direction: column; justify-content: center;">
+            <h1
+              style="margin: 0; font-size: 2.6rem; font-weight: 900; color: #1e293b; line-height: 1; letter-spacing: -0.02em;">
+              DOMATION</h1>
+            <p
+              style="margin: 0.4rem 0 0 0; font-size: 1.1rem; font-weight: 800; color: #94a3b8; line-height: 1; letter-spacing: 0.15em; display: flex; gap: 0.4rem; text-transform: uppercase;">
+              <span style="color: #fcd34d;">/</span> DIGITAL AI VISION
+            </p>
+          </div>
+
           <button onclick="toggleLogoPopup(event)" title="Đổi logo"
-            style="width:2.4rem;height:2.4rem;border-radius:50%;background:var(--mainClr);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;opacity:0;transition:opacity .2s,transform .2s;box-shadow:0 2px 6px rgba(255,169,0,.4);padding:0;">
+            style="position: absolute; right: -3.5rem; width:2.4rem;height:2.4rem;border-radius:50%;background:var(--mainClr);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;opacity:0;transition:opacity .2s,transform .2s;box-shadow:0 2px 6px rgba(255,169,0,.4);padding:0;">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"
               stroke-linecap="round" stroke-linejoin="round">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -283,22 +298,43 @@
         <i id="mobile_menu" class="fa-solid fa-square-caret-left"></i>
       </div>
       <p class="dom_text_menu">PROJECT VIEW</p>
-      <div class="dom_account_view">
-        <div class="dom_account_view_block">
-          <div class="account_item">
-            <div>
-              <img class="account_item_avatar" src="./assets/dom_avatar.jpg"
-                onerror="this.src='https://ui-avatars.com/api/?name=DOM&background=f5a623&color=fff&bold=true'" />
-              <div class="account_item_info">
-                <p class="account_item_name">AdAccount ID</p>
-                <p class="account_item_id">676599667843841</p>
-              </div>
+      <div class="dom_account_view_block" style="
+          cursor: pointer; 
+          border-radius: 1.2rem; 
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          transition: all 0.2s ease; 
+          padding: 0.8rem 1rem;
+          margin: 0.5rem 0 1.5rem 0;
+          width: 100%; 
+          display: flex; 
+          justify-content: space-between; 
+          align-items: center; 
+          gap: 0.5rem;" onclick="if(typeof openAccountManagerModal === 'function') openAccountManagerModal()"
+        onmouseover="this.style.borderColor='#cbd5e1'; this.style.background='#f1f5f9';"
+        onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+        <div style="display: flex; gap: 0.8rem; align-items: center; overflow: hidden; flex: 1; min-width: 0;">
+          <div style="position: relative; flex-shrink: 0; width: 38px; height: 38px;">
+            <img class="account_item_avatar" src="./assets/dom_avatar.jpg"
+              style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #f5a623; border: 1.5px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"
+              onerror="this.src='https://ui-avatars.com/api/?name=DOM&background=f5a623&color=fff&bold=true'" />
+            <div
+              style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #10b981; border-radius: 50%; border: 1.5px solid #fff;">
             </div>
-            <i class="fa-solid fa-sort"></i>
+          </div>
+          <div class="account_item_info"
+            style="display: flex; flex-direction: column; gap: 0.2rem; overflow: hidden; justify-content: center; flex: 1; min-width: 0;">
+            <p class="account_item_name"
+              style="margin: 0; color: #0f172a; font-weight: 700; font-size: 1.15rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">
+              Loading...</p>
+            <p class="account_item_id"
+              style="margin: 5px 0 0 0; color: #64748b; font-size: 1rem; font-family: 'Roboto', monospace; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">
+              ---</p>
           </div>
         </div>
-        <!-- Dropdown list — được JS render vào khi initAccountSelector() chạy -->
-        <ul class="box_shadow"></ul>
+        <div style="color: #94a3b8; font-size: 1rem; flex-shrink: 0; padding-right: 0.2rem;">
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
       </div>
       <p class="dom_text_menu">META REPORT</p>
       <ul class="dom_menu">
@@ -313,11 +349,6 @@
         <li class="" data-view="account">
           <i class="fa-solid fa-money-check"></i>
           <span>Ad Account</span>
-        </li>
-        <p class="dom_text_menu" id="gads_menu_title">GOOGLE ADS</p>
-        <li class="" data-view="google_ads" id="gads_menu_item">
-          <i class="fa-brands fa-google"></i>
-          <span>Google ads</span>
         </li>
 
       </ul>
@@ -431,42 +462,15 @@
           <div class="toolbar_divider"></div>
 
           <!-- Bộ lọc Brand (được kéo dài) -->
-          <div class="dom_filter">
+          <div class="dom_filter" style="display:none;">
             <div class="dom_select quick_filter_detail toolbar_select" style="padding-left: 0 !important;">
-              <img src="./assets/brand_logo/ampersand_img.jpg" />
+              <img id="quick_filter_current_img" src="" style="display:none;" />
               <div class="flex">
-                <p class="dom_selected">Ampersand Group</p>
+                <p class="dom_selected" id="quick_filter_current_text">Tất cả Brand</p>
               </div>
               <i class="fa-solid fa-angle-down"></i>
-              <ul class="dom_select_show">
-                <li data-filter="TRB">
-                  <img src="./assets/brand_logo/TRB.jpg" />
-                  <span>The Running Bean</span>
-                </li>
-                <li data-filter="Haagen Dazs">
-                  <img src="./assets/brand_logo/HD.jpg" />
-                  <span>Häagen-Dazs</span>
-                </li>
-                <li data-filter="BEAN">
-                  <img src="./assets/brand_logo/BEAN.jpg" />
-                  <span> Be An Vegetarian</span>
-                </li>
-                <li data-filter="Esta">
-                  <img src="./assets/brand_logo/Esta.jpg" />
-                  <span> Esta Saigon</span>
-                </li>
-                <li data-filter="Le Petit">
-                  <img src="./assets/brand_logo/LPT.jpg" />
-                  <span> Le Petit</span>
-                </li>
-                <li data-filter="SNOWEE">
-                  <img src="./assets/brand_logo/SNOWEE.jpg" />
-                  <span> SNOWEE</span>
-                </li>
-                <li data-filter="">
-                  <img src="./assets/brand_logo/ampersand_img.jpg" />
-                  <span> Ampersand Filter</span>
-                </li>
+              <ul class="dom_select_show" id="quick_filter_list">
+                <!-- Javascript sẽ tự động thêm danh sách dựa vào config -->
               </ul>
             </div>
           </div>
@@ -701,7 +705,8 @@
             <h2 class="">
               <span><i class="fa-solid fa-chart-simple main_clr"></i> Age &amp; Gender</span>
               <div style="display:flex;gap:0.6rem;align-items:center;">
-                <span class="dom_title_button" id="age_only_toggle_btn" onclick="toggleAgeOnlyView()" title="Gộp theo Age">
+                <span class="dom_title_button" id="age_only_toggle_btn" onclick="toggleAgeOnlyView()"
+                  title="Gộp theo Age">
                   <i class="fa-solid fa-venus-mars"></i> Age Only
                 </span>
                 <span class="dom_title_button region" onclick="toggleRegionView()"><i class="fa-solid fa-repeat"></i>
@@ -2365,13 +2370,10 @@
   </script>
 </body>
 <!-- Foundation: lib/ (token, auth, settings, setup) -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="./lib/token.js?v=9"></script>
 <script src="./lib/settings.js?v=9"></script>
-<!-- Google Identity Services — cần cho auth.js -->
-<script src="https://accounts.google.com/gsi/client" async></script>
-<script src="./lib/auth.js?v=9"></script>
-<script src="./lib/setup.js?v=9"></script>
-<script src="./js/api/google_ads.js?v=9"></script>
+<script src="./lib/auth.js?v=10"></script>
 
 <!-- ═══════════════════════════════════════════════════
      JS MODULES — Thứ tự load quan trọng (dependency order)
@@ -2388,7 +2390,7 @@
 <!-- 2. API layer -->
 <script src="./js/api/constants.js?v=9"></script>
 <script src="./js/api/fetch.js?v=9"></script>
-<script src="./js/api/account.js?v=9"></script>
+<script src="./js/api/account.js?v=18"></script>
 <script src="./js/api/meta_insights.js?v=9"></script>
 
 <!-- 3. Data helpers (phải load sớm vì toggleSkeletons, getResults được dùng ở nhiều nơi) -->
@@ -2439,6 +2441,127 @@
 <!-- 9. App wiring (dashboard trước → startup gọi main() cuối cùng) -->
 <script src="./js/core/listeners.js?v=9"></script>
 <script src="./js/core/dashboard.js?v=9"></script>
+<script src="./js/api/account_manager.js?v=20"></script>
 <script src="./js/core/startup.js?v=9"></script>
+
+<!-- ═══════════════════════════════════════════════════
+     ACCOUNT MANAGER MODAL
+     ═══════════════════════════════════════════════════ -->
+<div id="account_manager_modal" class="modal_overlay"
+  style="display: none; align-items: center; justify-content: center; z-index: 10000; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px);">
+  <div
+    style="background: #fff; width: min(95vw, 1000px); max-height: 88vh; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+
+    <!-- Header -->
+    <div
+      style="padding: 1.8rem 2.4rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+      <div>
+        <h2
+          style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 0.8rem;">
+          <div
+            style="width: 36px; height: 36px; background: linear-gradient(135deg, #ffa900, #d88200); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <i class="fa-solid fa-layer-group" style="color: #fff; font-size: 1.4rem;"></i>
+          </div>
+          Quản lý Tài khoản (Workspace)
+        </h2>
+        <p style="margin: 0.4rem 0 0; color: #64748b; font-size: 1.2rem;">Quản lý và chuyển đổi giữa các Ad Accounts /
+          Tokens được kết nối.</p>
+      </div>
+      <button onclick="closeAccountManagerModal()"
+        style="background: #f1f5f9; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; font-size: 1.4rem; transition: background 0.2s;"
+        onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div style="flex: 1; overflow-y: auto; padding: 2.4rem; background: #fff;" id="account_manager_body">
+      <!-- Loading state -->
+      <div style="text-align: center; padding: 4rem 0; color: #94a3b8;">
+        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+        <p style="font-size: 1.4rem; margin: 0;">Đang tải danh sách tài khoản...</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div
+      style="padding: 1.6rem 2.4rem; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: space-between; align-items: center;"
+      id="account_manager_footer">
+      <p style="margin: 0; color: #64748b; font-size: 1.2rem;">Các thay đổi sẽ có hiệu lực ngay lập tức.</p>
+      <button id="am_add_token_btn" onclick="openAddTokenView()"
+        style="padding: 0.8rem 1.6rem; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 10px; font-weight: 700; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; gap: 0.6rem; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);"
+        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.4)'"
+        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)'">
+        <i class="fa-solid fa-plus"></i>
+        Thêm Token Mới
+      </button>
+    </div>
+
+    <!-- Màn hình Add Token Mới (ẩn mặc định) -->
+    <div id="am_add_view"
+      style="display: none; position: absolute; inset: 0; background: #fff; z-index: 10; flex-direction: column;">
+      <div
+        style="padding: 1.8rem 2.4rem; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 1.2rem; background: #f8fafc;">
+        <button onclick="closeAddTokenView()"
+          style="background: transparent; border: none; font-size: 1.5rem; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background 0.2s;"
+          onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div>
+          <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1e293b;">Kết nối Token Mới</h2>
+          <p style="margin: 0.2rem 0 0; color: #64748b; font-size: 1.2rem;">Nhập Access Token để tải danh sách BM & Ad
+            Accounts.</p>
+        </div>
+      </div>
+      <div style="flex: 1; overflow-y: auto; padding: 2.4rem;">
+        <div style="margin-bottom: 2rem;">
+          <label
+            style="display: block; font-weight: 700; color: #334155; margin-bottom: 0.6rem; font-size: 1.3rem;">Nhập
+            Meta Access Token</label>
+          <div style="display: flex; gap: 1rem;">
+            <input type="text" id="am_new_token_input" placeholder="EAAGm0PX4ZC..."
+              style="flex: 1; padding: 1rem 1.4rem; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1.3rem; color: #1e293b; outline: none; transition: border-color 0.2s;"
+              onfocus="this.style.borderColor='#ffa900'" onblur="this.style.borderColor='#e2e8f0'">
+            <button id="am_fetch_accounts_btn" onclick="fetchAccountsFromNewToken()"
+              style="padding: 0 1.6rem; background: #3b82f6; color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 1.3rem; cursor: pointer; transition: background 0.2s;"
+              onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+              <i class="fa-solid fa-magnifying-glass"></i> Tải ID
+            </button>
+          </div>
+          <p style="margin: 0.6rem 0 0; color: #94a3b8; font-size: 1.15rem;"><i class="fa-solid fa-circle-info"></i>
+            Token sẽ được lưu lại để tải dữ liệu cho các ID bạn chọn.</p>
+        </div>
+
+        <div id="am_fetched_accounts_container"
+          style="display: none; border-top: 1px dashed #e2e8f0; padding-top: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+            <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #1e293b;">Chọn Ad Accounts để lưu</h3>
+            <span id="am_fetched_count"
+              style="background: #e2e8f0; color: #475569; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 1.2rem;">0
+              tìm thấy</span>
+          </div>
+          <div id="am_fetched_accounts_list"
+            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; max-height: 300px; overflow-y: auto; padding-right: 0.5rem;">
+            <!-- Render fetched accounts here -->
+          </div>
+        </div>
+      </div>
+      <div
+        style="padding: 1.6rem 2.4rem; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: flex-end; gap: 1rem;"
+        id="am_add_footer">
+        <button onclick="closeAddTokenView()"
+          style="padding: 0.8rem 1.6rem; background: #f1f5f9; color: #475569; border: none; border-radius: 10px; font-weight: 700; font-size: 1.3rem; cursor: pointer; transition: background 0.2s;"
+          onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Hủy</button>
+        <button id="am_save_token_btn" onclick="saveSelectedAccounts()"
+          style="padding: 0.8rem 1.6rem; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none; border-radius: 10px; font-weight: 700; font-size: 1.3rem; cursor: not-allowed; opacity: 0.5; display: flex; align-items: center; gap: 0.6rem; transition: transform 0.15s, box-shadow 0.15s;"
+          disabled>
+          <i class="fa-solid fa-floppy-disk"></i>
+          Lưu Token & Accounts
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 </html>

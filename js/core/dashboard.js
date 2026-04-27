@@ -167,9 +167,8 @@ async function main() {
   await Promise.all([
     window._SETTINGS_PROMISE,
     googleAdsTask,
-    initAccountSelector(),
     loadDashboardData(),
-    syncAiHistoryFromSheet(),
+    syncAiHistoryFromApi(),
   ]);
 
   // Lắng nghe sự kiện Reset All Filters từ Empty Card

@@ -101,33 +101,22 @@ function renderBrandSettingsToModal() {
       </div>
       <!-- Body -->
       <div style="display:flex; gap:1.6rem; padding:1.4rem; align-items:flex-start;">
-        <!-- Avatar preview -->
-        <div style="flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:0.6rem;">
-          <img class="brand_avatar_preview" src="${b.img || ''}" onerror="this.src=''" style="width:5.6rem; height:5.6rem; border-radius:12px; object-fit:cover; border:2px solid #e2e8f0; background:#f1f5f9;">
-          <span style="font-size:1rem; color:#94a3b8;">Avatar</span>
-        </div>
         <!-- Fields -->
         <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; gap:0.8rem 1.2rem;">
           <div>
             <label style="display:block; font-size:1.1rem; font-weight:600; color:#475569; margin-bottom:0.35rem;">Tên thương hiệu</label>
-            <input type="text" placeholder="VD: The Running Bean" class="brand_name bsi_input" value="${b.name}"
-              oninput="this.closest('.brand_setting_item').querySelector('.brand_label_preview').textContent = this.value || 'Brand mới'"
+            <input type="text" placeholder="Để trống nếu không dùng" class="brand_name bsi_input" value="${b.name || ''}"
+              oninput="this.closest('.brand_setting_item').querySelector('.brand_label_preview').textContent = this.value || '(Trống)'"
               style="width:100%; padding:0.65rem 0.9rem; border-radius:8px; border:1.5px solid #e2e8f0; font-size:1.25rem; outline:none; transition:border .2s; box-sizing:border-box;"
               onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
           </div>
           <div>
             <label style="display:block; font-size:1.1rem; font-weight:600; color:#475569; margin-bottom:0.35rem;">Từ khóa (Campaign name)</label>
-            <input type="text" placeholder="VD: TRB" class="brand_filter bsi_input" value="${b.filter}"
+            <input type="text" placeholder="Để trống nếu không dùng" class="brand_filter bsi_input" value="${b.filter || ''}"
               style="width:100%; padding:0.65rem 0.9rem; border-radius:8px; border:1.5px solid #e2e8f0; font-size:1.25rem; outline:none; transition:border .2s; font-family:monospace; box-sizing:border-box;"
               onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
           </div>
-          <div style="grid-column:1/-1;">
-            <label style="display:block; font-size:1.1rem; font-weight:600; color:#475569; margin-bottom:0.35rem;">Đường dẫn ảnh Avatar</label>
-            <input type="text" placeholder="VD: ./assets/brand_logo/TRB.jpg" class="brand_img bsi_input" value="${b.img}"
-              oninput="const preview=this.closest('.brand_setting_item').querySelector('.brand_avatar_preview'); preview.src=this.value;"
-              style="width:100%; padding:0.65rem 0.9rem; border-radius:8px; border:1.5px solid #e2e8f0; font-size:1.2rem; outline:none; transition:border .2s; font-family:monospace; color:#64748b; box-sizing:border-box;"
-              onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
-          </div>
+          <input type="hidden" class="brand_img" value="">
         </div>
       </div>
     </div>
@@ -163,31 +152,21 @@ function addNewBrandSetting() {
       </div>
     </div>
     <div style="display:flex; gap:1.6rem; padding:1.4rem; align-items:flex-start;">
-      <div style="flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:0.6rem;">
-        <img class="brand_avatar_preview" src="" onerror="this.src=''" style="width:5.6rem; height:5.6rem; border-radius:12px; object-fit:cover; border:2px solid #e2e8f0; background:#f1f5f9;">
-        <span style="font-size:1rem; color:#94a3b8;">Avatar</span>
-      </div>
       <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; gap:0.8rem 1.2rem;">
         <div>
           <label style="display:block; font-size:1.1rem; font-weight:600; color:#475569; margin-bottom:0.35rem;">Tên thương hiệu</label>
-          <input type="text" placeholder="VD: The Running Bean" class="brand_name bsi_input" value=""
-            oninput="this.closest('.brand_setting_item').querySelector('.brand_label_preview').textContent = this.value || 'Brand mới'"
+          <input type="text" placeholder="Để trống nếu không dùng" class="brand_name bsi_input" value=""
+            oninput="this.closest('.brand_setting_item').querySelector('.brand_label_preview').textContent = this.value || '(Trống)'"
             style="width:100%; padding:0.65rem 0.9rem; border-radius:8px; border:1.5px solid #e2e8f0; font-size:1.25rem; outline:none; transition:border .2s; box-sizing:border-box;"
             onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
         </div>
         <div>
           <label style="display:block; font-size:1.1rem; font-weight:600; color:#475569; margin-bottom:0.35rem;">Từ khóa (Campaign name)</label>
-          <input type="text" placeholder="VD: TRB" class="brand_filter bsi_input" value=""
+          <input type="text" placeholder="Để trống nếu không dùng" class="brand_filter bsi_input" value=""
             style="width:100%; padding:0.65rem 0.9rem; border-radius:8px; border:1.5px solid #e2e8f0; font-size:1.25rem; outline:none; transition:border .2s; font-family:monospace; box-sizing:border-box;"
             onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
         </div>
-        <div style="grid-column:1/-1;">
-          <label style="display:block; font-size:1.1rem; font-weight:600; color:#475569; margin-bottom:0.35rem;">Đường dẫn ảnh Avatar</label>
-          <input type="text" placeholder="VD: ./assets/brand_logo/TRB.jpg" class="brand_img bsi_input" value=""
-            oninput="const preview=this.closest('.brand_setting_item').querySelector('.brand_avatar_preview'); preview.src=this.value;"
-            style="width:100%; padding:0.65rem 0.9rem; border-radius:8px; border:1.5px solid #e2e8f0; font-size:1.2rem; outline:none; transition:border .2s; font-family:monospace; color:#64748b; box-sizing:border-box;"
-            onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
-        </div>
+        <input type="hidden" class="brand_img" value="">
       </div>
     </div>
   `;

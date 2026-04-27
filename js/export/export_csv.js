@@ -55,15 +55,7 @@ function exportAdsToCSV() {
 
 /* --- BRAND SETTINGS LOGIC --- */
 const BRAND_SETTINGS_KEY = "dom_brand_filters";
-const DEFAULT_BRANDS = [
-  { filter: "TRB",    img: "./assets/brand_logo/TRB.jpg",            name: "The Running Bean" },
-  { filter: "HGD",    img: "./assets/brand_logo/HD.jpg",             name: "Häagen-Dazs" },
-  { filter: "BeAn",   img: "./assets/brand_logo/BEAN.jpg",           name: "Be An Vegetarian" },
-  { filter: "Esta",   img: "./assets/brand_logo/Esta.jpg",           name: "Esta Saigon" },
-  { filter: "LP",     img: "./assets/brand_logo/LPT.jpg",            name: "Le Petit" },
-  { filter: "SNOWEE", img: "./assets/brand_logo/SNOWEE.jpg",         name: "SNOWEE" },
-  { filter: "",       img: "./assets/brand_logo/ampersand_img.jpg",  name: "Ampersand" },
-];
+const DEFAULT_BRANDS = [];
 
 function loadBrandSettings() {
   const saved = localStorage.getItem(BRAND_SETTINGS_KEY);
@@ -75,7 +67,16 @@ function loadBrandSettings() {
 
 function updateBrandDropdownUI() {
   const brands = loadBrandSettings();
+  const filterWrapper = document.querySelector(".dom_filter");
   const dropdownUl = document.querySelector(".quick_filter_detail .dom_select_show");
+  
+  if (brands.length === 0) {
+      if (filterWrapper) filterWrapper.style.display = "none";
+      return;
+  } else {
+      if (filterWrapper && window.BRAND_FILTER_SETUP !== false) filterWrapper.style.display = "flex";
+  }
+
   if (!dropdownUl) return;
 
   const current = (CURRENT_CAMPAIGN_FILTER || "").toUpperCase() === "RESET"
@@ -87,7 +88,7 @@ function updateBrandDropdownUI() {
     const isActive = bFilter === current;
     return `
     <li data-filter="${b.filter}" class="${isActive ? "active" : ""}">
-      <img src="${b.img}" />
+      <img src="${b.img}" style="border-radius:50%;" onerror="this.style.display='none'"/>
       <span>${b.name}</span>
     </li>`;
   }).join("");

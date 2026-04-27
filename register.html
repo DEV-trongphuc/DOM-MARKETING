@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khởi Tạo Workspace - DOM META SAAS</title>
+    <link rel="icon" href="http://localhost:3000/imgs/ICON.png" type="image/png" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Cấu hình API -->
+    <script src="./lib/config_env.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <style>
+        :root {
+            --primary: #f59e0b; /* Amber 500 */
+            --primary-dark: #d97706; /* Amber 600 */
+            --primary-light: #fef3c7; /* Amber 100 */
+            --text-dark: #0f172a; /* Slate 900 */
+            --text-muted: #64748b; /* Slate 500 */
+            --bg-body: #f8fafc; /* Slate 50 */
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0; /* Slate 200 */
+        }
+
+        body { 
+            margin: 0; 
+            font-family: 'Roboto', sans-serif; 
+            background-color: #0f172a; 
+            color: var(--text-dark); 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 2rem;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Fixed Animated Background */
+        .bg-animated {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: #0f172a;
+        }
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            animation: float 12s infinite ease-in-out alternate;
+        }
+        .orb-1 { width: 500px; height: 500px; background: rgba(245, 158, 11, 0.15); top: -10%; left: -10%; }
+        .orb-2 { width: 600px; height: 600px; background: rgba(59, 130, 246, 0.15); bottom: -20%; right: -10%; animation-delay: -4s; }
+        .orb-3 { width: 400px; height: 400px; background: rgba(16, 185, 129, 0.1); top: 40%; left: 50%; transform: translate(-50%, -50%); animation-delay: -8s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(40px, -40px) scale(1.1); }
+        }
+
+        .container { 
+            background: rgba(255, 255, 255, 0.98); 
+            backdrop-filter: blur(20px);
+            width: 100%; 
+            max-width: 540px; 
+            padding: 3.5rem 3rem; 
+            border-radius: 28px; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1); 
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Thêm highlight trang trí phía trên cùng card */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 6px;
+            background: linear-gradient(90deg, var(--primary), #fbbf24);
+        }
+
+        .logo { 
+            width: 64px; 
+            height: 64px; 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            border-radius: 18px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 2rem; 
+            color: #fff; 
+            margin: 0 auto 1.5rem; 
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4); 
+            transform: rotate(-5deg);
+        }
+
+        h1 { 
+            text-align: center; 
+            margin: 0 0 0.5rem; 
+            font-weight: 900; 
+            font-size: 2.2rem; 
+            letter-spacing: -0.03em; 
+            color: var(--text-dark);
+        }
+
+        p.subtitle { 
+            text-align: center; 
+            color: var(--text-muted); 
+            margin: 0 0 2.5rem; 
+            font-size: 1.05rem; 
+            line-height: 1.5;
+        }
+        
+        .step-container { 
+            display: none; 
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
+        .step-container.active { display: block; }
+        @keyframes slideUp { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .input-group { margin-bottom: 1.5rem; }
+        .input-group label { 
+            display: flex; 
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            color: #334155; 
+            margin-bottom: 0.6rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+        }
+        
+        .input-group input, .input-group textarea { 
+            width: 100%; 
+            padding: 1.1rem 1.2rem; 
+            background: #f8fafc;
+            border: 2px solid var(--border-color); 
+            border-radius: 14px; 
+            font-size: 1rem; 
+            font-family: 'Roboto', sans-serif; 
+            box-sizing: border-box; 
+            outline: none; 
+            transition: all 0.2s; 
+            color: var(--text-dark);
+        }
+        
+        .input-group input:focus, .input-group textarea:focus { 
+            background: #fff;
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 4px var(--primary-light); 
+        }
+        
+        .btn-primary { 
+            width: 100%; 
+            padding: 1.2rem; 
+            background: var(--primary); 
+            color: #fff; 
+            border: none; 
+            border-radius: 50px; 
+            font-size: 1.1rem; 
+            font-weight: 800; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 0.6rem; 
+            box-shadow: 0 10px 20px rgba(245, 158, 11, 0.25); 
+        }
+        
+        .btn-primary:hover { 
+            background: var(--primary-dark); 
+            transform: translateY(-2px); 
+            box-shadow: 0 15px 25px rgba(245, 158, 11, 0.35); 
+        }
+        
+        .btn-primary:disabled { 
+            background: #cbd5e1; 
+            cursor: not-allowed; 
+            transform: none; 
+            box-shadow: none; 
+        }
+
+        .google-btn-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+            min-height: 50px;
+        }
+        
+        .account-list { 
+            max-height: 320px; 
+            overflow-y: auto; 
+            border: 2px solid var(--border-color); 
+            border-radius: 14px; 
+            padding: 0.5rem; 
+            margin-bottom: 1.5rem; 
+            background: #f8fafc;
+        }
+        
+        .account-item { 
+            display: flex; 
+            align-items: center; 
+            padding: 1rem 1.2rem; 
+            border-radius: 10px; 
+            transition: all 0.2s; 
+            cursor: pointer; 
+            gap: 1rem; 
+            background: #fff;
+            margin-bottom: 0.5rem;
+            border: 1px solid transparent;
+        }
+        .account-item:last-child { margin-bottom: 0; }
+        .account-item:hover { 
+            border-color: var(--primary-light);
+            background: #fffbeb; 
+            transform: translateX(4px);
+        }
+        .account-item input[type="checkbox"] { 
+            width: 22px; 
+            height: 22px; 
+            accent-color: var(--primary); 
+            cursor: pointer; 
+        }
+        .account-info { flex: 1; }
+        .account-name { font-weight: 700; color: var(--text-dark); margin-bottom: 0.3rem; font-size: 1.05rem; }
+        .account-id { font-size: 0.85rem; color: var(--text-muted); font-family: monospace; }
+        
+        .business-header { 
+            padding: 0.8rem 1rem; 
+            font-weight: 800; 
+            color: #475569; 
+            font-size: 0.8rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.1em; 
+            margin-top: 0.5rem; 
+        }
+        
+        .error-msg { 
+            background: #fef2f2; 
+            border: 1px solid #fecaca; 
+            color: #ef4444; 
+            padding: 1rem 1.2rem; 
+            border-radius: 12px; 
+            margin-bottom: 1.5rem; 
+            font-weight: 600; 
+            font-size: 0.95rem; 
+            display: none; 
+            align-items: center; 
+            gap: 0.6rem; 
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.1);
+        }
+
+        .guide-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .guide-link:hover { color: var(--primary-dark); text-decoration: underline; }
+
+        /* MODAL HƯỚNG DẪN */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: #1e293b;
+            color: #f8fafc;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(245, 158, 11, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-header {
+            padding: 1.5rem 2rem;
+            background: rgba(15, 23, 42, 0.6);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 { margin: 0; font-size: 1.3rem; font-weight: 800; color: #f59e0b; }
+        .modal-close {
+            background: rgba(255,255,255,0.05); border: none; font-size: 1.2rem; color: #cbd5e1;
+            width: 36px; height: 36px; border-radius: 12px; display:flex; align-items:center; justify-content:center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .modal-close:hover { background: #ef4444; color: #fff; transform: rotate(90deg); }
+        .modal-body {
+            padding: 2.5rem 2rem;
+            max-height: 70vh;
+            overflow-y: auto;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body::-webkit-scrollbar-track { background: transparent; }
+        .modal-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .modal-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        
+        .modal-body ol { padding-left: 1.2rem; margin: 0; }
+        .modal-body li { margin-bottom: 1.2rem; font-size: 1rem; }
+        .modal-body li b { color: #f8fafc; }
+        .code-block {
+            background: #0f172a; padding: 1rem 1.2rem; border-radius: 12px; font-family: monospace;
+            font-size: 0.95rem; color: #f59e0b; border: 1px solid rgba(255,255,255,0.05); word-break: break-all;
+            margin-top: 0.8rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animated">
+        <div class="bg-orb orb-1"></div>
+        <div class="bg-orb orb-2"></div>
+        <div class="bg-orb orb-3"></div>
+    </div>
+    <div class="container">
+        <div class="logo"><i class="fa-solid fa-chart-line"></i></div>
+        <h1>Khởi Tạo Workspace</h1>
+        <p class="subtitle">Trải nghiệm hệ thống báo cáo Meta Ads tự động</p>
+        
+        <div id="error_box" class="error-msg"><i class="fa-solid fa-triangle-exclamation"></i> <span id="error_text"></span></div>
+
+        <!-- BƯỚC 1: ĐĂNG NHẬP GOOGLE -->
+        <div id="step_1" class="step-container active">
+            <div style="text-align:center; margin-bottom:2rem; padding: 2rem; background: #f8fafc; border-radius: 20px; border: 1px dashed #cbd5e1;">
+                <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="Google" style="width:70px; margin-bottom:1rem; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));">
+                <h2 style="margin:0 0 0.5rem; font-size:1.6rem; font-weight:800;">Xác Thực Tài Khoản</h2>
+                <p style="color:#64748b; font-size:1rem; margin:0;">Sử dụng tài khoản Google của bạn để liên kết và tạo Workspace an toàn.</p>
+                
+                <!-- Khu vực render nút Google thật -->
+                <div class="google-btn-wrapper" id="google_btn_render_area"></div>
+            </div>
+            
+            <p id="google_error_text" style="color:#ef4444; font-size:0.9rem; text-align:center; display:none; margin-top:1rem;">
+                <i class="fa-solid fa-circle-exclamation"></i> Lỗi: Chưa cấu hình GOOGLE_CLIENT_ID trong file config_env.js.
+            </p>
+        </div>
+
+        <!-- BƯỚC 2: NHẬP THÔNG TIN CƠ BẢN -->
+        <div id="step_2" class="step-container">
+            <div class="input-group">
+                <label>Email liên hệ</label>
+                <div style="position:relative;">
+                    <i class="fa-brands fa-google" style="position:absolute; left:1.2rem; top:50%; transform:translateY(-50%); color:#94a3b8;"></i>
+                    <input type="text" id="reg_email" readonly style="background:#f1f5f9; color:#64748b; cursor:not-allowed; padding-left:3rem;">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Tên Doanh Nghiệp / Team</label>
+                <input type="text" id="reg_name" placeholder="VD: Nava Store" onkeyup="generateSlug()">
+            </div>
+            <div class="input-group">
+                <label>Đường dẫn Workspace (Slug)</label>
+                <div style="position:relative;">
+                    <input type="text" id="reg_slug" placeholder="nava-store" style="font-family:monospace; color:var(--primary); font-weight:700; background:#fffbeb; border-color:var(--primary-light); padding-right:2.5rem;">
+                    <i id="slug_icon" class="fa-solid" style="position:absolute; right:1rem; top:50%; transform:translateY(-50%); font-size:1.1rem; display:none;"></i>
+                </div>
+                <div id="slug_status" style="font-size:0.85rem; margin-top:0.4rem; font-weight:600; display:none;"></div>
+                <div style="font-size:0.85rem; color:#94a3b8; margin-top:0.6rem; line-height:1.4;">
+                    Đường dẫn truy cập: <br>
+                    <b style="color:#334155; font-size:0.95rem;">meta.domation.net/<span id="slug_preview" style="color:var(--primary);">...</span></b>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="nextStep(3)">Tiếp tục <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+
+        <!-- BƯỚC 3: KẾT NỐI META -->
+        <div id="step_3" class="step-container">
+            <div class="input-group">
+                <label>
+                    Meta Access Token
+                    <span class="guide-link" onclick="openTokenGuide()"><i class="fa-regular fa-circle-question"></i> Cách lấy Token</span>
+                </label>
+                <textarea id="reg_token" rows="4" placeholder="EAA..." style="font-family:monospace; font-size:0.9rem; line-height:1.5;"></textarea>
+            </div>
+            <button class="btn-primary" id="btn_fetch_accounts" onclick="fetchMetaAccounts()"><i class="fa-solid fa-cloud-arrow-down"></i> Tải danh sách Ad Accounts</button>
+        </div>
+
+        <!-- BƯỚC 4: CHỌN AD ACCOUNTS -->
+        <div id="step_4" class="step-container">
+            <h3 style="margin:0 0 0.5rem; color:var(--text-dark); font-size:1.3rem;">Chọn Ad Accounts</h3>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:1.5rem;">Hệ thống sẽ chỉ kéo dữ liệu báo cáo từ các tài khoản bạn chọn.</p>
+            
+            <div class="account-list" id="account_list_container">
+                <!-- Data sẽ được render vào đây -->
+            </div>
+            
+            <button class="btn-primary" onclick="nextStep(5)">Tiếp tục <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+
+        <!-- BƯỚC 5: CHỌN GÓI DỊCH VỤ -->
+        <div id="step_5" class="step-container">
+            <h3 style="margin:0 0 0.5rem; color:var(--text-dark); font-size:1.3rem; text-align:center;">Chọn gói dịch vụ</h3>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:1.5rem; text-align:center;">Nâng cấp để trải nghiệm toàn bộ tính năng</p>
+            
+            <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.5rem;">
+                <label style="border:2px solid var(--border-color); border-radius:14px; padding:1.2rem; cursor:pointer; transition:all 0.2s; position:relative;" class="plan-option" onclick="selectPlan(this)">
+                    <input type="radio" name="plan" value="1_month" checked style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:800; font-size:1.1rem; color:var(--text-dark);">Gói Tháng</div>
+                            <div style="font-size:0.85rem; color:var(--text-muted);">Thanh toán mỗi tháng</div>
+                        </div>
+                        <div style="font-weight:800; font-size:1.2rem; color:var(--primary);">690.000đ</div>
+                    </div>
+                </label>
+
+                <label style="border:2px solid var(--primary); background:#fffbeb; border-radius:14px; padding:1.2rem; cursor:pointer; transition:all 0.2s; position:relative;" class="plan-option active" onclick="selectPlan(this)">
+                    <input type="radio" name="plan" value="1_year" style="display:none;">
+                    <div style="position:absolute; top:-10px; right:15px; background:#ef4444; color:#fff; font-size:0.75rem; font-weight:800; padding:2px 8px; border-radius:10px;">Giảm 10%</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:800; font-size:1.1rem; color:var(--text-dark);">Gói Năm</div>
+                            <div style="font-size:0.85rem; color:var(--text-muted);">Thanh toán 1 lần</div>
+                        </div>
+                        <div style="font-weight:800; font-size:1.2rem; color:var(--primary);">7.452.000đ</div>
+                    </div>
+                </label>
+            </div>
+
+            <div id="phone_input_group" style="margin-bottom:1.5rem;">
+                <label style="display:flex; align-items:center; justify-content:space-between; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:0.6rem; text-transform:uppercase; letter-spacing:0.05em;">Số điện thoại Zalo (Để Admin liên hệ kích hoạt)</label>
+                <div style="position:relative;">
+                    <i class="fa-solid fa-phone" style="position:absolute; left:1.2rem; top:50%; transform:translateY(-50%); color:#94a3b8;"></i>
+                    <input type="text" id="reg_phone" placeholder="0987.654.321" style="width:100%; padding:1.1rem 1.2rem 1.1rem 3rem; background:#f8fafc; border:2px solid var(--border-color); border-radius:14px; font-size:1rem; font-family:'Roboto', sans-serif; box-sizing:border-box; outline:none; transition:all 0.2s; color:var(--text-dark);">
+                </div>
+            </div>
+
+            <button class="btn-primary" id="btn_finish" onclick="submitRegistration('paid')"><i class="fa-solid fa-paper-plane"></i> Gửi Yêu Cầu & Bắt Đầu Dùng Thử</button>
+            <div style="text-align:center; margin-top:1rem;">
+                <button onclick="submitRegistration('trial')" style="background:transparent; border:none; color:var(--text-muted); font-size:0.9rem; font-weight:600; cursor:pointer; text-decoration:underline;">Hoặc dùng thử miễn phí 1 ngày (không cần SĐT)</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL HƯỚNG DẪN LẤY TOKEN -->
+    <div id="token_guide_modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Hướng Dẫn Lấy Meta Token</h3>
+                <button class="modal-close" onclick="closeTokenGuide()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <ol>
+                    <li>Truy cập vào trang <a href="https://developers.facebook.com/" target="_blank" style="color:#2563eb; font-weight:600;">Facebook dành cho Nhà phát triển</a>.</li>
+                    <li>Đăng nhập bằng tài khoản Facebook có quyền quản trị BM / Ad Account của bạn.</li>
+                    <li>Bấm vào <b>Tạo ứng dụng (Create App)</b> > Chọn loại <b>Kinh Doanh (Business)</b>.</li>
+                    <li>Vào mục <b>Trình khám phá API đồ thị (Graph API Explorer)</b> từ công cụ.</li>
+                    <li>Ở phần <b>Quyền (Permissions)</b>, hãy đảm bảo bạn đã thêm các quyền sau:
+                        <div class="code-block" style="margin-top:0.5rem;">
+                            ads_management, ads_read, business_management
+                        </div>
+                    </li>
+                    <li>Bấm nút <b>Tạo Token truy cập (Generate Access Token)</b>.</li>
+                    <li>(Quan trọng) Copy đoạn mã Token bắt đầu bằng chữ <b style="color:#f59e0b;">EAA...</b> và dán vào ô nhập liệu.</li>
+                </ol>
+                <div style="background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.3); padding:1rem 1.2rem; border-radius:12px; margin-top:1.5rem; color:#fef3c7;">
+                    <i class="fa-solid fa-lightbulb" style="color:#f59e0b; margin-right:0.5rem; font-size:1.1rem;"></i>
+                    <b style="color:#f59e0b;">Mẹo:</b> Để Token không bị hết hạn sau 2 tiếng, hãy kéo dài thời hạn Token (Extend Token) trong công cụ truy cập Token của Facebook.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userData = { email: '', name: '', slug: '', token: '', accounts: [] };
+
+        window.onload = function() {
+            // Cài đặt Client ID cho Google OAuth
+            if (!window.APP_CONFIG.GOOGLE_CLIENT_ID) {
+                document.getElementById('google_error_text').style.display = 'block';
+            } else {
+                // Khởi tạo Google Identity Services bằng JS API
+                google.accounts.id.initialize({
+                    client_id: window.APP_CONFIG.GOOGLE_CLIENT_ID,
+                    callback: handleGoogleLogin,
+                    auto_select: false
+                });
+                
+                // Render nút Google
+                google.accounts.id.renderButton(
+                    document.getElementById("google_btn_render_area"),
+                    { theme: "outline", size: "large", shape: "pill", type: "standard", text: "signin_with", logo_alignment: "left" }
+                );
+            }
+        };
+
+        function handleGoogleLogin(response) {
+            try {
+                // Decode JWT to get email
+                const base64Url = response.credential.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                const payload = JSON.parse(jsonPayload);
+                if (payload.email) {
+                    try {
+                        localStorage.setItem("dom_auth_v1", JSON.stringify({
+                            u: {
+                                email: payload.email,
+                                name: payload.name || payload.email.split('@')[0],
+                                picture: payload.picture || ""
+                            },
+                            ts: Date.now()
+                        }));
+                    } catch(e) {}
+
+                    userData.email = payload.email;
+                    document.getElementById('reg_email').value = payload.email;
+                    nextStep(2);
+                }
+            } catch (e) {
+                console.error("Lỗi xác thực:", e);
+                showError("Lỗi đọc dữ liệu từ Google. Vui lòng thử lại.");
+            }
+        }
+
+        function showError(msg) {
+            const err = document.getElementById('error_box');
+            document.getElementById('error_text').textContent = msg;
+            err.style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => { err.style.display = 'none'; }, 5000);
+        }
+
+        function nextStep(step) {
+            if (step === 3) {
+                const name = document.getElementById('reg_name').value.trim();
+                const slug = document.getElementById('reg_slug').value.trim();
+                if (!name || !slug) return showError("Vui lòng nhập tên doanh nghiệp và đường dẫn (Slug)!");
+                if (!isSlugValid) return showError("Đường dẫn (Slug) không hợp lệ hoặc đã tồn tại!");
+                userData.name = name;
+                userData.slug = slug;
+            }
+            document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+            document.getElementById('step_' + step).classList.add('active');
+        }
+
+        function generateSlug() {
+            const name = document.getElementById('reg_name').value;
+            const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            document.getElementById('reg_slug').value = slug;
+            document.getElementById('slug_preview').textContent = slug || '...';
+            clearTimeout(slugCheckTimer);
+            slugCheckTimer = setTimeout(() => checkSlug(slug), 500);
+        }
+
+        let slugCheckTimer;
+        let isSlugValid = false;
+
+        document.getElementById('reg_slug').addEventListener('input', function() {
+            let val = this.value.toLowerCase().replace(/[^a-z0-9\-]/g, '');
+            this.value = val;
+            document.getElementById('slug_preview').textContent = val || '...';
+            
+            clearTimeout(slugCheckTimer);
+            slugCheckTimer = setTimeout(() => checkSlug(val), 500);
+        });
+
+        async function checkSlug(slug) {
+            const statusEl = document.getElementById('slug_status');
+            const iconEl = document.getElementById('slug_icon');
+            
+            if (!slug || slug.length < 3) {
+                statusEl.textContent = "Slug quá ngắn (tối thiểu 3 ký tự)";
+                statusEl.style.color = '#ef4444';
+                statusEl.style.display = 'block';
+                iconEl.className = 'fa-solid fa-circle-xmark';
+                iconEl.style.color = '#ef4444';
+                iconEl.style.display = 'block';
+                isSlugValid = false;
+                return;
+            }
+
+            statusEl.textContent = "Đang kiểm tra...";
+            statusEl.style.color = '#f59e0b';
+            statusEl.style.display = 'block';
+            iconEl.className = 'fa-solid fa-circle-notch fa-spin';
+            iconEl.style.color = '#f59e0b';
+            iconEl.style.display = 'block';
+
+            try {
+                const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({action: 'check_slug', slug: slug})
+                });
+                const data = await res.json();
+                
+                if (data.exists) {
+                    statusEl.textContent = "Đường dẫn này đã có người sử dụng!";
+                    statusEl.style.color = '#ef4444';
+                    iconEl.className = 'fa-solid fa-circle-xmark';
+                    iconEl.style.color = '#ef4444';
+                    isSlugValid = false;
+                } else {
+                    statusEl.textContent = "Đường dẫn hợp lệ, có thể sử dụng.";
+                    statusEl.style.color = '#10b981';
+                    iconEl.className = 'fa-solid fa-circle-check';
+                    iconEl.style.color = '#10b981';
+                    isSlugValid = true;
+                }
+            } catch (e) {
+                statusEl.textContent = "Lỗi kết nối khi kiểm tra.";
+                statusEl.style.color = '#ef4444';
+                iconEl.style.display = 'none';
+                isSlugValid = false;
+            }
+        }
+
+        // Token Guide Modal
+        function openTokenGuide() { document.getElementById('token_guide_modal').style.display = 'flex'; }
+        function closeTokenGuide() { document.getElementById('token_guide_modal').style.display = 'none'; }
+
+        async function fetchMetaAccounts() {
+            const token = document.getElementById('reg_token').value.trim();
+            if (!token) return showError("Vui lòng nhập Meta Access Token!");
+            userData.token = token;
+
+            const btn = document.getElementById('btn_fetch_accounts');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang kết nối Facebook...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({action: 'fetch_meta_accounts', meta_token: token})
+                });
+                const data = await res.json();
+                
+                if (!data.ok) throw new Error(data.error);
+
+                renderAccounts(data.data);
+                nextStep(4);
+            } catch (e) {
+                showError("Lỗi API Facebook: " + e.message);
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> Tải danh sách Ad Accounts';
+                btn.disabled = false;
+            }
+        }
+
+        function renderAccounts(data) {
+            const container = document.getElementById('account_list_container');
+            let html = '';
+            
+            if (data.personal_accounts && data.personal_accounts.length > 0) {
+                html += `<div class="business-header">Tài khoản cá nhân</div>`;
+                data.personal_accounts.forEach(acc => {
+                    const cleanId = acc.account_id || acc.id.replace('act_', '');
+                    html += `
+                        <label class="account-item">
+                            <input type="checkbox" value="${cleanId}" data-name="${acc.name}">
+                            <div class="account-info">
+                                <div class="account-name">${acc.name}</div>
+                                <div class="account-id">ID: ${cleanId}</div>
+                            </div>
+                        </label>
+                    `;
+                });
+            }
+
+            if (data.businesses && data.businesses.length > 0) {
+                data.businesses.forEach(bm => {
+                    if (bm.client_ad_accounts && bm.client_ad_accounts.data && bm.client_ad_accounts.data.length > 0) {
+                        html += `<div class="business-header"><i class="fa-solid fa-briefcase" style="margin-right:0.4rem;"></i> BM: ${bm.name}</div>`;
+                        bm.client_ad_accounts.data.forEach(acc => {
+                            const cleanId = acc.account_id || acc.id.replace('act_', '');
+                            html += `
+                                <label class="account-item">
+                                    <input type="checkbox" value="${cleanId}" data-name="${acc.name}">
+                                    <div class="account-info">
+                                        <div class="account-name">${acc.name}</div>
+                                        <div class="account-id">ID: ${cleanId}</div>
+                                    </div>
+                                </label>
+                            `;
+                        });
+                    }
+                });
+            }
+
+            if (!html) html = '<div style="padding:2rem; text-align:center; color:#ef4444;"><i class="fa-solid fa-circle-xmark" style="font-size:2rem; margin-bottom:1rem; opacity:0.5;"></i><br>Không tìm thấy Ad Account nào từ Token này!</div>';
+            container.innerHTML = html;
+        }
+
+        function selectPlan(el) {
+            document.querySelectorAll('.plan-option').forEach(opt => {
+                opt.style.borderColor = 'var(--border-color)';
+                opt.style.background = 'transparent';
+                opt.querySelector('input').checked = false;
+            });
+            el.style.borderColor = 'var(--primary)';
+            el.style.background = '#fffbeb';
+            el.querySelector('input').checked = true;
+        }
+
+        async function submitRegistration(planType = 'trial') {
+            const checkboxes = document.querySelectorAll('.account-item input[type="checkbox"]:checked');
+            if (checkboxes.length === 0) return showError("Vui lòng chọn ít nhất 1 Ad Account!");
+
+            const selectedAccounts = Array.from(checkboxes).map(cb => ({
+                id: cb.value,
+                name: cb.getAttribute('data-name')
+            }));
+
+            let finalPlan = planType;
+            let phone = '';
+            if (planType === 'paid') {
+                const selected = document.querySelector('input[name="plan"]:checked');
+                if (selected) finalPlan = selected.value;
+                phone = document.getElementById('reg_phone').value.trim();
+                if (!phone) return showError("Vui lòng nhập Số điện thoại Zalo để Admin liên hệ kích hoạt!");
+            }
+
+            const btn = document.getElementById('btn_finish');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang xử lý...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        action: 'client_register',
+                        slug: userData.slug,
+                        name: userData.name,
+                        google_email: userData.email,
+                        meta_token: userData.token,
+                        ad_accounts: selectedAccounts,
+                        plan: finalPlan,
+                        phone: phone
+                    })
+                });
+                const data = await res.json();
+                
+                if (!data.ok) throw new Error(data.error);
+
+                // Chuyển hướng vào trang Workspace vừa tạo (Path Routing)
+                window.location.href = `/${data.slug}`;
+
+            } catch (e) {
+                showError("Lỗi đăng ký: " + e.message);
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Gửi Yêu Cầu & Bắt Đầu Dùng Thử';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

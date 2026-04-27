@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Chặn truy cập trực tiếp bằng .html (Ví dụ: /workspaces.html -> /workspaces)
+RewriteCond %{THE_REQUEST} /([^.]+)\.html [NC]
+RewriteRule ^ /%1 [NC,L,R=301]
+
+# Nếu file .html tồn tại, ngầm serve nó
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*?)/?$ $1.html [L]
+
+# Bỏ qua nếu là file hoặc thư mục thực tế (css, js, ảnh, lib, api)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Còn lại (các slug dự án), đẩy về index.html để Router JS xử lý
+RewriteRule ^(.*)$ index.html [QSA,L]
+</IfModule>

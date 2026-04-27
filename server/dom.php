@@ -6,8 +6,8 @@
  */
 
 // ─── CẤU HÌNH ────────────────────────────────────────────────
-$GEMINI_API_KEY = "AIzaSyCt78NC1rK4vFykgwY6jDPb7MXBq-M-_W8";   // ← Điền key thật vào đây
-$GEMINI_MODEL = "gemini-2.5-flash";
+$GEMINI_API_KEY = "";   // ← Điền key thật vào đây
+$GEMINI_MODEL = "gemini-2.5-flash-lite";
 $GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{$GEMINI_MODEL}:generateContent?key={$GEMINI_API_KEY}";
 
 // Danh sách domain được phép gọi (bảo mật thêm)

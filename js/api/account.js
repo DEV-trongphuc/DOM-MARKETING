@@ -1,46 +1,49 @@
-async function fetchMyAdAccounts() {
-  const url = `${BASE_URL}/me/adaccounts?fields=name,account_id,id&limit=50&access_token=${META_TOKEN}`;
-  try {
-    const res = await fetchJSON(url);
-    return res.data || [];
-  } catch (err) {
-    console.error("Lỗi khi lấy danh sách tài khoản:", err);
-    return [];
+async function initAccountSelector() {
+  const selectedInfo = document.querySelector(".dom_account_view_block");
+  if (!selectedInfo) return;
+
+  let groups = typeof _normalizeAccounts === 'function' ? _normalizeAccounts() : [];
+  
+  const slug = new URLSearchParams(window.location.search).get('slug') || window.location.pathname.replace(/^\/|\/$/g, '').split('?')[0];
+  let savedId = localStorage.getItem(`dom_last_account_${slug}`);
+  
+  let targetAccount = null;
+  let targetToken = null;
+
+  if (savedId) {
+      for (const g of groups) {
+          const found = (g.accounts || []).find(a => a.id === savedId || a.id.replace('act_', '') === savedId);
+          if (found) {
+              targetAccount = found;
+              targetToken = g.token;
+              break;
+          }
+      }
+  }
+
+  if (!targetAccount && groups.length > 0) {
+      for (const g of groups) {
+          if (g.accounts && g.accounts.length > 0) {
+              targetAccount = g.accounts[0];
+              targetToken = g.token;
+              break;
+          }
+      }
+  }
+
+  if (targetAccount) {
+      let cleanId = targetAccount.id.replace('act_', '');
+      ACCOUNT_ID = cleanId;
+      window.ACCOUNT_ID = cleanId;
+      window.APP_CONFIG.META_TOKEN = targetToken;
+      updateSelectedAccountUI(targetAccount.name, cleanId, "./assets/dom_avatar.jpg");
+  } else {
+      updateSelectedAccountUI("Chưa có Account", "---", "./assets/dom_avatar.jpg");
   }
 }
 
-async function initAccountSelector() {
-  const accounts    = await fetchMyAdAccounts();
-  const dropdownUl  = document.querySelector(".dom_account_view ul");
-  const selectedInfo = document.querySelector(".dom_account_view_block .account_item");
-  if (!dropdownUl || !selectedInfo) return;
-
-  dropdownUl.innerHTML = "";
-
-  const allowedIds = window.ALLOWED_ACCOUNTS;
-  const filteredAccounts =
-    Array.isArray(allowedIds) && allowedIds.length > 0
-      ? accounts.filter((acc) => allowedIds.includes(acc.account_id))
-      : accounts;
-
-  filteredAccounts.forEach((acc) => {
-    const li = document.createElement("li");
-    li.dataset.acc = acc.account_id;
-    const avatarUrl = acc.business?.profile_picture_uri || "./assets/dom_avatar.jpg";
-    li.innerHTML = `<img src="${avatarUrl}" /><p><span> ${acc.name}</span></p>`;
-    dropdownUl.appendChild(li);
-
-    if (acc.account_id === ACCOUNT_ID) {
-      updateSelectedAccountUI(acc.name, acc.account_id, avatarUrl);
-    }
-  });
-
-  const isCurrentAccountInList = accounts.some((a) => a.account_id === ACCOUNT_ID);
-  if (!isCurrentAccountInList && ACCOUNT_ID) fetchSingleAccountInfo(ACCOUNT_ID);
-}
-
 function updateSelectedAccountUI(name, id, avatarUrl) {
-  const selectedInfo = document.querySelector(".dom_account_view_block .account_item");
+  const selectedInfo = document.querySelector(".dom_account_view_block");
   if (!selectedInfo) return;
 
   const avatar = selectedInfo.querySelector(".account_item_avatar");
@@ -50,14 +53,4 @@ function updateSelectedAccountUI(name, id, avatarUrl) {
   if (avatar) avatar.src          = avatarUrl || "./assets/dom_avatar.jpg";
   if (nameEl) nameEl.textContent  = name;
   if (idEl)   idEl.textContent    = id;
-}
-
-async function fetchSingleAccountInfo(accId) {
-  const url = `${BASE_URL}/act_${accId}?fields=name,account_id&access_token=${META_TOKEN}`;
-  try {
-    const acc = await fetchJSON(url);
-    if (acc) updateSelectedAccountUI(acc.name, acc.account_id, acc.business?.profile_picture_uri);
-  } catch (err) {
-    console.error("Lỗi khi lấy thông tin tài khoản lẻ:", err);
-  }
 }

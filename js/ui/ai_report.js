@@ -18,7 +18,7 @@ function openAiSummaryModal() {
   }
   updateAiHistoryBadge();
   switchAiTab("home");
-  syncAiHistoryFromSheet(); // Đồng bộ ngầm khi mở modal
+  syncAiHistoryFromApi(); // Đồng bộ ngầm khi mở modal
 }
 
 function switchAiTab(tab) {
@@ -215,7 +215,8 @@ YÊU CẦU PHÂN TÍCH SO SÁNH:
 ⚠️ QUY TẮC: Dùng bảng markdown cho phần so sánh số liệu, viết bằng tiếng Việt, có số liệu cụ thể.`;
 
   try {
-    const resp = await fetch("https://automation.ideas.edu.vn/dom.php", {
+    const PROXY_URL = (window.APP_CONFIG?.SAAS_API_URL || "api/index.php") + "?action=ai_generate";
+    const resp = await fetch(PROXY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt }),
@@ -481,23 +482,27 @@ function exportAiToWord() {
 
 
 
-// ── AI sheet sync helper ─────────────────────────
-function _aiSheetPost(body) {
-  const url = typeof window.SETTINGS_SHEET_URL === "string" && window.SETTINGS_SHEET_URL
-    ? window.SETTINGS_SHEET_URL : null;
-  if (!url) return;
-  fetch(url, { method: "POST", body: JSON.stringify(body) }).catch(() => { });
+// ── AI api sync helper ─────────────────────────
+function _aiApiPost(action, payload) {
+  const url = window.APP_CONFIG?.SAAS_API_URL;
+  const slug = window.SAAS_ROUTER?.tenant?.slug;
+  if (!url || !slug) return;
+  
+  const body = { action: action, slug: slug, ...payload };
+  fetch(url, { 
+    method: "POST", 
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body) 
+  }).catch(() => { });
 }
 
-async function syncAiHistoryFromSheet() {
-  const url = typeof window.SETTINGS_SHEET_URL === "string" && window.SETTINGS_SHEET_URL
-    ? window.SETTINGS_SHEET_URL : null;
-  if (!url) return;
+async function syncAiHistoryFromApi() {
+  const url = window.APP_CONFIG?.SAAS_API_URL;
+  const slug = window.SAAS_ROUTER?.tenant?.slug;
+  if (!url || !slug) return;
+  
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      body: JSON.stringify({ sheet: "ai_reports", action: "list" })
-    });
+    const res = await fetch(`${url}?action=ai_list&slug=${encodeURIComponent(slug)}`);
     if (!res.ok) return;
     const json = await res.json();
     if (json.ok && Array.isArray(json.data)) {
@@ -541,10 +546,8 @@ function saveAiHistory(html, label) {
   try { localStorage.setItem(AI_HISTORY_KEY, JSON.stringify(history)); } catch { }
   updateAiHistoryBadge();
 
-  // Sync to Google Sheets ngầm (non-blocking)
-  _aiSheetPost({
-    sheet: "ai_reports",
-    action: "save",
+  // Sync to API ngầm (non-blocking)
+  _aiApiPost("ai_save", {
     report: {
       id: entry.id,
       timestamp: entry.timestamp,
@@ -600,8 +603,8 @@ function _doDeleteAiHistory(id) {
   updateAiHistoryBadge();
   renderAiHistory();
 
-  // 2. Xóa trên Sheet ngầm
-  _aiSheetPost({ sheet: "ai_reports", action: "delete", id });
+  // 2. Xóa trên API ngầm
+  _aiApiPost("ai_delete", { id });
 }
 
 
@@ -842,7 +845,7 @@ YÊU CẦU PHÂN TÍCH (đầy đủ, chi tiết, có số liệu cụ thể)
     const signal = _aiController.signal;
 
     // ── Gọi qua PHP proxy (API key ẩn phía server) ──
-    const PROXY_URL = "https://automation.ideas.edu.vn/dom.php";
+    const PROXY_URL = (window.APP_CONFIG?.SAAS_API_URL || "api/index.php") + "?action=ai_generate";
 
     const resp = await fetch(PROXY_URL, {
       method: "POST",
