@@ -726,9 +726,31 @@ window._filterOutMeta = true; // Mặc định là bật lọc meta
 window.toggleMetaActivityFilter = function() {
   const cb = document.getElementById("activity_filter_meta_toggle");
   window._filterOutMeta = cb ? cb.checked : true;
+
+  // --- Animate toggle UI ---
+  const thumb = document.getElementById("meta_toggle_thumb");
+  const track = document.getElementById("meta_toggle_track");
+  const icon  = document.getElementById("meta_toggle_icon");
+  if (thumb && track && icon) {
+    if (window._filterOutMeta) {
+      // ON: thumb sang phải, vàng
+      thumb.style.transform = "translateX(2rem)";
+      track.style.background = "linear-gradient(135deg,#f59e0b,#d97706)";
+      track.style.boxShadow  = "0 2px 8px rgba(245,158,11,0.35)";
+      icon.className = "fa-solid fa-check";
+      icon.style.color = "#f59e0b";
+    } else {
+      // OFF: thumb sang trái, xám
+      thumb.style.transform = "translateX(0)";
+      track.style.background = "linear-gradient(135deg,#cbd5e1,#94a3b8)";
+      track.style.boxShadow  = "0 2px 6px rgba(0,0,0,0.10)";
+      icon.className = "fa-solid fa-xmark";
+      icon.style.color = "#94a3b8";
+    }
+  }
+
   if (_activityAllData && _activityAllData.length > 0) {
     renderActivityList(_activityAllData);
-    // Cập nhật lại số lượng badge
     const badge = document.getElementById("activity_count_badge");
     if (badge) {
       const allowed = _activityCategory && ACTIVITY_CATEGORY_MAP[_activityCategory]

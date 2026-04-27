@@ -1402,10 +1402,35 @@
                   style="background:#f1f5f9; color:#64748b; font-size:1.1rem; font-weight:600; padding:0.2rem 0.8rem; border-radius:20px; display:none;"></span>
               </h2>
               <div style="display:flex; gap: 1.2rem; align-items: center;">
-                <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; color:#475569; font-weight:600; font-size:1.1rem; user-select: none;">
-                  <input type="checkbox" id="activity_filter_meta_toggle" checked onchange="window.toggleMetaActivityFilter()" style="width:1.2rem; height:1.2rem; accent-color:var(--mainClr); cursor:pointer;">
-                  Lọc Hệ thống Meta
-                </label>
+                <!-- Toggle switch đẹp -->
+                <div style="display:flex; align-items:center; gap:0.8rem;">
+                  <span style="color:#475569; font-weight:600; font-size:1.15rem; white-space:nowrap; user-select:none;">
+                    <i class="fa-solid fa-filter" style="font-size:1rem; opacity:0.6;"></i>
+                    Lọc Meta
+                  </span>
+                  <label id="meta_toggle_label" style="position:relative; display:inline-block; width:4.2rem; height:2.2rem; cursor:pointer;" title="Bật/tắt lọc hệ thống Meta">
+                    <input type="checkbox" id="activity_filter_meta_toggle" checked onchange="window.toggleMetaActivityFilter()" style="opacity:0; width:0; height:0; position:absolute;">
+                    <span id="meta_toggle_track" style="
+                      position:absolute; inset:0;
+                      background: linear-gradient(135deg,#f59e0b,#d97706);
+                      border-radius:99px;
+                      transition: background 0.3s ease;
+                      box-shadow: 0 2px 8px rgba(245,158,11,0.35);
+                    "></span>
+                    <span id="meta_toggle_thumb" style="
+                      position:absolute; top:0.22rem; left:0.22rem;
+                      width:1.76rem; height:1.76rem;
+                      background:#fff;
+                      border-radius:50%;
+                      transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+                      transform: translateX(2rem);
+                      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+                      display:flex; align-items:center; justify-content:center;
+                    ">
+                      <i id="meta_toggle_icon" class="fa-solid fa-check" style="font-size:0.75rem; color:#f59e0b;"></i>
+                    </span>
+                  </label>
+                </div>
                 <button id="activity_refresh_btn" onclick="loadAccountActivities(true)"
                   style="background:var(--mainClr); color:#fff; border:none; padding:0.7rem 1.4rem; border-radius:8px; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; gap:0.6rem;">
                   <i class="fa-solid fa-rotate-right"></i> Refresh
