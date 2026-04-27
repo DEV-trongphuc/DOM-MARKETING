@@ -608,6 +608,7 @@
                                 email: payload.email,
                                 name: payload.name || payload.email.split('@')[0],
                                 picture: payload.picture || "",
+                                role: "admin",
                                 status: "active"
                             },
                             ts: Date.now()
