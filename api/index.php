@@ -176,6 +176,12 @@ try {
             
             if (!$slug || !$name || !$token) _json(["ok" => false, "error" => "Missing required fields"], 400);
 
+            // Chặn các slug dành riêng cho hệ thống
+            $reserved_slugs = ['admin', 'register', 'workspaces', 'api', 'assets', 'css', 'js', 'lib', 'server'];
+            if (in_array(strtolower($slug), $reserved_slugs)) {
+                _json(["ok" => false, "error" => "Tên miền (slug) này được hệ thống bảo lưu. Vui lòng chọn tên khác."], 400);
+            }
+
             // KIỂM TRA EMAIL ĐÃ TẠO WORKSPACE CHƯA (Mỗi email chỉ được 1 lần dùng thử)
             if ($plan === 'trial' && $email && $email !== 'dom.marketing.vn@gmail.com') {
                 $check_email = $pdo->prepare("SELECT id FROM saas_tenants WHERE google_email = ?");
@@ -245,6 +251,11 @@ try {
             if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = trim($body['slug'] ?? '');
             if (!$slug) _json(["ok" => false, "error" => "Missing slug"], 400);
+
+            $reserved_slugs = ['admin', 'register', 'workspaces', 'api', 'assets', 'css', 'js', 'lib', 'server'];
+            if (in_array(strtolower($slug), $reserved_slugs)) {
+                _json(["ok" => true, "exists" => true]); // Treat reserved as "exists" so client UI shows error
+            }
 
             $stmt = $pdo->prepare("SELECT id FROM saas_tenants WHERE slug = ?");
             $stmt->execute([$slug]);
