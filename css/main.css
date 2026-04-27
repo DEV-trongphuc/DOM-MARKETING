@@ -5555,7 +5555,7 @@ tbody {
 }
 
 .ad_library_brand_title {
-  font-size: 1.8rem;
+  font-size: 2.2rem;
   font-weight: 800;
   color: #0f172a;
   margin: 0 0 2rem 0;
@@ -5568,8 +5568,18 @@ tbody {
 
 .ad_library_grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 2.5rem;
+}
+@media (max-width: 1200px) {
+  .ad_library_grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .ad_library_grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .ad_library_card {

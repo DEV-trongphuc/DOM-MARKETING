@@ -77,31 +77,15 @@ window.renderAdLibrary = function () {
     html += `
       <div class="ad_library_brand_group">
         <h3 class="ad_library_brand_title">
-          <i class="fa-solid fa-tags" style="color:#3b82f6; font-size: 1.4rem;"></i>
+          <i class="fa-solid fa-tags" style="color:#f59e0b; font-size: 1.6rem;"></i>
           ${brand} <span style="font-size:0.9rem; color:#94a3b8; background:#f1f5f9; padding: 0.2rem 0.6rem; border-radius: 20px;">${ads.length} ads</span>
         </h3>
         <div class="ad_library_grid">
     `;
 
     ads.forEach((ad) => {
-      // Decode URL if necessary, meta API often returns valid permalinks for iframe
-      let isFacebookPost = ad.post_url && ad.post_url.includes('facebook.com');
-      let iframeSrc = "";
-      
-      // Attempt to build iframe URL
-      if (isFacebookPost && ad.post_url) {
-        iframeSrc = `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(ad.post_url)}&show_text=true&width=auto`;
-      } else if (ad.effective_object_story_id && ad.effective_object_story_id.includes('_')) {
-        // Build facebook plugin URL from ID
-        const pageId = ad.effective_object_story_id.split('_')[0];
-        const postId = ad.effective_object_story_id.split('_')[1];
-        
-        // This is a standard FB post embed URL format
-        iframeSrc = `https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2F${pageId}%2Fposts%2F${postId}&show_text=true&width=auto`;
-      }
-
       // Format spend
-      const spendFormatted = formatMoneyShort ? formatMoneyShort(ad.spend) : ad.spend;
+      const spendFormatted = window.formatMoneyShort ? window.formatMoneyShort(ad.spend) : ad.spend;
 
       html += `
         <div class="ad_library_card">
@@ -113,16 +97,11 @@ window.renderAdLibrary = function () {
               <i class="fa-solid fa-coins" style="color:#f59e0b;"></i> ${spendFormatted}
             </div>
           </div>
-          <div class="ad_library_iframe_wrap">
-            ${iframeSrc ? `
-              <iframe src="${iframeSrc}" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" onerror="handleIframeError(this, '${ad.thumbnail}')"></iframe>
-              <div class="iframe_loading_placeholder" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#f1f5f9; z-index:-1;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; color:#cbd5e1;"></i>
-              </div>
-            ` : `
-              <img src="${ad.thumbnail}" class="ad_library_fallback" loading="lazy" alt="${ad.ad_name}" onerror="this.src='https://ideas.edu.vn/wp-content/uploads/2025/10/520821295_122209126670091888_6779497482843304564_n.webp'">
-              <a href="${ad.post_url}" target="_blank" class="ad_library_fallback_btn"><i class="fa-brands fa-meta"></i> Xem Quảng Cáo</a>
-            `}
+          <div class="ad_library_iframe_wrap" id="ad_lib_wrap_${ad.ad_id}" data-ad-id="${ad.ad_id}" data-thumb="${ad.thumbnail}" data-post="${ad.post_url}">
+             <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#f1f5f9; flex-direction:column; gap: 1rem; z-index:1;">
+               <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; color:#cbd5e1;"></i>
+               <span style="color:#94a3b8; font-size: 0.9rem; font-weight:500;">Đang tải nội dung...</span>
+             </div>
           </div>
           <div style="padding: 1rem 1.2rem; background: #fff;">
             <div style="font-weight: 700; color: #1e293b; font-size: 1rem; margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${ad.ad_name}">${ad.ad_name}</div>
@@ -139,7 +118,57 @@ window.renderAdLibrary = function () {
   });
 
   container.innerHTML = html;
+  
+  // After HTML is inserted, load previews asynchronously
+  loadAdLibraryPreviews();
 };
+
+async function loadAdLibraryPreviews() {
+  const wrappers = document.querySelectorAll('.ad_library_iframe_wrap');
+  
+  // To avoid hitting API rate limits too hard, we can fetch them in parallel with a concurrency limit
+  // But a simple Promise.all with small arrays is fine. We'll do it sequentially or all at once.
+  // Meta API can handle parallel requests if not too many. Let's just fire them.
+  for (const wrap of wrappers) {
+    const adId = wrap.dataset.adId;
+    const thumb = wrap.dataset.thumb;
+    const postUrl = wrap.dataset.post;
+    
+    if (!adId) continue;
+    
+    try {
+      const url = \`\${window.BASE_URL}/\${adId}/previews?ad_format=DESKTOP_FEED_STANDARD&access_token=\${window.META_TOKEN}\`;
+      const data = await window.fetchJSON(url);
+      const iframeHtml = data?.data?.[0]?.body || "";
+      
+      if (iframeHtml) {
+        // Strip out the width/height if we want to ensure it fits, but Meta's iframe is usually responsive
+        wrap.innerHTML = iframeHtml;
+        // Fix up the iframe to be 100% width and height
+        const iframe = wrap.querySelector('iframe');
+        if (iframe) {
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.border = 'none';
+        }
+      } else {
+        renderAdLibraryFallback(wrap, thumb, postUrl);
+      }
+    } catch (err) {
+      console.warn("Ad Library preview load failed for ad:", adId, err);
+      renderAdLibraryFallback(wrap, thumb, postUrl);
+    }
+  }
+}
+
+function renderAdLibraryFallback(wrap, thumb, postUrl) {
+  wrap.innerHTML = \`
+    <img src="\${thumb}" class="ad_library_fallback" loading="lazy" onerror="this.src='https://ideas.edu.vn/wp-content/uploads/2025/10/520821295_122209126670091888_6779497482843304564_n.webp'">
+    <a href="\${postUrl && postUrl !== '#' ? postUrl : '#'}" target="_blank" class="ad_library_fallback_btn" \${!postUrl || postUrl === '#' ? 'onclick="alert(\\'Không thể xem trực tiếp quảng cáo này.\\'); return false;"' : ''}>
+       <i class="fa-brands fa-meta"></i> Xem Quảng Cáo
+    </a>
+  \`;
+}
 
 // Global error handler for iframe loading failures (e.g. non-public posts)
 window.handleIframeError = function(iframeEl, fallbackThumbnail) {
