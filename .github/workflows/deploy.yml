@@ -1,0 +1,31 @@
+name: Deploy to cPanel (meta.domation.net)
+
+on:
+  push:
+    branches:
+      - main # Chạy tự động khi có push lên nhánh main
+
+jobs:
+  web-deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Yêu cầu để biết file nào đã thay đổi
+
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: /meta.domation.net/
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/venv/**
+          .env
+          README.md

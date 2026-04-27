@@ -17,3 +17,9 @@ RewriteRule ^ - [L]
 # Còn lại (các slug dự án), đẩy về index.html để Router JS xử lý
 RewriteRule ^(.*)$ index.html [QSA,L]
 </IfModule>
+
+# Chặn truy cập HTTP trực tiếp vào các file cấu hình nhạy cảm
+<FilesMatch "^(config|db)\.php$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>

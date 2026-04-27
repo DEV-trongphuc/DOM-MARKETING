@@ -34,6 +34,7 @@ window.SAAS_ROUTER = {
             const data = await res.json();
 
             if (!data.ok) {
+                document.title = `404 — Workspace Not Found · Domation`;
                 document.body.innerHTML = `
                     <div style="display:flex; height:100vh; align-items:center; justify-content:center; background:#f8fafc; font-family:'Roboto', sans-serif;">
                         <div style="text-align:center; background:#fff; padding:4rem 3rem; border-radius:24px; box-shadow:0 10px 40px -10px rgba(0,0,0,0.1); max-width:450px; border:1px solid #f1f5f9;">
@@ -42,7 +43,7 @@ window.SAAS_ROUTER = {
                             </div>
                             <h2 style="color:#0f172a; margin:0 0 1rem; font-weight:800; font-size:2rem; letter-spacing:-0.02em;">Workspace Not Found</h2>
                             <p style="color:#64748b; margin:0 0 2rem; font-size:1.1rem; line-height:1.5;">Workspace <b style="color:#334155;">${hash}</b> không tồn tại hoặc đã bị xóa. Vui lòng kiểm tra lại đường link.</p>
-                            <a href="register.html" style="display:inline-block; padding:1rem 2rem; background:#f59e0b; color:#fff; text-decoration:none; border-radius:12px; font-weight:700; box-shadow:0 4px 10px rgba(245,158,11,0.2);">Tạo Workspace Mới</a>
+                            <a href="/register" style="display:inline-block; padding:1rem 2rem; background:#f59e0b; color:#fff; text-decoration:none; border-radius:12px; font-weight:700; box-shadow:0 4px 10px rgba(245,158,11,0.2);">Tạo Workspace Mới</a>
                         </div>
                     </div>
                 `;
@@ -321,7 +322,7 @@ window.SAAS_ROUTER = {
                     <tr style="background: ${bg}; transition: background 0.2s;" onmouseover="this.style.background='rgba(245,158,11,0.05)'" onmouseout="this.style.background='${bg}'">
                         <td style="padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <div style="font-weight: 700; color: #f8fafc; font-size:1.05rem;">${t.name}</div>
-                            <div style="margin-top:0.3rem;"><a href="#/${t.slug}" target="_blank" style="color: #f59e0b; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;"><i class="fa-solid fa-link" style="font-size:0.8rem;"></i> ${t.slug}</a></div>
+                            <div style="margin-top:0.3rem;"><a href="/${t.slug}" target="_blank" style="color: #f59e0b; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;"><i class="fa-solid fa-link" style="font-size:0.8rem;"></i> ${t.slug}</a></div>
                             <div style="margin-top:0.3rem; font-size:0.85rem; color:#64748b;"><i class="fa-brands fa-google"></i> ${t.google_email || 'Không có email'}</div>
                         </td>
                         <td style="padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">

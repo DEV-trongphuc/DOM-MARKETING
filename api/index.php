@@ -48,6 +48,55 @@ function verify_admin_token($token) {
 // Basic Routing
 $action = $_GET['action'] ?? $body['action'] ?? '';
 
+// ── Rate Limiter ─────────────────────────────────────────────────────────────
+// Simple IP-based rate limiter using DB to prevent spam/brute-force.
+function _check_rate_limit(PDO $pdo, string $ip, int $limit = RATE_LIMIT_MAX_REQUESTS, int $window = RATE_LIMIT_WINDOW): void {
+    try {
+        // Cleanup old entries first
+        $pdo->prepare("DELETE FROM saas_rate_limits WHERE created_at < DATE_SUB(NOW(), INTERVAL ? SECOND)")->execute([$window]);
+        // Count requests from this IP in current window
+        $stmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM saas_rate_limits WHERE ip = ? AND created_at > DATE_SUB(NOW(), INTERVAL ? SECOND)");
+        $stmt->execute([$ip, $window]);
+        $row = $stmt->fetch();
+        if ($row && $row['cnt'] >= $limit) {
+            _json(["ok" => false, "error" => "Quá nhiều yêu cầu. Vui lòng thử lại sau " . $window . " giây."], 429);
+        }
+        // Record this request
+        $pdo->prepare("INSERT INTO saas_rate_limits (ip, action, created_at) VALUES (?, ?, NOW())")->execute([$ip, 'request']);
+    } catch (Exception $e) {
+        // If rate limit table doesn't exist, skip silently (non-blocking)
+    }
+}
+
+// ── Admin Email Verifier ──────────────────────────────────────────────────────
+// Returns true if $email owns or is super-admin of $slug tenant.
+function _verify_admin_for_slug(PDO $pdo, string $slug, string $admin_email): bool {
+    if (!$slug || !$admin_email) return false;
+    $is_super = (strtolower($admin_email) === 'dom.marketing.vn@gmail.com');
+    if ($is_super) return true;
+    $stmt = $pdo->prepare("SELECT google_email FROM saas_tenants WHERE slug = ?");
+    $stmt->execute([$slug]);
+    $tenant = $stmt->fetch();
+    return $tenant && strtolower($admin_email) === strtolower($tenant['google_email']);
+}
+
+// Returns true if $email is an active member (owner or viewer) of $slug tenant.
+function _verify_tenant_member(PDO $pdo, string $slug, string $email): bool {
+    if (!$slug || !$email) return false;
+    // Super admin always passes
+    if (strtolower($email) === 'dom.marketing.vn@gmail.com') return true;
+    // Check owner
+    $stmt = $pdo->prepare("SELECT google_email FROM saas_tenants WHERE slug = ?");
+    $stmt->execute([$slug]);
+    $tenant = $stmt->fetch();
+    if (!$tenant) return false;
+    if (strtolower($email) === strtolower($tenant['google_email'])) return true;
+    // Check active viewer
+    $vstmt = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ? AND status = 'active'");
+    $vstmt->execute([$slug, $email]);
+    return $vstmt->fetch() !== false;
+}
+
 try {
     switch ($action) {
         // --- 0. TEMP MIGRATION ---
@@ -69,8 +118,18 @@ try {
                   FOREIGN KEY (`tenant_slug`) REFERENCES `saas_tenants`(`slug`) ON DELETE CASCADE
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
             } catch (Exception $e) {}
+            try {
+                $pdo->exec("CREATE TABLE IF NOT EXISTS `saas_rate_limits` (
+                  `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+                  `ip` VARCHAR(60) NOT NULL,
+                  `action` VARCHAR(60) NOT NULL DEFAULT 'request',
+                  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+                  INDEX idx_ip_created (ip, created_at)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+            } catch (Exception $e) {}
             _json(["ok" => true, "message" => "Migration complete"]);
             break;
+
 
         // --- 1. SAAS CLIENT API (For End Users) ---
         case 'get_user_tenants':
@@ -274,7 +333,12 @@ try {
             if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $token = $body['token'] ?? '';
+            $admin_email = $body['admin_email'] ?? '';
             if (!$slug || !$token) _json(["ok" => false, "error" => "Missing slug or token"], 400);
+            // 🔒 Phải là owner hoặc super admin mới được update token
+            if (!_verify_admin_for_slug($pdo, $slug, $admin_email)) {
+                _json(["ok" => false, "error" => "Unauthorized — chỉ Admin mới được cập nhật token"], 403);
+            }
 
             $stmt = $pdo->prepare("UPDATE saas_tenants SET meta_token = ? WHERE slug = ?");
             $stmt->execute([$token, $slug]);
@@ -334,6 +398,9 @@ try {
 
         case 'auth_request':
             if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            // 🔒 Rate limit: tối đa 10 request access per IP per phút
+            $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+            _check_rate_limit($pdo, $client_ip, 10, 60);
             $slug = $body['slug'] ?? '';
             $email = $body['email'] ?? '';
             $name = $body['name'] ?? '';
@@ -445,21 +512,28 @@ try {
 
             $json_accounts = is_array($ad_accounts) ? json_encode($ad_accounts) : $ad_accounts;
             
-            $updates = ["ad_accounts" => $json_accounts];
-            $params = [$json_accounts];
-            
-            if (is_array($ad_accounts) && count($ad_accounts) > 0 && !empty($ad_accounts[0]['token'])) {
-                $updates["meta_token"] = $ad_accounts[0]['token'];
-                $params[] = $ad_accounts[0]['token'];
+            // Lấy account đầu tiên trong danh sách để đặt làm default ad_account_id
+            $first_account_id = '';
+            if (is_array($ad_accounts) && count($ad_accounts) > 0) {
+                $first = $ad_accounts[0];
+                if (isset($first['accounts']) && count($first['accounts']) > 0) {
+                    // Multi-token format: [{token, accounts: [{id, name}]}]
+                    $first_account_id = $first['accounts'][0]['id'] ?? '';
+                } elseif (isset($first['id'])) {
+                    // Legacy flat format: [{id, name}]
+                    $first_account_id = $first['id'];
+                }
+                // Also sync meta_token if multi-token format
+                if (!empty($first['token'])) {
+                    $pdo->prepare("UPDATE saas_tenants SET ad_accounts = ?, meta_token = ?, ad_account_id = ? WHERE slug = ?")
+                        ->execute([$json_accounts, $first['token'], $first_account_id, $slug]);
+                    _json(["ok" => true, "message" => "Cập nhật tài khoản thành công"]);
+                    break;
+                }
             }
             
-            $params[] = $slug;
-            
-            if (isset($updates['meta_token'])) {
-                $pdo->prepare("UPDATE saas_tenants SET ad_accounts = ?, meta_token = ? WHERE slug = ?")->execute($params);
-            } else {
-                $pdo->prepare("UPDATE saas_tenants SET ad_accounts = ? WHERE slug = ?")->execute($params);
-            }
+            $pdo->prepare("UPDATE saas_tenants SET ad_accounts = ?, ad_account_id = ? WHERE slug = ?")
+                ->execute([$json_accounts, $first_account_id, $slug]);
             
             _json(["ok" => true, "message" => "Cập nhật tài khoản thành công"]);
             break;
@@ -609,7 +683,12 @@ try {
             if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $report = $body['report'] ?? [];
+            $user_email = $body['user_email'] ?? '';
             if (!$slug || empty($report) || !isset($report['id'])) _json(["ok" => false, "error" => "Missing data"], 400);
+            // 🔒 Chỉ active member của tenant mới được lưu báo cáo AI
+            if (!_verify_tenant_member($pdo, $slug, $user_email)) {
+                _json(["ok" => false, "error" => "Unauthorized"], 403);
+            }
 
             // Delete old if exists (overwrite)
             $stmt = $pdo->prepare("DELETE FROM saas_ai_reports WHERE tenant_slug = ? AND local_id = ?");
@@ -647,7 +726,12 @@ try {
             if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $local_id = $body['id'] ?? '';
+            $user_email = $body['user_email'] ?? '';
             if (!$slug || !$local_id) _json(["ok" => false, "error" => "Missing data"], 400);
+            // 🔒 Chỉ active member mới được xóa báo cáo
+            if (!_verify_tenant_member($pdo, $slug, $user_email)) {
+                _json(["ok" => false, "error" => "Unauthorized"], 403);
+            }
 
             $stmt = $pdo->prepare("DELETE FROM saas_ai_reports WHERE tenant_slug = ? AND local_id = ?");
             $stmt->execute([$slug, $local_id]);

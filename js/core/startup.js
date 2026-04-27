@@ -25,19 +25,21 @@ window.toggleSmartBadges = function (btn) {
 
 // Đợi router khởi tạo xong mới chạy main()
 async function bootstrapSaaS() {
-  const routerReady = await SAAS_ROUTER.init();
-  if (!routerReady) return; // Nếu là trang admin hoặc lỗi tenant, dừng lại
+  const _isDev = location.search.includes('debug=1');
+  const _dbg = _isDev ? console.log.bind(console, '[STARTUP]') : () => {};
 
-  console.log("[STARTUP] Cho xac thuc Google...");
-  // 1. Phải chờ Auth xong trước (để lấy Token/Accounts từ auth_check nếu có)
+  const routerReady = await SAAS_ROUTER.init();
+  if (!routerReady) return;
+
+  _dbg('Chờ xác thực Google...');
   if (window._authReady instanceof Promise) await window._authReady;
-  console.log("[STARTUP] Xac thuc hoan tat. Chuan bi trich xuat Token...");
+  _dbg('Xác thực hoàn tất. Chuẩn bị trích xuất Token...');
 
   // 1.5. Chạy initAccountSelector để nạp đúng targetToken từ cấu trúc multi-token vào APP_CONFIG.META_TOKEN
   if (typeof initAccountSelector === 'function') {
       await initAccountSelector();
   }
-  console.log("[STARTUP] Token hien tai trong cau hinh:", window.APP_CONFIG.META_TOKEN ? "Co token" : "Khong co token");
+  _dbg('Token hiện tại:', window.APP_CONFIG.META_TOKEN ? 'Có token' : 'Không có token');
 
   // 2. Sau khi Auth xong, mới kiểm tra Token xem có hợp lệ hay không
   let tokenOk = true;
@@ -68,7 +70,8 @@ async function bootstrapSaaS() {
     return;
   }
 
-  console.log("[STARTUP] Token OK, khoi chay Dashboard!");
+  _dbg('Token OK, khởi chạy Dashboard!');
+
   // 3. Khởi chạy Dashboard
   main();
 }

@@ -3,434 +3,548 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Workspace - DOM META SAAS</title>
-    <link rel="icon" href="http://localhost:3000/imgs/ICON.png" type="image/png" />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Workspaces — Domation</title>
+    <meta name="description" content="Chọn workspace để xem báo cáo Meta Ads realtime của bạn.">
+    <link rel="icon" href="https://domation.net/imgs/ICON.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Cấu hình API -->
     <script src="./lib/config_env.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         :root {
-            --primary: #f59e0b;
-            --primary-dark: #d97706;
-            --primary-light: #fef3c7;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --bg-body: #f8fafc;
-            --border-color: #e2e8f0;
+            --amber: #f59e0b;
+            --amber-d: #d97706;
+            --amber-glow: rgba(245,158,11,0.2);
+            --surface: rgba(255,255,255,0.98);
+            --border: #e8edf3;
+            --muted: #64748b;
+            --dark: #0f172a;
         }
 
-        body { 
-            margin: 0; 
-            font-family: 'Roboto', sans-serif; 
-            background-color: #0f172a; 
-            color: var(--text-dark); 
-            min-height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 2rem;
-            box-sizing: border-box;
-            position: relative;
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
         }
 
-        /* Fixed Animated Background */
-        .bg-animated {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
+        /* background */
+        .bg-wrap {
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(245,158,11,.13) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 60% at 85% 90%, rgba(59,130,246,.1) 0%, transparent 70%),
+                #0f172a;
+        }
+        .bg-grid {
+            position: fixed; inset: 0; z-index: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+
+        /* card shell */
+        .card {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 480px;
+            background: var(--surface);
+            border-radius: 26px;
+            box-shadow: 0 32px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.07);
             overflow: hidden;
-            background: #0f172a;
+            animation: cardIn .45s cubic-bezier(.16,1,.3,1) both;
         }
-        .bg-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            animation: float 12s infinite ease-in-out alternate;
-        }
-        .orb-1 { width: 500px; height: 500px; background: rgba(245, 158, 11, 0.15); top: -10%; left: -10%; }
-        .orb-2 { width: 600px; height: 600px; background: rgba(59, 130, 246, 0.15); bottom: -20%; right: -10%; animation-delay: -4s; }
-        .orb-3 { width: 400px; height: 400px; background: rgba(16, 185, 129, 0.1); top: 40%; left: 50%; transform: translate(-50%, -50%); animation-delay: -8s; }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(40px, -40px) scale(1.1); }
+        @keyframes cardIn {
+            from { opacity:0; transform:translateY(24px) scale(.97); }
+            to   { opacity:1; transform:none; }
         }
 
-        .container { 
-            background: rgba(255, 255, 255, 0.98); 
-            backdrop-filter: blur(20px);
-            width: 100%; 
-            max-width: 580px; 
-            padding: 3.5rem 3rem; 
-            border-radius: 28px; 
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1); 
-            position: relative;
-            overflow: hidden;
+        /* top gradient bar */
+        .top-bar { height: 3px; background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #34d399 100%); }
+
+        /* ── HEADER (logo + title centered, user pill bên phải) ── */
+        .hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.6rem 2rem 0;
+            gap: 1rem;
+        }
+        .brand {
+            display: flex; align-items: center; gap: .75rem;
+        }
+        .brand-img {
+            width: 42px; height: 42px; border-radius: 12px;
+            overflow: hidden; flex-shrink: 0;
+            box-shadow: 0 4px 14px var(--amber-glow);
+            background: #fef3c7;
+        }
+        .brand-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .brand-text h1 {
+            font-size: 1.15rem; font-weight: 900; color: var(--dark);
+            letter-spacing: -.03em; line-height: 1;
+        }
+        .brand-text p {
+            font-size: .6rem; font-weight: 700; color: #94a3b8;
+            letter-spacing: .12em; text-transform: uppercase; margin-top: 3px;
+        }
+        .brand-text span { color: var(--amber); }
+
+        /* user pill (shown when logged in) */
+        .user-pill {
+            display: none;
+            align-items: center; gap: .55rem;
+            background: #f8fafc; border: 1.5px solid var(--border);
+            border-radius: 99px; padding: .35rem .7rem .35rem .35rem;
+            cursor: pointer; transition: border-color .2s;
+            max-width: 180px;
+        }
+        .user-pill:hover { border-color: #cbd5e1; }
+        .user-pill.visible { display: flex; }
+        .pill-av {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg,#f59e0b,#d97706);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: .75rem; color: #fff;
+            flex-shrink: 0; overflow: hidden;
+        }
+        .pill-av img { width: 100%; height: 100%; border-radius: 50%; }
+        .pill-name {
+            font-size: .75rem; font-weight: 700; color: var(--dark);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 100px;
+        }
+        .pill-out {
+            font-size: .65rem; color: #94a3b8;
+            flex-shrink: 0; margin-left: 2px;
         }
 
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 6px;
-            background: linear-gradient(90deg, var(--primary), #fbbf24);
-        }
+        /* body padding */
+        .body { padding: 1.4rem 2rem 2rem; }
 
-        .logo { 
-            width: 64px; 
-            height: 64px; 
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
-            border-radius: 18px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 2rem; 
-            color: #fff; 
-            margin: 0 auto 1.5rem; 
-            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4); 
-            transform: rotate(-5deg);
-        }
-
-        h1 { 
-            text-align: center; 
-            margin: 0 0 0.5rem; 
-            font-weight: 900; 
-            font-size: 2.2rem; 
-            letter-spacing: -0.03em; 
-            color: var(--text-dark);
-        }
-
-        p.subtitle { 
-            text-align: center; 
-            color: var(--text-muted); 
-            margin: 0 0 2.5rem; 
-            font-size: 1.05rem; 
+        /* subtitle */
+        .subtitle {
+            font-size: .88rem; color: var(--muted);
+            text-align: center; margin: 1rem 0 1.6rem;
             line-height: 1.5;
         }
-        
-        .step-container { 
-            display: none; 
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
-        }
-        .step-container.active { display: block; }
-        @keyframes slideUp { 
-            from { opacity: 0; transform: translateY(20px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
 
-        .google-btn-wrapper {
-            display: flex;
-            justify-content: center;
-            margin-top: 1.5rem;
-            min-height: 50px;
-        }
+        /* step */
+        .step { display: none; }
+        .step.active { display: block; animation: fadeUp .32s cubic-bezier(.16,1,.3,1) both; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 
-        /* Workspace Cards */
-        .workspace-list {
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 0.5rem;
-        }
-        .workspace-list::-webkit-scrollbar { width: 6px; }
-        .workspace-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-        .workspace-card {
-            background: #fff;
-            border: 2px solid var(--border-color);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-        .workspace-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.15);
-        }
-        
-        .workspace-card::after {
-            content: '\f105';
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
-            position: absolute;
-            right: 1.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.2rem;
-            color: #cbd5e1;
-            transition: color 0.2s;
-        }
-        .workspace-card:hover::after { color: var(--primary); }
-
-        .ws-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem; padding-right: 2rem; }
-        .ws-header h4 { margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--text-dark); }
-        
-        .ws-role { font-size: 0.75rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
-        .role-owner { background: #fef3c7; color: #d97706; }
-        .role-viewer { background: #e0e7ff; color: #4338ca; }
-        
-        .ws-footer { font-size: 0.9rem; color: var(--text-muted); display: flex; gap: 1rem; }
-        .ws-footer span { display: flex; align-items: center; gap: 0.3rem; }
-
-        .btn-create {
-            width: 100%;
-            padding: 1rem;
-            background: transparent;
-            color: var(--primary-dark);
-            border: 2px dashed var(--primary);
-            border-radius: 16px;
-            font-size: 1rem;
-            font-weight: 800;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem;
-            margin-top: 1rem;
-        }
-        .btn-create:hover {
-            background: var(--primary-light);
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            padding: 1rem;
+        /* ── SIGN IN BOX ── */
+        .signin-box {
             background: #f8fafc;
-            border-radius: 16px;
-        }
-        .user-avatar { width: 48px; height: 48px; border-radius: 50%; background: #e2e8f0; display:flex; align-items:center; justify-content:center; color:#64748b; font-weight:700; font-size:1.2rem; }
-        .user-info h3 { margin: 0 0 0.2rem; font-size: 1.1rem; color: #0f172a; }
-        .user-info p { margin: 0; font-size: 0.9rem; color: #64748b; }
-
-        /* Loading Spinner */
-        #loading_state {
+            border: 1.5px dashed #d1d5db;
+            border-radius: 18px;
+            padding: 2rem 1.6rem;
             text-align: center;
-            padding: 3rem 0;
-            display: none;
         }
-        .spinner {
-            font-size: 2.5rem;
-            color: var(--primary);
-            animation: spin 1s infinite linear;
-            margin-bottom: 1rem;
+        .g-circle {
+            width: 52px; height: 52px; margin: 0 auto .9rem;
+            background: linear-gradient(135deg,#4285F4,#34A853);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 18px rgba(66,133,244,.28);
         }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .signin-box h2 { font-size: 1.1rem; font-weight: 800; color: var(--dark); margin-bottom: .3rem; }
+        .signin-box p  { font-size: .83rem; color: var(--muted); }
+        .google-wrap { display: flex; justify-content: center; margin-top: 1.3rem; min-height: 44px; }
 
+        /* ── SKELETON ── */
+        .skeleton-list { display: flex; flex-direction: column; gap: .7rem; }
+        .skel {
+            height: 72px; border-radius: 14px;
+            background: linear-gradient(90deg,#f1f5f9 25%,#e8ecf1 50%,#f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.3s infinite;
+        }
+        .skel:nth-child(2){animation-delay:.12s;opacity:.8}
+        .skel:nth-child(3){animation-delay:.24s;opacity:.6}
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        .load-lbl {
+            text-align: center; font-size: .8rem; color: #94a3b8;
+            margin-top: .9rem; display: flex; align-items: center; justify-content: center; gap: .45rem;
+        }
+
+        /* ── WORKSPACE CARDS ── */
+        .ws-list { display: flex; flex-direction: column; gap: .55rem; max-height: 340px; overflow-y: auto; padding-right: 2px; }
+        .ws-list::-webkit-scrollbar { width: 4px; }
+        .ws-list::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+
+        .ws-card {
+            display: flex; align-items: center; gap: .9rem;
+            padding: 1rem 1.1rem;
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            cursor: pointer; text-decoration: none; color: inherit;
+            transition: border-color .18s, transform .18s, box-shadow .18s;
+            position: relative; overflow: hidden;
+        }
+        .ws-card:hover {
+            border-color: var(--amber);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--amber-glow);
+        }
+
+        /* left accent */
+        .ws-card::before {
+            content:''; position:absolute; left:0; top:12px; bottom:12px; width:3px;
+            background: linear-gradient(180deg,#f59e0b,#fbbf24);
+            border-radius: 0 3px 3px 0;
+            transform: scaleY(0); transition: transform .18s;
+            transform-origin: bottom;
+        }
+        .ws-card:hover::before { transform: scaleY(1); }
+
+        /* icon block */
+        .ws-icon {
+            width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+            background: linear-gradient(135deg,#fef3c7,#fde68a);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; color: #d97706;
+        }
+
+        /* info */
+        .ws-info { flex: 1; min-width: 0; }
+        .ws-name {
+            font-size: .95rem; font-weight: 800; color: var(--dark);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: .28rem;
+        }
+        .ws-tags { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+        .ws-slug { font-size: .7rem; color: var(--muted); font-family: monospace; }
+
+        .tag {
+            font-size: .62rem; font-weight: 800; padding: .16rem .45rem;
+            border-radius: 20px; text-transform: uppercase; letter-spacing: .04em;
+        }
+        .tag-owner  { background: #fef3c7; color: #b45309; }
+        .tag-viewer { background: #e0e7ff; color: #4338ca; }
+        .tag-active  { background: #dcfce7; color: #15803d; }
+        .tag-trial   { background: #fef9c3; color: #a16207; }
+        .tag-expired { background: #fee2e2; color: #b91c1c; }
+
+        /* expire pill */
+        .expire-pill {
+            display: inline-flex; align-items: center; gap: .28rem;
+            font-size: .68rem; font-weight: 700;
+            margin-top: .28rem; color: #94a3b8;
+        }
+        .expire-pill.warn { color: #d97706; }
+        .expire-pill.danger { color: #ef4444; }
+
+        /* chevron */
+        .ws-arrow {
+            font-size: .8rem; color: #d1d5db; flex-shrink: 0;
+            transition: color .18s, transform .18s;
+        }
+        .ws-card:hover .ws-arrow { color: var(--amber); transform: translateX(3px); }
+
+        /* ── CREATE BUTTON ── */
+        .btn-create {
+            width: 100%; margin-top: .8rem;
+            padding: .85rem;
+            background: transparent;
+            border: 1.5px dashed #d1d5db;
+            border-radius: 13px;
+            font-family: 'Inter', sans-serif;
+            font-size: .85rem; font-weight: 700; color: #94a3b8;
+            cursor: pointer; transition: all .18s;
+            display: flex; align-items: center; justify-content: center; gap: .5rem;
+        }
+        .btn-create:hover { border-color: var(--amber); color: var(--amber-d); background: #fffbeb; }
+
+        /* error */
+        .err-box {
+            background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px;
+            padding: .75rem 1rem; font-size: .82rem; color: #b91c1c;
+            display: flex; align-items: center; gap: .5rem; margin-bottom: .9rem;
+        }
+
+        /* empty */
+        .empty { text-align: center; padding: 1.8rem 0; }
+        .empty i { font-size: 2rem; color: #d1d5db; margin-bottom: .6rem; display: block; }
+        .empty p { color: var(--muted); font-size: .85rem; line-height: 1.6; }
+
+        /* footer */
+        .footer {
+            text-align: center; font-size: .68rem; color: #94a3b8;
+            margin-top: 1.4rem; letter-spacing: .02em;
+        }
+        .footer a { color: #94a3b8; text-decoration: none; }
+        .footer a:hover { color: var(--amber); }
+
+        /* signout dropdown */
+        .signout-tip {
+            position: absolute; right: 2rem; top: 4.2rem;
+            background: #fff; border: 1.5px solid var(--border);
+            border-radius: 12px; padding: .5rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,.12);
+            z-index: 100; display: none; animation: fadeUp .2s ease;
+        }
+        .signout-tip.open { display: block; }
+        .signout-btn {
+            width: 100%; padding: .6rem 1rem;
+            background: none; border: none; border-radius: 8px;
+            font-family: 'Inter', sans-serif; font-size: .82rem; font-weight: 700;
+            color: #ef4444; cursor: pointer; white-space: nowrap;
+            display: flex; align-items: center; gap: .5rem;
+            transition: background .15s;
+        }
+        .signout-btn:hover { background: #fef2f2; }
     </style>
 </head>
 <body>
-    <div class="bg-animated">
-        <div class="bg-orb orb-1"></div>
-        <div class="bg-orb orb-2"></div>
-        <div class="bg-orb orb-3"></div>
+<div class="bg-wrap"></div>
+<div class="bg-grid"></div>
+
+<div class="card">
+    <div class="top-bar"></div>
+
+    <!-- Header row -->
+    <div class="hdr">
+        <div class="brand">
+            <div class="brand-img">
+                <img src="https://domation.net/imgs/ICON.png" alt="Domation">
+            </div>
+            <div class="brand-text">
+                <h1>DOMATION</h1>
+                <p><span>/</span> REALTIME META REPORT</p>
+            </div>
+        </div>
+
+        <!-- User pill — shown after login -->
+        <div class="user-pill" id="user_pill" onclick="toggleSignout()">
+            <div class="pill-av" id="pill_av">U</div>
+            <span class="pill-name" id="pill_name">User</span>
+            <i class="fa-solid fa-chevron-down pill-out" style="font-size:.55rem;"></i>
+        </div>
+
+        <!-- Signout dropdown -->
+        <div class="signout-tip" id="signout_tip">
+            <button class="signout-btn" onclick="doSignOut()">
+                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+            </button>
+        </div>
     </div>
-    <div class="container">
-        <div style="display:flex; align-items:center; justify-content:center; gap:1.2rem; margin-bottom:0.5rem; transform: scale(1.1); margin-top: 1rem;">
-            <img src="http://localhost:3000/imgs/ICON.png" alt="DOMATION Logo" style="width: 4.8rem; height: 4.8rem; object-fit: contain; flex-shrink: 0;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2991/2991148.png'">
-            <div style="display: flex; flex-direction: column; justify-content: center; text-align: left;">
-                <h1 style="margin: 0; font-size: 2.8rem; font-weight: 900; color: #0f172a; line-height: 1; letter-spacing: -0.02em; text-align: left;">DOMATION</h1>
-                <p style="margin: 0.4rem 0 0 0; font-size: 0.9rem; font-weight: 800; color: #64748b; line-height: 1; letter-spacing: 0.15em; display: flex; gap: 0.4rem; text-transform: uppercase;">
-                    <span style="color: #f59e0b;">/</span> REALTIME META REPORT
+
+    <div class="body">
+        <p class="subtitle" id="main_subtitle">Đăng nhập để xem workspace của bạn</p>
+
+        <!-- Step 1: Sign in -->
+        <div id="step_1" class="step active">
+            <div class="signin-box">
+                <div class="g-circle">
+                    <i class="fab fa-google" style="color:#fff;font-size:1.3rem;"></i>
+                </div>
+                <h2>Xác Thực Tài Khoản</h2>
+                <p>Sử dụng Google để đăng nhập an toàn</p>
+                <div class="google-wrap" id="google_btn_render_area"></div>
+                <p id="google_error_text" style="display:none;color:#ef4444;font-size:.8rem;margin-top:.8rem;">
+                    <i class="fa-solid fa-circle-exclamation"></i> Chưa cấu hình GOOGLE_CLIENT_ID.
                 </p>
             </div>
         </div>
-        <p class="subtitle" id="main_subtitle" style="margin-bottom:2.5rem; margin-top:1.5rem;">Đăng nhập để xem các dự án của bạn</p>
 
-        <!-- BƯỚC 1: ĐĂNG NHẬP GOOGLE -->
-        <div id="step_1" class="step-container active">
-            <div style="text-align:center; padding: 2rem; background: #f8fafc; border-radius: 20px; border: 1px dashed #cbd5e1;">
-                <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="Google" style="width:70px; margin-bottom:1rem; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));">
-                <h2 style="margin:0 0 0.5rem; font-size:1.6rem; font-weight:800;">Xác Thực Tài Khoản</h2>
-                <p style="color:#64748b; font-size:1rem; margin:0;">Sử dụng tài khoản Google để truy cập an toàn.</p>
-                
-                <div class="google-btn-wrapper" id="google_btn_render_area"></div>
+        <!-- Step loading -->
+        <div id="loading_state" class="step">
+            <div class="skeleton-list">
+                <div class="skel"></div>
+                <div class="skel"></div>
+                <div class="skel"></div>
             </div>
-            
-            <p id="google_error_text" style="color:#ef4444; font-size:0.9rem; text-align:center; display:none; margin-top:1rem;">
-                <i class="fa-solid fa-circle-exclamation"></i> Lỗi: Chưa cấu hình GOOGLE_CLIENT_ID trong config_env.js.
-            </p>
+            <div class="load-lbl">
+                <i class="fa-solid fa-circle-notch fa-spin" style="color:#f59e0b;"></i>
+                Đang tải danh sách workspace...
+            </div>
         </div>
 
-        <!-- BƯỚC 2: LOADING -->
-        <div id="loading_state" class="step-container">
-            <i class="fa-solid fa-circle-notch spinner"></i>
-            <h3 style="margin:0; color:#334155;">Đang tải danh sách dự án...</h3>
-        </div>
-
-        <!-- BƯỚC 3: HIỂN THỊ DANH SÁCH WORKSPACE -->
-        <div id="step_2" class="step-container">
-            <div class="user-profile">
-                <div class="user-avatar" id="user_avatar_char">U</div>
-                <div class="user-info">
-                    <h3 id="user_name_display">User Name</h3>
-                    <p id="user_email_display">user@gmail.com</p>
-                </div>
+        <!-- Step 2: List -->
+        <div id="step_2" class="step">
+            <div id="error_box" class="err-box" style="display:none;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span id="error_text"></span>
             </div>
-
-            <div class="workspace-list" id="workspace_list_container">
-                <!-- Thẻ Workspace sẽ được chèn vào đây -->
-            </div>
-
+            <div class="ws-list" id="workspace_list_container"></div>
             <button class="btn-create" onclick="window.location.href='/register'">
                 <i class="fa-solid fa-plus"></i> Khởi tạo Workspace mới
             </button>
         </div>
 
+        <div class="footer">
+            Powered by <a href="https://domation.net" target="_blank">Domation</a> &mdash; Meta Realtime Analytics
+        </div>
     </div>
+</div>
 
-    <script>
-        window.onload = function() {
-            // Kiểm tra xem đã có Session đăng nhập chưa (Auto Login)
-            try {
-                const session = JSON.parse(localStorage.getItem("dom_auth_v1") || "null");
-                if (session && session.u && session.u.email) {
-                    const u = session.u;
-                    document.getElementById('user_name_display').innerText = u.name || u.email.split('@')[0];
-                    document.getElementById('user_email_display').innerText = u.email;
-                    document.getElementById('user_avatar_char').innerText = u.email.charAt(0).toUpperCase();
-                    if (u.picture) {
-                        document.getElementById('user_avatar_char').innerHTML = `<img src="${u.picture}" style="width:100%;height:100%;border-radius:50%;">`;
-                    }
-                    
-                    document.getElementById('main_subtitle').innerText = "Chọn dự án để bắt đầu";
-                    showStep('loading_state');
-                    fetchUserTenants(u.email);
-                    return; // Đã đăng nhập nên không cần render nút Google nữa
-                }
-            } catch(e) {}
+<script>
+    const SESSION_KEY = 'dom_auth_v1';
+    const SESSION_TTL = 30 * 24 * 60 * 60 * 1000;
 
-            if (!window.APP_CONFIG.GOOGLE_CLIENT_ID) {
-                document.getElementById('google_error_text').style.display = 'block';
-            } else {
-                google.accounts.id.initialize({
-                    client_id: window.APP_CONFIG.GOOGLE_CLIENT_ID,
-                    callback: handleGoogleLogin,
-                    auto_select: true
-                });
-                
-                google.accounts.id.renderButton(
-                    document.getElementById("google_btn_render_area"),
-                    { theme: "outline", size: "large", shape: "pill", type: "standard", text: "signin_with", logo_alignment: "left" }
-                );
-            }
-        };
+    // Close dropdown on outside click
+    document.addEventListener('click', e => {
+        if (!e.target.closest('#user_pill') && !e.target.closest('#signout_tip')) {
+            document.getElementById('signout_tip').classList.remove('open');
+        }
+    });
 
-        function showStep(stepId) {
-            document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
-            document.getElementById(stepId).classList.add('active');
+    function toggleSignout() {
+        document.getElementById('signout_tip').classList.toggle('open');
+    }
+
+    function showStep(id) {
+        document.querySelectorAll('.step').forEach(el => {
+            el.classList.remove('active'); el.style.display = 'none';
+        });
+        const el = document.getElementById(id);
+        if (el) { el.style.display = 'block'; requestAnimationFrame(() => el.classList.add('active')); }
+    }
+
+    function doSignOut() {
+        localStorage.removeItem(SESSION_KEY);
+        sessionStorage.clear();
+        if (typeof google !== 'undefined') google.accounts?.id?.disableAutoSelect();
+        location.reload();
+    }
+
+    function setUserPill(u) {
+        const av   = document.getElementById('pill_av');
+        const name = document.getElementById('pill_name');
+        if (u.picture) {
+            av.innerHTML = `<img src="${u.picture}">`;
+        } else {
+            av.textContent = (u.name || u.email || 'U').charAt(0).toUpperCase();
+        }
+        name.textContent = u.name || u.email.split('@')[0];
+        document.getElementById('user_pill').classList.add('visible');
+    }
+
+    function getDaysLeft(expiresAt) {
+        if (!expiresAt) return null;
+        return Math.ceil((new Date(expiresAt) - new Date()) / 86400000);
+    }
+
+    function renderTenants(tenants) {
+        const container = document.getElementById('workspace_list_container');
+        if (!tenants || tenants.length === 0) {
+            container.innerHTML = `<div class="empty">
+                <i class="fa-regular fa-folder-open"></i>
+                <p>Bạn chưa có workspace nào.<br>Tạo mới để bắt đầu.</p>
+            </div>`;
+            return;
         }
 
-        async function handleGoogleLogin(response) {
-            try {
-                // Decode JWT
-                const base64Url = response.credential.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
+        const icons = ['fa-chart-line','fa-bullhorn','fa-rocket','fa-store','fa-fire','fa-gem','fa-bolt','fa-star'];
 
-                const payload = JSON.parse(jsonPayload);
-                if (payload.email) {
-                    try {
-                        localStorage.setItem("dom_auth_v1", JSON.stringify({
-                            u: {
-                                email: payload.email,
-                                name: payload.name || payload.email.split('@')[0],
-                                picture: payload.picture || ""
-                            },
-                            ts: Date.now()
-                        }));
-                    } catch(e) {}
+        container.innerHTML = tenants.map((t, i) => {
+            const isOwner = t.role === 'owner';
+            const roleTag = isOwner
+                ? `<span class="tag tag-owner">Chủ sở hữu</span>`
+                : `<span class="tag tag-viewer">Thành viên</span>`;
 
-                    // Update Profile UI
-                    document.getElementById('user_name_display').innerText = payload.name || payload.email.split('@')[0];
-                    document.getElementById('user_email_display').innerText = payload.email;
-                    document.getElementById('user_avatar_char').innerText = payload.email.charAt(0).toUpperCase();
-                    if (payload.picture) {
-                        document.getElementById('user_avatar_char').innerHTML = `<img src="${payload.picture}" style="width:100%;height:100%;border-radius:50%;">`;
-                    }
-                    
-                    document.getElementById('main_subtitle').innerText = "Chọn dự án để bắt đầu";
-                    showStep('loading_state');
+            let statusTag = `<span class="tag tag-trial">TRIAL</span>`;
+            if (t.status === 'active')  statusTag = `<span class="tag tag-active">ACTIVE</span>`;
+            if (t.status === 'expired' || t.status === 'locked') statusTag = `<span class="tag tag-expired">HẾT HẠN</span>`;
 
-                    // Call API to fetch tenants
-                    fetchUserTenants(payload.email);
-                }
-            } catch (e) {
-                console.error("Lỗi xác thực:", e);
-                alert("Lỗi đọc dữ liệu từ Google.");
-                showStep('step_1');
+            const days = getDaysLeft(t.expires_at);
+            let expireHtml = '';
+            if (days !== null) {
+                const cls  = days <= 0 ? 'danger' : days <= 7 ? 'warn' : '';
+                const ico  = days <= 0 ? 'fa-calendar-xmark' : days <= 7 ? 'fa-clock' : 'fa-calendar';
+                const lbl  = days <= 0 ? 'Đã hết hạn' : days === 1 ? 'Còn 1 ngày' : `Còn ${days} ngày`;
+                expireHtml = `<div class="expire-pill ${cls}"><i class="fa-regular ${ico}"></i>${lbl}</div>`;
             }
-        }
 
-        async function fetchUserTenants(email) {
-            try {
-                const res = await fetch(`${window.APP_CONFIG.SAAS_API_URL}?action=get_user_tenants&email=${encodeURIComponent(email)}`);
-                const data = await res.json();
-                
-                if (!data.ok) throw new Error(data.error);
-
-                if (!data.data || data.data.length === 0) {
-                    // Không có tenant nào -> Tự động chuyển hướng sang trang tạo mới
-                    window.location.href = "/register";
-                    return;
-                }
-
-                // Có tenant -> Render danh sách
-                renderTenants(data.data);
-                showStep('step_2');
-
-            } catch (e) {
-                console.error("Lỗi tải tenants:", e);
-                alert("Lỗi kết nối máy chủ: " + e.message);
-                showStep('step_1');
-            }
-        }
-
-        function renderTenants(tenants) {
-            const container = document.getElementById('workspace_list_container');
-            let html = '';
-
-            tenants.forEach(t => {
-                const isOwner = t.role === 'owner';
-                const roleClass = isOwner ? 'role-owner' : 'role-viewer';
-                const roleText = isOwner ? 'Chủ sở hữu' : 'Thành viên';
-                
-                const statusColor = t.status === 'active' ? '#10b981' : (t.status === 'trial' ? '#f59e0b' : '#ef4444');
-                const statusLabel = t.status.toUpperCase();
-                
-                let expireText = "Không xác định";
-                if (t.expires_at) {
-                    const d = new Date(t.expires_at);
-                    expireText = isNaN(d) ? t.expires_at : d.toLocaleDateString("vi-VN", { day: '2-digit', month: '2-digit', year: 'numeric' });
-                }
-
-                html += `
-                    <div class="workspace-card" onclick="window.location.href='/${t.slug}'">
-                        <div class="ws-header">
-                            <h4>${t.name}</h4>
-                            <span class="ws-role ${roleClass}">${roleText}</span>
-                        </div>
-                        <div class="ws-footer" style="flex-wrap: wrap;">
-                            <span style="min-width:120px;"><i class="fa-solid fa-link"></i> /${t.slug}</span>
-                            <span style="color:${statusColor}; font-weight:600;"><i class="fa-solid fa-circle" style="font-size:0.6rem;"></i> ${statusLabel}</span>
-                            <span style="margin-left: auto; color:#64748b; font-size: 0.85rem;"><i class="fa-regular fa-calendar-xmark"></i> Hết hạn: ${expireText}</span>
-                        </div>
+            return `<a class="ws-card" href="/${t.slug}">
+                <div class="ws-icon"><i class="fa-solid ${icons[i % icons.length]}"></i></div>
+                <div class="ws-info">
+                    <div class="ws-name">${t.name}</div>
+                    <div class="ws-tags">
+                        <span class="ws-slug">/${t.slug}</span>
+                        ${roleTag}
+                        ${statusTag}
                     </div>
-                `;
-            });
+                    ${expireHtml}
+                </div>
+                <i class="fa-solid fa-chevron-right ws-arrow"></i>
+            </a>`;
+        }).join('');
+    }
 
-            container.innerHTML = html;
+    async function fetchUserTenants(email) {
+        try {
+            const res  = await fetch(`${window.APP_CONFIG.SAAS_API_URL}?action=get_user_tenants&email=${encodeURIComponent(email)}`);
+            const data = await res.json();
+            if (!data.ok) throw new Error(data.error);
+            if (!data.data || data.data.length === 0) { window.location.href = '/register'; return; }
+            renderTenants(data.data);
+            showStep('step_2');
+        } catch (e) {
+            document.getElementById('error_text').textContent = 'Lỗi kết nối: ' + e.message;
+            document.getElementById('error_box').style.display = 'flex';
+            showStep('step_2');
         }
-    </script>
+    }
+
+    function handleGoogleLogin(response) {
+        try {
+            const b64 = response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+            const p   = JSON.parse(decodeURIComponent(escape(atob(b64))));
+            if (!p.email) throw new Error('No email');
+            const u = { email: p.email, name: p.name || p.email.split('@')[0], picture: p.picture || '', status: 'active' };
+            try { localStorage.setItem(SESSION_KEY, JSON.stringify({ u, ts: Date.now() })); } catch(_) {}
+            setUserPill(u);
+            document.getElementById('main_subtitle').textContent = 'Chọn workspace để bắt đầu';
+            showStep('loading_state');
+            fetchUserTenants(p.email);
+        } catch(e) { alert('Lỗi xác thực Google. Vui lòng thử lại.'); }
+    }
+
+    window.onload = function() {
+        // Auto-login from cache
+        try {
+            const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+            if (s && s.u && s.u.email && s.ts && (Date.now() - s.ts < SESSION_TTL)) {
+                setUserPill(s.u);
+                document.getElementById('main_subtitle').textContent = 'Chọn workspace để bắt đầu';
+                showStep('loading_state');
+                fetchUserTenants(s.u.email);
+                return;
+            }
+            if (s && !s.ts) localStorage.removeItem(SESSION_KEY);
+        } catch(_) {}
+
+        // Render Google button
+        if (!window.APP_CONFIG?.GOOGLE_CLIENT_ID) {
+            document.getElementById('google_error_text').style.display = 'block';
+        } else {
+            const tryRender = () => {
+                if (typeof google !== 'undefined' && google.accounts) {
+                    google.accounts.id.initialize({
+                        client_id: window.APP_CONFIG.GOOGLE_CLIENT_ID,
+                        callback: handleGoogleLogin,
+                        auto_select: false,
+                        ux_mode: 'popup'
+                    });
+                    google.accounts.id.renderButton(
+                        document.getElementById('google_btn_render_area'),
+                        { theme: 'outline', size: 'large', shape: 'pill', text: 'signin_with', logo_alignment: 'left', width: 260 }
+                    );
+                    google.accounts.id.prompt();
+                } else { setTimeout(tryRender, 200); }
+            };
+            tryRender();
+        }
+    };
+</script>
 </body>
 </html>

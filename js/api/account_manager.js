@@ -78,9 +78,14 @@ function _renderAccountManagerList() {
                     </div>
                 </div>
                 ${isAdmin ? `
-                <button onclick="_removeTokenGroup(${index})" style="background: transparent; border: none; color: #ef4444; font-size: 1.4rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: background 0.2s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'" title="Xóa kết nối này">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button onclick="_fetchAccountsForToken('${group.token}')" style="background: transparent; border: none; color: #3b82f6; font-size: 1.4rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: background 0.2s;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='transparent'" title="Tải danh sách Ad Accounts">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                    <button onclick="_removeTokenGroup(${index})" style="background: transparent; border: none; color: #ef4444; font-size: 1.4rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: background 0.2s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'" title="Xóa kết nối này">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
                 ` : ''}
             </div>
             
@@ -157,6 +162,13 @@ window.openAddTokenView = function() {
     document.getElementById("am_save_token_btn").disabled = true;
     document.getElementById("am_save_token_btn").style.opacity = "0.5";
     window._am_fetched_accounts = [];
+};
+
+window._fetchAccountsForToken = function(token) {
+    if (!token) return;
+    openAddTokenView();
+    document.getElementById("am_new_token_input").value = token;
+    fetchAccountsFromNewToken();
 };
 
 window.closeAddTokenView = function() {
