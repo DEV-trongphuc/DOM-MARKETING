@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <script>
     (function () {
-      var APP_VERSION = "v21.0"; // TÄƒng chuá»—i nÃ y lÃªn khi cÃ³ báº£n cáº­p nháº­t má»›i
+      var APP_VERSION = "v21.0"; // Tăng chuỗi này lên khi có bản cập nhật mới
       var localVer = localStorage.getItem("dom_app_version");
       if (localVer !== APP_VERSION) {
         if (window.location.search.indexOf("dom_cache_bust") === -1) {
@@ -17,9 +17,9 @@
     })();
   </script>
   <!-- Central Configuration -->
-  <script src="./lib/config_env.js?v=16"></script>
+  <script src="./lib/config_env.js?v=12"></script>
   <!-- SaaS Router -->
-  <script src="./js/core/router.js?v=16"></script>
+  <script src="./js/core/router.js?v=3"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DOM META REPORTS</title>
   <!-- <link rel="stylesheet" href="css/main.css" /> -->
@@ -32,14 +32,14 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Plugin hiá»ƒn thá»‹ sá»‘ trÃªn Ä‘áº§u cá»™t -->
+  <!-- Plugin hiển thị số trên đầu cột -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
     rel="stylesheet" />
   <style>
-    /* â”€â”€ Logo edit hover pencil â”€â”€ */
+    /* ── Logo edit hover pencil ── */
     .logo_edit_wrap {
       display: inline-flex;
       align-items: center;
@@ -68,7 +68,7 @@
       opacity: 1;
     }
 
-    /* popup nháº­p link â€” dÃ¹ng fixed Ä‘á»ƒ thoÃ¡t stacking context */
+    /* popup nhập link — dùng fixed để thoát stacking context */
     .logo_url_popup {
       position: fixed;
       background: #fff;
@@ -138,27 +138,27 @@
 </head>
 
 <body>
-  <!-- âš™ï¸ Column Settings Modal -->
+  <!-- ⚙️ Column Settings Modal -->
   <div id="column_settings_modal" class="ai_modal_overlay" style="display: none;">
     <div class="ai_modal_box" style="width: 85rem;">
       <div
         style="padding: 2rem 3rem; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-        <!-- Title area: thÆ°á»ng thÃ¬ icon+h2, khi edit preset thÃ¬ áº©n h2 vÃ  hiá»‡n name input táº¡i Ä‘Ã¢y -->
+        <!-- Title area: thường thì icon+h2, khi edit preset thì ẩn h2 và hiện name input tại đây -->
         <div id="col_modal_title_area" style="display:flex; align-items:center; gap:1rem;">
           <i class="fa-solid fa-table-columns main_clr" style="font-size:2rem;"></i>
-          <h2 id="col_modal_title" style="font-size:2rem; margin:0;">TÃ¹y chá»‰nh cá»™t hiá»ƒn thá»‹</h2>
-          <!-- Preset name input â€” áº©n máº·c Ä‘á»‹nh, hiá»‡n khi create/edit preset táº¡i chá»— title -->
+          <h2 id="col_modal_title" style="font-size:2rem; margin:0;">Tùy chỉnh cột hiển thị</h2>
+          <!-- Preset name input — ẩn mặc định, hiện khi create/edit preset tại chỗ title -->
           <div id="preset_edit_banner" style="display:none; align-items:center; gap:0.8rem;
             background:#fffbeb; border:1.5px solid #fde68a; border-radius:0.9rem;
             padding:0.5rem 1.2rem;">
             <i class="fa-solid fa-pen-to-square" style="color:#f59e0b;"></i>
             <input id="preset_edit_name_input" type="text" maxlength="40" style="border:none; outline:none; font-size:1.5rem; font-weight:700;
                 color:#78350f; background:transparent; min-width:16rem;
-                border-bottom:2px solid #f59e0b; padding:0.2rem 0.4rem;" placeholder="Nháº­p tÃªn preset..." />
+                border-bottom:2px solid #f59e0b; padding:0.2rem 0.4rem;" placeholder="Nhập tên preset..." />
           </div>
         </div>
 
-        <!-- Preset select + save-as-preset (hiá»‡n khi khÃ´ng edit) -->
+        <!-- Preset select + save-as-preset (hiện khi không edit) -->
         <div id="col_modal_preset_controls" style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
           <div style="display:flex; align-items:center; gap:0.5rem; background:#fff;
             border:1.5px solid #e2e8f0; border-radius:0.8rem; padding:0.4rem 1rem;">
@@ -166,13 +166,13 @@
             <select id="preset_select" style="border:none; outline:none; font-size:1.2rem; color:#374151;
                 background:transparent; cursor:pointer; min-width:13rem;"
               onchange="window.applyViewPreset(this.value)">
-              <option value="">-- Chá»n preset --</option>
+              <option value="">-- Chọn preset --</option>
             </select>
           </div>
           <button onclick="window.saveCurrentAsPreset()" style="padding:0.6rem 1.2rem; border-radius:0.7rem; border:1.5px solid #f59e0b;
               background:#fffbeb; color:#b45309; font-size:1.2rem; font-weight:600;
               cursor:pointer; display:flex; align-items:center; gap:0.4rem; white-space:nowrap;">
-            <i class="fa-solid fa-floppy-disk"></i> LÆ°u lÃ m Preset
+            <i class="fa-solid fa-floppy-disk"></i> Lưu làm Preset
           </button>
         </div>
 
@@ -187,22 +187,22 @@
         <div style="display: flex; flex-direction: column; gap: 2rem;">
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-              <h3 style="font-size: 1.6rem; color: #333; font-weight: 700; margin:0;">Metrics kháº£ dá»¥ng</h3>
+              <h3 style="font-size: 1.6rem; color: #333; font-weight: 700; margin:0;">Metrics khả dụng</h3>
               <div style="display:flex; gap:1.2rem;">
                 <button onclick="window.selectAllMetrics()"
-                  style="background:transparent; border:none; color:var(--mainClr); font-weight:600; cursor:pointer; font-size:1.3rem;">Chá»n
-                  háº¿t</button>
+                  style="background:transparent; border:none; color:var(--mainClr); font-weight:600; cursor:pointer; font-size:1.3rem;">Chọn
+                  hết</button>
                 <button onclick="window.deselectAllMetrics()"
-                  style="background:transparent; border:none; color:#666; font-weight:500; cursor:pointer; font-size:1.3rem;">Bá»
-                  háº¿t</button>
+                  style="background:transparent; border:none; color:#666; font-weight:500; cursor:pointer; font-size:1.3rem;">Bỏ
+                  hết</button>
               </div>
             </div>
 
-            <!-- ðŸ” SEARCH BAR -->
+            <!-- 🔍 SEARCH BAR -->
             <div style="position: relative; margin-bottom: 1.5rem;">
               <i class="fa-solid fa-magnifying-glass"
                 style="position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.3rem;"></i>
-              <input type="text" id="metric_search_input" placeholder="TÃ¬m kiáº¿m metric..."
+              <input type="text" id="metric_search_input" placeholder="Tìm kiếm metric..."
                 style="width: 100%; padding: 1.1rem 1.2rem 1.1rem 3.4rem; border: 1.8px solid #e2e8f0; border-radius: 1.1rem; font-size: 1.35rem; transition:all .2s; outline:none;"
                 onfocus="this.style.borderColor='var(--mainClr)'; this.style.boxShadow='0 0 0 3px rgba(255,169,0,0.1)';"
                 onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';"
@@ -216,18 +216,18 @@
           </div>
 
           <div style="padding-top: 2rem; border-top: 1px solid #eee;">
-            <h3 style="font-size: 1.6rem; margin-bottom: 1.5rem; color: #333; font-weight: 700;">ThÃªm Custom Metric</h3>
+            <h3 style="font-size: 1.6rem; margin-bottom: 1.5rem; color: #333; font-weight: 700;">Thêm Custom Metric</h3>
             <div style="display: flex; flex-direction: column; gap: 1rem;">
-              <input type="text" id="custom_metric_name" placeholder="TÃªn metric (VD: CPV)"
+              <input type="text" id="custom_metric_name" placeholder="Tên metric (VD: CPV)"
                 style="padding: 1.2rem; border: 1.5px solid #ddd; border-radius: 1rem; font-size: 1.3rem;">
               <div style="position: relative;">
-                <textarea id="custom_metric_formula" placeholder="CÃ´ng thá»©c (VD: {{spend}} / {{video_view}})"
+                <textarea id="custom_metric_formula" placeholder="Công thức (VD: {{spend}} / {{video_view}})"
                   style="width: 100%; padding: 1.2rem; border: 1.5px solid #ddd; border-radius: 1rem; font-size: 1.3rem; height: 10rem; resize: none;"></textarea>
-                <div style="font-size: 1rem; color: #999; margin-top: 0.5rem;">Sá»­ dá»¥ng {{id}} Ä‘á»ƒ gá»i cÃ¡c metric cÆ¡ báº£n.
-                  Há»— trá»£ +, -, *, /, ( )</div>
+                <div style="font-size: 1rem; color: #999; margin-top: 0.5rem;">Sử dụng {{id}} để gọi các metric cơ bản.
+                  Hỗ trợ +, -, *, /, ( )</div>
               </div>
               <button id="add_custom_metric_btn" class="ai_report"
-                style="width: fit-content; padding: 1rem 2rem; font-size: 1.3rem;">Táº¡o Metric</button>
+                style="width: fit-content; padding: 1rem 2rem; font-size: 1.3rem;">Tạo Metric</button>
             </div>
           </div>
         </div>
@@ -236,8 +236,8 @@
         <div
           style="background: #fcfcfc; border: 1px solid #f0f0f0; border-radius: 1.5rem; padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem;">
           <h3 style="font-size: 1.6rem; color: #333; font-weight: 700; display: flex; justify-content: space-between;">
-            Cá»™t Ä‘ang chá»n
-            <small style="font-weight: 400; color: #999; font-size: 1.2rem;">KÃ©o tháº£ Ä‘á»ƒ sáº¯p xáº¿p (sáº¯p tá»›i)</small>
+            Cột đang chọn
+            <small style="font-weight: 400; color: #999; font-size: 1.2rem;">Kéo thả để sắp xếp (sắp tới)</small>
           </h3>
           <div id="active_columns_list" style="display: flex; flex-direction: column; gap: 0.8rem;">
             <!-- JS populated -->
@@ -251,17 +251,17 @@
         <div style="display:flex;gap:1rem;">
           <button id="reset_column_config"
             style="padding: 1.2rem 2.5rem; border: 1.5px solid #ddd; background: #fff; border-radius: 1rem; cursor: pointer; font-size: 1.4rem; color: #666;">Reset
-            máº·c Ä‘á»‹nh</button>
+            mặc định</button>
         </div>
         <div style="display:flex;gap:1rem;">
           <!-- Cancel edit preset (hidden by default) -->
           <button id="cancel_edit_preset_btn" onclick="window._cancelEditPreset()" style="display:none;
             padding:1.2rem 2.5rem; border:1.5px solid #e2e8f0; background:#fff;
             border-radius:1rem; cursor:pointer; font-size:1.4rem; color:#64748b;">
-            <i class="fa-solid fa-ban"></i> Há»§y chá»‰nh
+            <i class="fa-solid fa-ban"></i> Hủy chỉnh
           </button>
           <button id="save_column_config_btn" class="ai_report" style="padding: 1.2rem 4rem; font-size: 1.5rem;">
-            <i class="fa-solid fa-floppy-disk"></i> <span id="save_btn_label">LÆ°u thay Ä‘á»•i</span>
+            <i class="fa-solid fa-floppy-disk"></i> <span id="save_btn_label">Lưu thay đổi</span>
           </button>
         </div>
       </div>
@@ -434,14 +434,14 @@
           </div>
           <p class="dom_date">-/-/- - -/-/-</p>
         </div>
-        <!-- Toolbar bÃªn pháº£i -->
-        <!-- Toolbar chÃ­nh bÃªn pháº£i -->
+        <!-- Toolbar bên phải -->
+        <!-- Toolbar chính bên phải -->
         <div class="dom_toolbar_right">
-          <!-- NhÃ³m nÃºt chá»©c nÄƒng -->
+          <!-- Nhóm nút chức năng -->
           <div class="toolbar_actions_group">
-            <button id="ai_summary_btn" class="toolbar_btn toolbar_btn_primary" title="AI PhÃ¢n tÃ­ch">
+            <button id="ai_summary_btn" class="toolbar_btn toolbar_btn_primary" title="AI Phân tích">
               <i class="fa-solid fa-wand-magic-sparkles"></i>
-              <span>AI PhÃ¢n tÃ­ch</span>
+              <span>AI Phân tích</span>
             </button>
             <button id="share_url_btn" class="toolbar_btn" title="Share (Ctrl+Shift+S)"
               onclick="window.openShareModal && window.openShareModal()">
@@ -455,36 +455,36 @@
 
           <div class="toolbar_divider"></div>
 
-          <!-- Bá»™ lá»c Brand (Ä‘Æ°á»£c kÃ©o dÃ i) -->
+          <!-- Bộ lọc Brand (được kéo dài) -->
           <div class="dom_filter" style="display:none;">
             <div class="dom_select quick_filter_detail toolbar_select" style="padding-left: 0 !important;">
               <img id="quick_filter_current_img" src="" style="display:none;" />
               <div class="flex">
-                <p class="dom_selected" id="quick_filter_current_text">Táº¥t cáº£ Brand</p>
+                <p class="dom_selected" id="quick_filter_current_text">Tất cả Brand</p>
               </div>
               <i class="fa-solid fa-angle-down"></i>
               <ul class="dom_select_show" id="quick_filter_list">
-                <!-- Javascript sáº½ tá»± Ä‘á»™ng thÃªm danh sÃ¡ch dá»±a vÃ o config -->
+                <!-- Javascript sẽ tự động thêm danh sách dựa vào config -->
               </ul>
             </div>
           </div>
         </div>
       </div>
       <div class="dom_dashboard">
-        <!-- ðŸ“­ Empty State Card -->
+        <!-- 📭 Empty State Card -->
         <div class="dom_empty_state">
           <div class="empty_card">
             <i class="fa-solid fa-chart-pie" style="font-size:4rem;color:#e2e8f0;margin-bottom:1.2rem;"></i>
-            <h3>KhÃ´ng cÃ³ dá»¯ liá»‡u</h3>
-            <p>KhÃ´ng tÃ¬m tháº¥y dá»¯ liá»‡u chi phÃ­ quáº£ng cÃ¡o cho khoáº£ng thá»i gian hoáº·c bá»™ lá»c Ä‘Ã£ chá»n.</p>
+            <h3>Không có dữ liệu</h3>
+            <p>Không tìm thấy dữ liệu chi phí quảng cáo cho khoảng thời gian hoặc bộ lọc đã chọn.</p>
             <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;">
               <button class="btn_reset_all" style="display:flex;align-items:center;gap:.5rem;">
-                <i class="fa-solid fa-filter-circle-xmark"></i> XÃ³a táº¥t cáº£ bá»™ lá»c
+                <i class="fa-solid fa-filter-circle-xmark"></i> Xóa tất cả bộ lọc
               </button>
               <button onclick="document.querySelector('.time_picker_panel')?.style.setProperty('display','block')"
                 style="display:flex;align-items:center;gap:.5rem;background:#f1f5f9;border:1.5px solid #e2e8f0;padding:.8rem 1.8rem;border-radius:.8rem;cursor:pointer;font-size:1.3rem;font-weight:600;color:#475569;transition:background .15s;"
                 onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
-                <i class="fa-solid fa-calendar-days"></i> Äá»•i khoáº£ng thá»i gian
+                <i class="fa-solid fa-calendar-days"></i> Đổi khoảng thời gian
               </button>
             </div>
           </div>
@@ -700,7 +700,7 @@
               <span><i class="fa-solid fa-chart-simple main_clr"></i> Age &amp; Gender</span>
               <div style="display:flex;gap:0.6rem;align-items:center;">
                 <span class="dom_title_button" id="age_only_toggle_btn" onclick="toggleAgeOnlyView()"
-                  title="Gá»™p theo Age">
+                  title="Gộp theo Age">
                   <i class="fa-solid fa-venus-mars"></i> Age Only
                 </span>
                 <span class="dom_title_button region" onclick="toggleRegionView()"><i class="fa-solid fa-repeat"></i>
@@ -807,36 +807,36 @@
                     </li> -->
                 </ul>
               </div>
-              <!-- â³ Status/Ending Filter -->
+              <!-- ⏳ Status/Ending Filter -->
               <div class="dom_select status_filter">
                 <div class="flex">
-                  <p class="dom_selected">Sáº¯p káº¿t thÃºc</p>
+                  <p class="dom_selected">Sắp kết thúc</p>
                 </div>
                 <i class="fa-solid fa-angle-down"></i>
                 <ul class="dom_select_show">
                   <li>
                     <span data-view="ending_1d" class="view_status"></span>
-                    <span><i class="fa-solid fa-hourglass-end status_filter_icon" style="color:#ef4444;"></i><span>CÃ²n 1
-                        ngÃ y</span></span>
+                    <span><i class="fa-solid fa-hourglass-end status_filter_icon" style="color:#ef4444;"></i><span>Còn 1
+                        ngày</span></span>
                   </li>
                   <li>
                     <span data-view="ending_3d" class="view_status"></span>
-                    <span><i class="fa-solid fa-hourglass-half status_filter_icon" style="color:#f59e0b;"></i><span>CÃ²n
+                    <span><i class="fa-solid fa-hourglass-half status_filter_icon" style="color:#f59e0b;"></i><span>Còn
                         3
-                        ngÃ y</span></span>
+                        ngày</span></span>
                   </li>
                   <li>
                     <span data-view="ended_ads" class="view_status"></span>
-                    <span><i class="fa-solid fa-circle-stop status_filter_icon" style="color:#64748b;"></i><span>ÄÃ£ káº¿t
-                        thÃºc</span></span>
+                    <span><i class="fa-solid fa-circle-stop status_filter_icon" style="color:#64748b;"></i><span>Đã kết
+                        thúc</span></span>
                   </li>
                   <li class="divider">
                     <span data-view="reset_status" class="view_status"></span>
-                    <span><i class="fa-solid fa-xmark status_filter_icon"></i><span>Reset bá»™ lá»c</span></span>
+                    <span><i class="fa-solid fa-xmark status_filter_icon"></i><span>Reset bộ lọc</span></span>
                   </li>
                 </ul>
               </div>
-              <!-- âš¡ Preset switcher â€” custom dropdown -->
+              <!-- ⚡ Preset switcher — custom dropdown -->
               <div id="toolbar_preset_wrap" style="position:relative; margin-left:auto;">
                 <button id="toolbar_preset_btn" onclick="window._togglePresetPanel()" style="display:flex; align-items:center; gap:0.8rem; height:100%;
                     padding:0.85rem 1.8rem; border:1.5px solid #e2e8f0; border-radius:3rem;
@@ -868,7 +868,7 @@
                         align-items:center;gap:0.4rem;box-shadow:0 2px 8px rgba(245,158,11,.3);
                         transition:all .15s;" onmouseover="this.style.background='#d97706'"
                       onmouseout="this.style.background='#f59e0b'">
-                      <i class="fa-solid fa-plus"></i> ThÃªm má»›i
+                      <i class="fa-solid fa-plus"></i> Thêm mới
                     </button>
                   </div>
                   <!-- preset list -->
@@ -884,7 +884,7 @@
 
             </div>
 
-            <!-- ðŸ“‹ Campaign Table Card Wrapper -->
+            <!-- 📋 Campaign Table Card Wrapper -->
             <div class="campaign_table_card">
               <div class="campaign_table_scroll">
                 <div class="view_campaign_header">
@@ -914,7 +914,7 @@
                   </div>
                 </div>
 
-                <!-- âœ… Selection Summary Bar (shown when rows are checked) -->
+                <!-- ✅ Selection Summary Bar (shown when rows are checked) -->
                 <div id="selection_summary_bar" style="display:none;"></div>
 
 
@@ -925,11 +925,11 @@
               <div class="view_campaign_empty" style="display:none">
                 <div class="empty_card">
                   <i class="fa-solid fa-filter-circle-xmark"></i>
-                  <h3>KhÃ´ng tÃ¬m tháº¥y káº¿t quáº£</h3>
-                  <p>KhÃ´ng cÃ³ campaign nÃ o khá»›p vá»›i bá»™ lá»c Ä‘Ã£ chá»n.<br />Thá»­ Ä‘á»•i ngÃ y, bá»™ lá»c nhÃ£n hiá»‡u hoáº·c reset bá»™
-                    lá»c.
+                  <h3>Không tìm thấy kết quả</h3>
+                  <p>Không có campaign nào khớp với bộ lọc đã chọn.<br />Thử đổi ngày, bộ lọc nhãn hiệu hoặc reset bộ
+                    lọc.
                   </p>
-                  <button class="btn_reset_all">Reset táº¥t cáº£ bá»™ lá»c</button>
+                  <button class="btn_reset_all">Reset tất cả bộ lọc</button>
                 </div>
               </div>
             </div>
@@ -988,7 +988,7 @@
         <div id="extra_charts_row" class="dom_row flex"
           style="margin-top:1rem;flex-wrap:nowrap;gap:2rem; padding-bottom: 15rem;width:100%;">
 
-          <!-- 5. Video Funnel (CSS-only, y há»‡t detail modal) -->
+          <!-- 5. Video Funnel (CSS-only, y hệt detail modal) -->
           <div class="dom_inner dom_fade_item box_shadow chart"
             style="flex:1;min-width:0;background-color:white;min-height:42rem;">
             <h2><i class="fa-solid fa-film main_clr"></i> Video Funnel</h2>
@@ -1029,12 +1029,12 @@
                 class="fa-solid fa-circle"
                 style="font-size:0.6rem; vertical-align:middle; margin-right:0.3rem; margin-top:-2px;"></i>
               ACTIVE</span>
-            Hiá»ƒn thá»‹ quáº£ng cÃ¡o Ä‘ang cháº¡y
+            Hiển thị quảng cáo đang chạy
           </div>
         </div>
         <div id="ad_library_content" style="width:100%;">
           <div style="text-align:center; padding: 4rem; color: #94a3b8;"><i class="fa-solid fa-circle-notch fa-spin"
-              style="font-size:2rem; margin-bottom:1rem; color:#f59e0b;"></i><br>Äang táº£i thÆ° viá»‡n quáº£ng cÃ¡o...</div>
+              style="font-size:2rem; margin-bottom:1rem; color:#f59e0b;"></i><br>Đang tải thư viện quảng cáo...</div>
         </div>
       </div>
 
@@ -1058,7 +1058,7 @@
           </p>
         </div>
         <div class="dom_row flex um">
-          <!-- Tá»•ng bÃ¡o cÃ¡o -->
+          <!-- Tổng báo cáo -->
           <div class="dom_inner dom_fade_item w20 box_shadow chart" id="detail_total_report">
             <div class="dom_total_report">
               <ul>
@@ -1256,7 +1256,7 @@
             <!-- Targeting -->
           </div>
         </div>
-        <!-- CÃ¡c chart khÃ¡c -->
+        <!-- Các chart khác -->
         <div class="dom_row">
           <div class="dom_inner dom_fade_item w33 box_shadow chart show">
             <h2>
@@ -1297,7 +1297,7 @@
                 Full Actions Detail
               </h2>
               <div class="detail_search_wrap" style="position: relative;">
-                <input type="text" id="detail_full_actions_search" placeholder="Lá»c chá»‰ sá»‘..."
+                <input type="text" id="detail_full_actions_search" placeholder="Lọc chỉ số..."
                   oninput="window.filterFullActions(this.value)"
                   style="padding: 0.8rem 1.2rem 0.8rem 3.5rem; border-radius: 8px; border: 1.5px solid #edf2f7; background: #f8fafc; font-size: 1.2rem; width: 220px; outline: none; transition: all 0.2s;">
                 <i class="fa-solid fa-magnifying-glass"
@@ -1321,7 +1321,7 @@
           </h2>
         </div>
         <div class="dom_row flex um">
-          <!-- Tá»•ng bÃ¡o cÃ¡o -->
+          <!-- Tổng báo cáo -->
           <div class="dom_inner dom_fade_item w30 box_shadow chart" id="detail_total_report">
             <div class="dom_total_report balance">
               <ul>
@@ -1350,7 +1350,7 @@
               month
             </h2>
             <div class="dom_table_filter">
-              <!-- Filter cho cÃ¡c loáº¡i hÃ nh Ä‘á»™ng (Lead, Reach, Message, Spend) -->
+              <!-- Filter cho các loại hành động (Lead, Reach, Message, Spend) -->
               <div class="dom_select year_filter">
                 <div class="flex">
                   <p class="dom_selected show">Spent</p>
@@ -1374,14 +1374,14 @@
                   </li>
                 </ul>
               </div>
-              <!-- Filter cho cÃ¡c nÄƒm -->
+              <!-- Filter cho các năm -->
               <div class="dom_select year">
                 <div class="flex">
                   <p class="dom_selected show" id="selectedYear">This Year</p>
                 </div>
                 <i class="fa-solid fa-angle-down"></i>
                 <ul class="dom_select_show year" id="yearSelect">
-                  <!-- CÃ¡c nÄƒm sáº½ Ä‘Æ°á»£c render Ä‘á»™ng á»Ÿ Ä‘Ã¢y -->
+                  <!-- Các năm sẽ được render động ở đây -->
                 </ul>
               </div>
             </div>
@@ -1402,16 +1402,16 @@
                   style="background:#f1f5f9; color:#64748b; font-size:1.1rem; font-weight:600; padding:0.2rem 0.8rem; border-radius:20px; display:none;"></span>
               </h2>
               <div style="display:flex; gap: 1.2rem; align-items: center;">
-                <!-- Toggle switch Ä‘áº¹p -->
+                <!-- Toggle switch đẹp -->
                 <div style="display:flex; align-items:center; gap:0.8rem;">
                   <span
                     style="color:#475569; font-weight:600; font-size:1.15rem; white-space:nowrap; user-select:none;">
                     <i class="fa-solid fa-filter" style="font-size:1rem; opacity:0.6;"></i>
-                    Lá»c Meta
+                    Lọc Meta
                   </span>
                   <label id="meta_toggle_label"
                     style="position:relative; display:inline-block; width:4.2rem; height:2.2rem; cursor:pointer;"
-                    title="Báº­t/táº¯t lá»c há»‡ thá»‘ng Meta">
+                    title="Bật/tắt lọc hệ thống Meta">
                     <input type="checkbox" id="activity_filter_meta_toggle" checked
                       onchange="window.toggleMetaActivityFilter()"
                       style="opacity:0; width:0; height:0; position:absolute;">
@@ -1479,7 +1479,7 @@
           <div class="g_sync_bar">
             <span class="g_sync_info">
               <i class="fa-solid fa-rotate main_clr"></i>
-              Dá»¯ liá»‡u Ä‘á»“ng bá»™ lÃºc: <span id="g_last_sync">--</span>
+              Dữ liệu đồng bộ lúc: <span id="g_last_sync">--</span>
             </span>
             <button class="g_sync_btn" id="g_sync_btn" onclick="triggerGAdsSync()">
               <i class="fa-solid fa-rotate-right"></i> Sync
@@ -1528,7 +1528,7 @@
                   </li>
                 </ul>
               </div>
-              <!-- KPI mini cards â€“ Interaction style -->
+              <!-- KPI mini cards – Interaction style -->
               <div id="g_kpi_cards" class="g_kpi_cards"></div>
             </div>
 
@@ -1568,10 +1568,10 @@
               </div>
             </div>
 
-            <!-- Bar Chart â€“ Campaign Performance -->
+            <!-- Bar Chart – Campaign Performance -->
             <div class="dom_inner w35 box_shadow chart">
               <div class="dom_table_filter">
-                <h2><i class="fa-solid fa-chart-bar main_clr"></i> Hiá»‡u quáº£ theo Campaign</h2>
+                <h2><i class="fa-solid fa-chart-bar main_clr"></i> Hiệu quả theo Campaign</h2>
                 <div class="dom_select daily_total" id="g_bar_select">
                   <i class="fa-solid fa-chart-simple"></i>
                   <div class="flex">
@@ -1622,7 +1622,7 @@
               </div>
             </div>
 
-            <!-- Donut Chart â€“ Spent by Campaign (CENTER) -->
+            <!-- Donut Chart – Spent by Campaign (CENTER) -->
             <div class="dom_inner g_third box_shadow chart g_donut_card">
               <h2><i class="fa-solid fa-circle-half-stroke main_clr"></i> Spent by Campaign</h2>
               <div class="g_donut_wrap">
@@ -1631,7 +1631,7 @@
               <div id="g_donut_legend" class="g_donut_legend"></div>
             </div>
 
-            <!-- CPVisit Chart â€“ Store Visit Efficiency (RIGHT) -->
+            <!-- CPVisit Chart – Store Visit Efficiency (RIGHT) -->
             <div class="dom_inner g_third box_shadow chart" style="display:flex;flex-direction:column;overflow:hidden;">
               <h2><i class="fa-solid fa-store main_clr"></i> CPVisit Efficiency</h2>
               <div id="g_cpvisit_wrap" class="g_funnel_wrap"
@@ -1715,7 +1715,7 @@
             <div class="dom_inner box_shadow chart"
               style="flex:1.2; min-width:0; display:flex; flex-direction:column; background-color: white;">
               <h2><i class="fa-solid fa-location-dot main_clr"></i> Location Performance</h2>
-              <p style="font-size:0.8rem;color:#94a3b8;margin:-0.3rem 0 0.6rem;">Top tá»‰nh/thÃ nh theo metric Ä‘Ã£ chá»n</p>
+              <p style="font-size:0.8rem;color:#94a3b8;margin:-0.3rem 0 0.6rem;">Top tỉnh/thành theo metric đã chọn</p>
               <div id="g_location_chart_wrap" style="position:relative; flex:1; min-height:220px;">
                 <canvas id="g_location_chart"></canvas>
               </div>
@@ -1725,7 +1725,7 @@
             <div class="dom_inner box_shadow chart"
               style="flex:1.4; min-width:0; display:flex; flex-direction:column; background-color: white;">
               <h2><i class="fa-solid fa-circle-dot main_clr"></i> Distance Radius</h2>
-              <p style="font-size:0.8rem;color:#94a3b8;margin:-0.3rem 0 0.6rem;">BÃ¡n kÃ­nh tá»« cá»­a hÃ ng â€” metric Ä‘Ã£ chá»n
+              <p style="font-size:0.8rem;color:#94a3b8;margin:-0.3rem 0 0.6rem;">Bán kính từ cửa hàng — metric đã chọn
               </p>
               <div style="position:relative; flex:1; min-height:220px;">
                 <canvas id="g_distance_chart"></canvas>
@@ -1736,7 +1736,7 @@
             <div class="dom_inner box_shadow chart"
               style="flex:1; min-width:0; display:flex; flex-direction:column; background-color: white;">
               <h2><i class="fa-solid fa-chart-pie main_clr"></i> Channel Breakdown</h2>
-              <p style="font-size:0.8rem;color:#94a3b8;margin:-0.3rem 0 0.6rem;">PhÃ¢n bá»• chi tiÃªu theo kÃªnh</p>
+              <p style="font-size:0.8rem;color:#94a3b8;margin:-0.3rem 0 0.6rem;">Phân bổ chi tiêu theo kênh</p>
               <span id="g_channel_chart" style="display:none;"></span>
               <div class="g_channel_body" style="flex:1;"></div>
             </div>
@@ -1791,13 +1791,13 @@
             <i class="fa-solid fa-robot ai_report_robot_icon"></i>
             <div>
               <p class="ai_report_header_title">DOM AI REPORT</p>
-              <p class="ai_report_header_sub" id="ai_report_subtitle">PhÃ¢n tÃ­ch hiá»‡u suáº¥t quáº£ng cÃ¡o</p>
+              <p class="ai_report_header_sub" id="ai_report_subtitle">Phân tích hiệu suất quảng cáo</p>
             </div>
           </div>
           <div class="ai_report_header_actions">
-            <button class="ai_report_btn_export" id="btn_export_docx" title="Xuáº¥t bÃ¡o cÃ¡o Word (.docx)">
+            <button class="ai_report_btn_export" id="btn_export_docx" title="Xuất báo cáo Word (.docx)">
               <i class="fa-solid fa-file-word"></i>
-              <span>Xuáº¥t DOCX</span>
+              <span>Xuất DOCX</span>
             </button>
             <button class="ai_report_btn_close" id="ai_report_close_btn">
               <i class="fa-solid fa-xmark"></i>
@@ -1844,7 +1844,7 @@
         <div style="display:flex;align-items:center;gap:0.6rem;">
           <button id="ai_history_icon_btn" onclick="switchAiTab('history')">
             <i class="fa-solid fa-clock-rotate-left"></i>
-            <span>Xem lá»‹ch sá»­</span>
+            <span>Xem lịch sử</span>
             <span id="ai_history_badge" class="ai_history_badge" style="display:none">0</span>
           </button>
           <button class="ai_close_btn" onclick="closeAiSummaryModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -1853,97 +1853,97 @@
 
       <!-- Panel: Home (2 cards) -->
       <div id="ai_panel_home" class="ai_home_panel" style="display:flex">
-        <!-- Card: PhÃ¢n tÃ­ch theo thá»i gian -->
+        <!-- Card: Phân tích theo thời gian -->
         <div class="ai_home_card" id="ai_home_card_analyze">
           <div class="ai_home_card_icon">
             <i class="fa-solid fa-chart-line"></i>
           </div>
           <div class="ai_home_card_content">
-            <h3>PhÃ¢n tÃ­ch dá»¯ liá»‡u hiá»‡n táº¡i</h3>
-            <p>AI tá»•ng há»£p vÃ  phÃ¢n tÃ­ch toÃ n bá»™ hiá»‡u suáº¥t campaign dá»±a trÃªn bá»™ lá»c vÃ  thá»i gian báº¡n Ä‘ang xem trÃªn
+            <h3>Phân tích dữ liệu hiện tại</h3>
+            <p>AI tổng hợp và phân tích toàn bộ hiệu suất campaign dựa trên bộ lọc và thời gian bạn đang xem trên
               dashboard.</p>
           </div>
           <button class="ai_home_run_btn" onclick="runAiSummaryFromHome()">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> Cháº¡y phÃ¢n tÃ­ch
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Chạy phân tích
           </button>
         </div>
 
-        <!-- Card: So sÃ¡nh Campaign -->
+        <!-- Card: So sánh Campaign -->
         <div class="ai_home_card clickable" onclick="switchAiTab('compare')">
           <div class="ai_home_card_icon compare">
             <i class="fa-solid fa-code-compare"></i>
           </div>
           <div class="ai_home_card_content">
-            <h3>So sÃ¡nh Campaign</h3>
-            <p>Chá»n 2 hoáº·c nhiá»u campaign Ä‘á»ƒ AI phÃ¢n tÃ­ch vÃ  so sÃ¡nh chi tiáº¿t hiá»‡u suáº¥t tá»«ng chiáº¿n dá»‹ch.</p>
+            <h3>So sánh Campaign</h3>
+            <p>Chọn 2 hoặc nhiều campaign để AI phân tích và so sánh chi tiết hiệu suất từng chiến dịch.</p>
           </div>
           <div class="ai_home_nav_btn">
-            <i class="fa-solid fa-arrow-right"></i> Chá»n campaign
+            <i class="fa-solid fa-arrow-right"></i> Chọn campaign
           </div>
         </div>
       </div>
 
-      <!-- Panel: Káº¿t quáº£ -->
+      <!-- Panel: Kết quả -->
       <div id="ai_panel_result" class="ai_modal_body" style="display:none">
         <div id="ai_summary_loading" style="display:none">
           <div class="ai_loader_dots"><span></span><span></span><span></span></div>
-          <p>DOM AI Ä‘ang phÃ¢n tÃ­ch dá»¯ liá»‡u...</p>
+          <p>DOM AI đang phân tích dữ liệu...</p>
         </div>
         <div id="ai_summary_content"></div>
       </div>
 
-      <!-- Panel: So sÃ¡nh Campaign -->
+      <!-- Panel: So sánh Campaign -->
       <div id="ai_panel_compare" class="ai_modal_body" style="display:none">
         <div class="ai_compare_header">
           <div class="ai_compare_search_wrap">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="ai_compare_search" placeholder="TÃ¬m tÃªn campaign..."
+            <input type="text" id="ai_compare_search" placeholder="Tìm tên campaign..."
               oninput="filterCompareCampaigns(this.value)">
           </div>
           <div class="ai_compare_actions_top">
             <button class="ai_compare_sel_btn" onclick="selectAllCompareCampaigns(true)"><i
-                class="fa-solid fa-check-double"></i> Chá»n táº¥t cáº£</button>
+                class="fa-solid fa-check-double"></i> Chọn tất cả</button>
             <button class="ai_compare_sel_btn" onclick="selectAllCompareCampaigns(false)"><i
-                class="fa-solid fa-xmark"></i> Bá» chá»n</button>
-            <span id="ai_compare_count" class="ai_compare_count">0 Ä‘Ã£ chá»n</span>
+                class="fa-solid fa-xmark"></i> Bỏ chọn</button>
+            <span id="ai_compare_count" class="ai_compare_count">0 đã chọn</span>
           </div>
         </div>
         <div id="ai_compare_list" class="ai_compare_list"></div>
       </div>
 
-      <!-- Panel: Lá»‹ch sá»­ -->
+      <!-- Panel: Lịch sử -->
       <div id="ai_panel_history" class="ai_modal_body" style="display:none">
         <div id="ai_history_list"></div>
       </div>
 
-      <!-- Footer Ä‘á»™ng -->
+      <!-- Footer động -->
       <div class="ai_modal_footer" id="ai_modal_footer">
         <!-- Home footer: empty -->
         <div id="ai_footer_home" style="display:flex;width:100%;justify-content:flex-end;"></div>
         <!-- Result footer -->
         <div id="ai_footer_result" style="display:none;width:100%;justify-content:space-between;align-items:center;">
           <button class="ai_back_btn" onclick="switchAiTab('home')"><i class="fa-solid fa-arrow-left"></i> Quay
-            láº¡i</button>
+            lại</button>
           <div style="display:flex;gap:0.8rem;">
-            <button id="ai_copy_btn" style="display:none"><i class="fa-solid fa-copy"></i> Sao chÃ©p</button>
+            <button id="ai_copy_btn" style="display:none"><i class="fa-solid fa-copy"></i> Sao chép</button>
             <button id="ai_export_word_btn" onclick="exportAiToWord()" style="display:none"><i
-                class="fa-solid fa-file-word"></i> Xuáº¥t Word</button>
-            <button id="ai_regenerate_btn" style="display:none"><i class="fa-solid fa-rotate-right"></i> Táº¡o
-              láº¡i</button>
+                class="fa-solid fa-file-word"></i> Xuất Word</button>
+            <button id="ai_regenerate_btn" style="display:none"><i class="fa-solid fa-rotate-right"></i> Tạo
+              lại</button>
           </div>
         </div>
         <!-- Compare footer -->
         <div id="ai_footer_compare" style="display:none;width:100%;justify-content:space-between;align-items:center;">
           <button class="ai_back_btn" onclick="switchAiTab('home')"><i class="fa-solid fa-arrow-left"></i> Quay
-            láº¡i</button>
+            lại</button>
           <button id="ai_compare_run_btn" onclick="runAiCompare()" disabled>
-            <i class="fa-solid fa-code-compare"></i> PhÃ¢n tÃ­ch so sÃ¡nh
+            <i class="fa-solid fa-code-compare"></i> Phân tích so sánh
           </button>
         </div>
         <!-- History footer -->
         <div id="ai_footer_history" style="display:none;width:100%;">
           <button class="ai_back_btn" onclick="switchAiTab('home')"><i class="fa-solid fa-arrow-left"></i> Quay
-            láº¡i</button>
+            lại</button>
         </div>
       </div>
 
@@ -1975,7 +1975,7 @@
             </button>
             <button class="setting-tab-btn" onclick="switchSettingTab('tab-plan')" id="btn-tab-plan"
               style="padding: 0 0 1.2rem 0; border: none; background: none; font-weight: 700; font-size: 1.3rem; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s; white-space: nowrap;">
-              <i class="fa-solid fa-crown"></i> GÃ³i & Gia Háº¡n
+              <i class="fa-solid fa-crown"></i> Gói & Gia Hạn
             </button>
           </div>
         </div>
@@ -1993,10 +1993,10 @@
             style="padding: 1.2rem 2.4rem; background: linear-gradient(135deg,#fffbeb,#fef3c7); border-bottom: 1px solid #fde68a; display:flex; align-items:center; gap:1rem; flex-shrink:0;">
             <i class="fa-solid fa-circle-info" style="color:#f59e0b; font-size:1.6rem;"></i>
             <div>
-              <p style="font-size:1.3rem; font-weight:700; color:#92400e; margin:0 0 0.2rem;">Quáº£n lÃ½ bá»™ lá»c thÆ°Æ¡ng hiá»‡u
+              <p style="font-size:1.3rem; font-weight:700; color:#92400e; margin:0 0 0.2rem;">Quản lý bộ lọc thương hiệu
               </p>
-              <p style="font-size:1.2rem; color:#78350f; margin:0; opacity: .8;">Má»—i brand cÃ³ <b>tá»« khÃ³a</b> Ä‘á»ƒ lá»c
-                chiáº¿n dá»‹ch theo tÃªn. áº¢nh avatar hiá»ƒn thá»‹ trá»±c tiáº¿p trong dropdown.</p>
+              <p style="font-size:1.2rem; color:#78350f; margin:0; opacity: .8;">Mỗi brand có <b>từ khóa</b> để lọc
+                chiến dịch theo tên. Ảnh avatar hiển thị trực tiếp trong dropdown.</p>
             </div>
           </div>
 
@@ -2010,7 +2010,7 @@
               style="margin-top:1.8rem; width:100%; padding:1.1rem; border-radius:12px; border:2px dashed #cbd5e1; background:transparent; color:#64748b; font-size:1.3rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.8rem; transition:all .2s;"
               onmouseover="this.style.borderColor='#f59e0b'; this.style.color='#f59e0b'; this.style.background='#fffbeb'"
               onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#64748b'; this.style.background='transparent'">
-              <i class="fa-solid fa-plus-circle"></i> ThÃªm thÆ°Æ¡ng hiá»‡u má»›i
+              <i class="fa-solid fa-plus-circle"></i> Thêm thương hiệu mới
             </button>
           </div>
 
@@ -2018,11 +2018,11 @@
             style="flex-shrink:0; justify-content:space-between; background: #fff; border-top: 1px solid #e2e8f0; padding: 1.5rem 2.4rem;">
             <button class="ai_back_btn" onclick="closeFilterSettings()"
               style="padding: 0.8rem 1.5rem; font-size: 1.3rem;">
-              <i class="fa-solid fa-arrow-left"></i> Há»§y
+              <i class="fa-solid fa-arrow-left"></i> Hủy
             </button>
             <button onclick="saveBrandSettings()"
               style="background: var(--mainClr); color:#fff; border-color: var(--mainClr); font-weight:700; gap: 0.6rem; display:flex; align-items:center; padding:0.8rem 1.8rem; border-radius:8px; border:none; cursor:pointer; font-size:1.3rem;">
-              <i class="fa-solid fa-floppy-disk"></i> LÆ°u cáº¥u hÃ¬nh
+              <i class="fa-solid fa-floppy-disk"></i> Lưu cấu hình
             </button>
           </div>
         </div>
@@ -2034,13 +2034,13 @@
             style="background: #fff; padding: 2.5rem; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <h3
               style="font-size: 1.6rem; font-weight: 800; color: #1e293b; margin-bottom: 2rem; display:flex; align-items:center; gap:0.8rem;">
-              <i class="fa-solid fa-pen-to-square" style="color: var(--mainClr);"></i> ThÃ´ng tin chung
+              <i class="fa-solid fa-pen-to-square" style="color: var(--mainClr);"></i> Thông tin chung
             </h3>
             <div style="margin-bottom: 2rem;">
               <label
-                style="display:block; font-weight:700; color: #475569; margin-bottom:0.8rem; font-size: 1.25rem;">TÃªn
+                style="display:block; font-weight:700; color: #475569; margin-bottom:0.8rem; font-size: 1.25rem;">Tên
                 Workspace</label>
-              <input type="text" id="edit_workspace_name" class="dom-input" placeholder="Nháº­p tÃªn workspace..."
+              <input type="text" id="edit_workspace_name" class="dom-input" placeholder="Nhập tên workspace..."
                 style="width:100%; padding: 1.2rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1.35rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s;"
                 onfocus="this.style.borderColor='var(--mainClr)'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
@@ -2062,13 +2062,13 @@
             <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed #e2e8f0;">
               <label
                 style="display:flex; align-items:center; gap: 0.5rem; font-weight:700; color: #475569; margin-bottom:0.8rem; font-size: 1.25rem;">
-                <i class="fa-solid fa-microchip" style="color: #10b981;"></i> Gemini API Key (Báº¯t buá»™c Ä‘á»ƒ dÃ¹ng AI)
+                <i class="fa-solid fa-microchip" style="color: #10b981;"></i> Gemini API Key (Bắt buộc để dùng AI)
               </label>
-              <input type="password" id="edit_workspace_gemini_key" class="dom-input" placeholder="Nháº­p Gemini API Key cá»§a báº¡n..."
+              <input type="password" id="edit_workspace_gemini_key" class="dom-input" placeholder="Nhập Gemini API Key của bạn..."
                 style="width:100%; padding: 1.2rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1.35rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s;"
                 onfocus="this.style.borderColor='var(--mainClr)'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
-              <p style="margin: 0.8rem 0 0; font-size: 1.15rem; color: #64748b; font-weight: 500;">Báº¯t buá»™c pháº£i cÃ³ API Key riÃªng Ä‘á»ƒ xuáº¥t bÃ¡o cÃ¡o AI. TÃ­nh nÄƒng nÃ y chá»‰ hiá»ƒn thá»‹ vá»›i Owner.</p>
+              <p style="margin: 0.8rem 0 0; font-size: 1.15rem; color: #64748b; font-weight: 500;">Bắt buộc phải có API Key riêng để xuất báo cáo AI. Tính năng này chỉ hiển thị với Owner.</p>
             </div>
           </div>
 
@@ -2078,7 +2078,7 @@
               onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(59,130,246,0.3)'"
               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(59,130,246,0.2)'"
               onmousedown="this.style.transform='scale(0.98)'">
-              <i class="fa-solid fa-floppy-disk"></i> LÆ°u thay Ä‘á»•i
+              <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
             </button>
           </div>
         </div>
@@ -2102,11 +2102,11 @@
               style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(245,158,11,0.3);">
               <i class="fa-solid fa-crown" style="color: #fff; font-size: 1.4rem;"></i>
             </div>
-            ThÃ´ng tin gÃ³i dá»‹ch vá»¥
+            Thông tin gói dịch vụ
           </h3>
 
           <div style="display:flex; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap;">
-            <!-- Card 1: Tráº¡ng thÃ¡i -->
+            <!-- Card 1: Trạng thái -->
             <div
               style="flex: 1; background: linear-gradient(145deg, #ffffff, #f8fafc); padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02); position: relative; overflow: hidden; transition: transform 0.3s;"
               onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
@@ -2115,15 +2115,15 @@
                 id="plan_status_indicator"></div>
               <div
                 style="font-size: 1.1rem; color: #64748b; font-weight: 700; margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; display:flex; justify-content: space-between; align-items: center;">
-                Tráº¡ng ThÃ¡i
+                Trạng Thái
                 <i class="fa-solid fa-bolt" style="color: #cbd5e1; font-size: 1.2rem;"></i>
               </div>
               <div id="plan_current_status"
                 style="font-size: 1.6rem; font-weight: 800; color: #10b981; display:flex; align-items:center; gap:0.6rem;">
-                <i class="fa-solid fa-circle-notch fa-spin"></i> Äang táº£i...
+                <i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải...
               </div>
             </div>
-            <!-- Card 2: Háº¡n sá»­ dá»¥ng -->
+            <!-- Card 2: Hạn sử dụng -->
             <div
               style="flex: 1; background: linear-gradient(145deg, #ffffff, #f8fafc); padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02); position: relative; overflow: hidden; transition: transform 0.3s;"
               onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
@@ -2132,12 +2132,12 @@
                 id="plan_expiry_indicator"></div>
               <div
                 style="font-size: 1.1rem; color: #64748b; font-weight: 700; margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; display:flex; justify-content: space-between; align-items: center;">
-                Háº¡n Sá»­ Dá»¥ng
+                Hạn Sử Dụng
                 <i class="fa-solid fa-calendar-days" style="color: #cbd5e1; font-size: 1.2rem;"></i>
               </div>
               <div id="plan_current_expiry"
                 style="font-size: 1.6rem; font-weight: 800; color: #1e293b; font-family: 'Inter', monospace; letter-spacing: -0.02em;">
-                Äang táº£i...
+                Đang tải...
               </div>
             </div>
           </div>
@@ -2146,21 +2146,21 @@
             <hr style="flex:1; border: none; border-top: 1px dashed #cbd5e1;">
             <span
               style="background: #f1f5f9; padding: 0.4rem 1.2rem; border-radius: 20px; font-size: 1.1rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;"><i
-                class="fa-solid fa-rocket" style="margin-right:0.5rem; color:#94a3b8;"></i> Gia Háº¡n</span>
+                class="fa-solid fa-rocket" style="margin-right:0.5rem; color:#94a3b8;"></i> Gia Hạn</span>
             <hr style="flex:1; border: none; border-top: 1px dashed #cbd5e1;">
           </div>
 
           <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: start;">
-            <!-- Chá»n GÃ³i UI -->
+            <!-- Chọn Gói UI -->
             <div>
               <label
-                style="display:block; font-weight:700; color: #334155; margin-bottom:1.2rem; font-size: 1.2rem;">Chá»n
-                GÃ³i NÃ¢ng Cáº¥p</label>
+                style="display:block; font-weight:700; color: #334155; margin-bottom:1.2rem; font-size: 1.2rem;">Chọn
+                Gói Nâng Cấp</label>
 
               <input type="hidden" id="extend_plan_type" value="1_year">
 
               <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <!-- Card GÃ³i 1 ThÃ¡ng -->
+                <!-- Card Gói 1 Tháng -->
                 <div class="plan-card" onclick="selectPlanCard('1_month')" id="plan_card_1_month"
                   style="border: 2px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; background: #fff;">
                   <div style="display: flex; align-items: center; gap: 1.2rem;">
@@ -2170,22 +2170,22 @@
                         id="radio_inner_1_month"></div>
                     </div>
                     <div>
-                      <div style="font-size: 1.3rem; font-weight: 700; color: #1e293b;">GÃ³i 1 ThÃ¡ng</div>
-                      <div style="font-size: 1.1rem; color: #64748b; margin-top: 0.2rem;">PhÃ¹ há»£p Ä‘á»ƒ tráº£i nghiá»‡m</div>
+                      <div style="font-size: 1.3rem; font-weight: 700; color: #1e293b;">Gói 1 Tháng</div>
+                      <div style="font-size: 1.1rem; color: #64748b; margin-top: 0.2rem;">Phù hợp để trải nghiệm</div>
                     </div>
                   </div>
                   <div style="text-align: right;">
-                    <div style="font-size: 1.4rem; font-weight: 800; color: #1e293b;">690.000Ä‘</div>
-                    <div style="font-size: 1rem; color: #64748b;">/thÃ¡ng</div>
+                    <div style="font-size: 1.4rem; font-weight: 800; color: #1e293b;">690.000đ</div>
+                    <div style="font-size: 1rem; color: #64748b;">/tháng</div>
                   </div>
                 </div>
 
-                <!-- Card GÃ³i 1 NÄƒm -->
+                <!-- Card Gói 1 Năm -->
                 <div class="plan-card active" onclick="selectPlanCard('1_year')" id="plan_card_1_year"
                   style="border: 2px solid #f59e0b; border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; background: rgba(245,158,11,0.03); position: relative; box-shadow: 0 4px 15px rgba(245,158,11,0.1);">
                   <div
                     style="position: absolute; top: -10px; right: 15px; background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; font-size: 0.9rem; font-weight: 800; padding: 0.3rem 0.8rem; border-radius: 20px; box-shadow: 0 2px 5px rgba(239,68,68,0.3);">
-                    TIáº¾T KIá»†M 29%
+                    TIẾT KIỆM 29%
                   </div>
                   <div style="display: flex; align-items: center; gap: 1.2rem;">
                     <div class="plan-radio" id="radio_1_year"
@@ -2194,29 +2194,29 @@
                         id="radio_inner_1_year"></div>
                     </div>
                     <div>
-                      <div style="font-size: 1.3rem; font-weight: 800; color: #92400e;">GÃ³i 1 NÄƒm</div>
-                      <div style="font-size: 1.1rem; color: #b45309; margin-top: 0.2rem;">Thanh toÃ¡n 5.880.000Ä‘/nÄƒm
+                      <div style="font-size: 1.3rem; font-weight: 800; color: #92400e;">Gói 1 Năm</div>
+                      <div style="font-size: 1.1rem; color: #b45309; margin-top: 0.2rem;">Thanh toán 5.880.000đ/năm
                       </div>
                     </div>
                   </div>
                   <div style="text-align: right;">
-                    <div style="font-size: 1.4rem; font-weight: 800; color: #92400e;">490.000Ä‘</div>
-                    <div style="font-size: 1rem; color: #b45309;">/thÃ¡ng</div>
+                    <div style="font-size: 1.4rem; font-weight: 800; color: #92400e;">490.000đ</div>
+                    <div style="font-size: 1rem; color: #b45309;">/tháng</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Form LiÃªn Há»‡ -->
+            <!-- Form Liên Hệ -->
             <div style="background: #f8fafc; padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0;">
               <h4
                 style="font-size: 1.2rem; font-weight: 700; color: #334155; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem;">
-                <i class="fa-solid fa-address-card" style="color: #64748b;"></i> ThÃ´ng Tin LiÃªn Há»‡
+                <i class="fa-solid fa-address-card" style="color: #64748b;"></i> Thông Tin Liên Hệ
               </h4>
               <label
-                style="display:block; font-weight:600; color: #475569; margin-bottom:0.6rem; font-size: 1.1rem;">SÄT
+                style="display:block; font-weight:600; color: #475569; margin-bottom:0.6rem; font-size: 1.1rem;">SĐT
                 Zalo <span style="color:#ef4444;">*</span></label>
-              <input type="text" id="extend_phone" placeholder="Nháº­p SÄT Ä‘á»ƒ Admin liÃªn há»‡..."
+              <input type="text" id="extend_phone" placeholder="Nhập SĐT để Admin liên hệ..."
                 style="width:100%; padding: 1.2rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1.2rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 1.5rem;"
                 onfocus="this.style.borderColor='var(--mainClr)'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.02)'">
@@ -2224,7 +2224,7 @@
               <div
                 style="font-size: 1.05rem; color: #64748b; line-height: 1.5; margin-bottom: 2rem; display: flex; gap: 0.8rem; background: rgba(59,130,246,0.05); padding: 1rem; border-radius: 8px; border: 1px dashed rgba(59,130,246,0.2);">
                 <i class="fa-solid fa-circle-info" style="color: #3b82f6; margin-top: 0.2rem;"></i>
-                <span>Sau khi gá»­i yÃªu cáº§u, Admin sáº½ liÃªn há»‡ qua Zalo cá»§a báº¡n Ä‘á»ƒ há»— trá»£ kÃ­ch hoáº¡t gÃ³i dá»‹ch vá»¥.</span>
+                <span>Sau khi gửi yêu cầu, Admin sẽ liên hệ qua Zalo của bạn để hỗ trợ kích hoạt gói dịch vụ.</span>
               </div>
 
               <button id="btn_submit_extend" onclick="submitPlanExtension()"
@@ -2232,7 +2232,7 @@
                 onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(245,158,11,0.4)'"
                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245,158,11,0.3)'"
                 onmousedown="this.style.transform='scale(0.98)'">
-                <i class="fa-solid fa-paper-plane"></i> Gá»­i YÃªu Cáº§u NÃ¢ng Cáº¥p
+                <i class="fa-solid fa-paper-plane"></i> Gửi Yêu Cầu Nâng Cấp
               </button>
             </div>
           </div>
@@ -2302,7 +2302,7 @@
 
     async function saveWorkspaceInfo() {
       if (!window.SAAS_ROUTER || !window.SAAS_ROUTER.tenant) {
-        showToast("Lá»—i: KhÃ´ng tÃ¬m tháº¥y thÃ´ng tin tenant hiá»‡n táº¡i", 3000);
+        showToast("Lỗi: Không tìm thấy thông tin tenant hiện tại", 3000);
         return;
       }
       const slug = window.SAAS_ROUTER.tenant.slug;
@@ -2322,20 +2322,20 @@
         });
         const data = await res.json();
         if (data.ok) {
-          showToast("ÄÃ£ lÆ°u thÃ´ng tin cÃ i Ä‘áº·t thÃ nh cÃ´ng!", 3000);
+          showToast("Đã lưu thông tin cài đặt thành công!", 3000);
           window.SAAS_ROUTER.tenant.gemini_api_key = gemini_api_key;
         } else {
-          alert("Lá»—i: " + (data.error || "KhÃ´ng thá»ƒ cáº­p nháº­t cáº¥u hÃ¬nh"));
+          alert("Lỗi: " + (data.error || "Không thể cập nhật cấu hình"));
         }
       } catch (e) {
         console.error(e);
-        alert("Lá»—i káº¿t ná»‘i");
+        alert("Lỗi kết nối");
       }
     }
 
     async function submitPlanExtension() {
       if (!window.SAAS_ROUTER || !window.SAAS_ROUTER.tenant) {
-        showToast("Lá»—i: KhÃ´ng tÃ¬m tháº¥y thÃ´ng tin tenant hiá»‡n táº¡i", 3000);
+        showToast("Lỗi: Không tìm thấy thông tin tenant hiện tại", 3000);
         return;
       }
       const slug = window.SAAS_ROUTER.tenant.slug;
@@ -2343,13 +2343,13 @@
       const plan = document.getElementById('extend_plan_type').value;
 
       if (!phone) {
-        alert("Vui lÃ²ng nháº­p Sá»‘ Äiá»‡n Thoáº¡i Zalo Ä‘á»ƒ Admin liÃªn há»‡!");
+        alert("Vui lòng nhập Số Điện Thoại Zalo để Admin liên hệ!");
         return;
       }
 
       const btn = document.getElementById('btn_submit_extend');
       const originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Äang Gá»­i...';
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang Gửi...';
       btn.disabled = true;
 
       try {
@@ -2366,16 +2366,16 @@
         });
         const data = await res.json();
         if (data.ok) {
-          showToast("YÃªu cáº§u Ä‘Ã£ gá»­i! Admin sáº½ liÃªn há»‡ Zalo báº¡n sá»›m.", 4000);
-          btn.innerHTML = '<i class="fa-solid fa-check"></i> ÄÃ£ Gá»­i ThÃ nh CÃ´ng';
+          showToast("Yêu cầu đã gửi! Admin sẽ liên hệ Zalo bạn sớm.", 4000);
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> Đã Gửi Thành Công';
         } else {
-          alert("Lá»—i: " + (data.error || "KhÃ´ng thá»ƒ gá»­i yÃªu cáº§u"));
+          alert("Lỗi: " + (data.error || "Không thể gửi yêu cầu"));
           btn.innerHTML = originalText;
           btn.disabled = false;
         }
       } catch (e) {
         console.error(e);
-        alert("Lá»—i káº¿t ná»‘i");
+        alert("Lỗi kết nối");
         btn.innerHTML = originalText;
         btn.disabled = false;
       }
@@ -2397,10 +2397,10 @@
         style="padding: 1.2rem 2.4rem; background: linear-gradient(135deg,#fffbeb,#fef3c7); border-bottom: 1px solid #fde68a; display:flex; align-items:center; gap:1rem; flex-shrink:0;">
         <i class="fa-solid fa-circle-info" style="color:#f59e0b; font-size:1.6rem;"></i>
         <div>
-          <p style="font-size:1.3rem; font-weight:700; color:#92400e; margin:0 0 0.2rem;">Cáº¥u hÃ¬nh tá»« khÃ³a lá»c Campaign
+          <p style="font-size:1.3rem; font-weight:700; color:#92400e; margin:0 0 0.2rem;">Cấu hình từ khóa lọc Campaign
           </p>
-          <p style="font-size:1.2rem; color:#78350f; margin:0; opacity: .8;">Nháº­p cÃ¡c tá»« khÃ³a. Tá»•ng spend sáº½ Ä‘Æ°á»£c tÃ­nh
-            cho cÃ¡c campaign cÃ³ tÃªn chá»©a tá»« khÃ³a nÃ y.</p>
+          <p style="font-size:1.2rem; color:#78350f; margin:0; opacity: .8;">Nhập các từ khóa. Tổng spend sẽ được tính
+            cho các campaign có tên chứa từ khóa này.</p>
         </div>
       </div>
 
@@ -2412,31 +2412,31 @@
 
       <div class="ai_modal_footer" style="flex-shrink:0; justify-content:space-between;">
         <button class="ai_back_btn" onclick="closeGoalSettings()">
-          <i class="fa-solid fa-arrow-left"></i> Há»§y
+          <i class="fa-solid fa-arrow-left"></i> Hủy
         </button>
         <button onclick="saveGoalSettings()"
           style="background: var(--mainClr); color:#fff; border-color: var(--mainClr); font-weight:700; gap: 0.6rem; display:flex; align-items:center; padding: 1rem 2rem; border-radius: 8px; cursor: pointer; border: none;">
-          <i class="fa-solid fa-floppy-disk"></i> LÆ°u cáº¥u hÃ¬nh
+          <i class="fa-solid fa-floppy-disk"></i> Lưu cấu hình
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ðŸ“Š Detailed Performance Modal -->
+  <!-- 📊 Detailed Performance Modal -->
   <div id="performance_modal" class="ai_modal_overlay" style="display:none; z-index: 2000;">
     <div class="ai_modal_content"
       style="width: 90vw; max-width: 1300px; height: 85vh; display:flex; flex-direction:column;">
       <div class="ai_modal_header">
         <div style="display:flex; align-items:center; gap:1.2rem;">
           <i class="fa-solid fa-chart-column" style="color: var(--mainClr); font-size: 2.2rem;"></i>
-          <span style="font-size: 2rem; font-weight:800; color: #1e293b;">BÃO CÃO HIá»†U SUáº¤T CHI TIáº¾T</span>
+          <span style="font-size: 2rem; font-weight:800; color: #1e293b;">BÁO CÁO HIỆU SUẤT CHI TIẾT</span>
         </div>
         <div style="display:flex; align-items:center; gap:1.5rem;">
           <div
             style="cursor: pointer; color: #64748b; background: #f1f5f9; width: 3.2rem; height: 3.2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
             onclick="openSummarySettings()"
             onmouseover="this.style.background='var(--mainClr)'; this.style.color='#fff'"
-            onmouseout="this.style.background='#f1f5f9'; this.style.color='#64748b'" title="Cáº¥u hÃ¬nh 3 chá»‰ sá»‘">
+            onmouseout="this.style.background='#f1f5f9'; this.style.color='#64748b'" title="Cấu hình 3 chỉ số">
             <i class="fa-solid fa-gear" style="font-size: 1.5rem;"></i>
           </div>
           <button class="ai_close_btn" onclick="closePerformanceDetail()"><i class="fa-solid fa-xmark"></i></button>
@@ -2448,16 +2448,16 @@
         <div style="display:flex; align-items:center; gap:1.5rem;">
           <div class="perf_date_selector" style="cursor: default; border-color: #cbd5e1; background: #f1f5f9;">
             <i class="fa-solid fa-calendar-day" style="color:#94a3b8;"></i>
-            <span style="font-weight:600; color:#64748b;">Ká»³ hiá»‡n táº¡i:</span>
+            <span style="font-weight:600; color:#64748b;">Kỳ hiện tại:</span>
             <span id="perf_current_date_range" style="font-weight:700; color:#1e293b; margin-left: 0.5rem;">-</span>
           </div>
           <i class="fa-solid fa-arrow-right-arrow-left" style="color:#cbd5e1;"></i>
           <div class="perf_date_selector_wrap" style="position: relative;">
             <div class="perf_date_selector" onclick="togglePerfDatePicker()">
               <i class="fa-solid fa-calendar-check" style="color:var(--mainClr);"></i>
-              <span style="font-weight:600; color:#64748b;">So sÃ¡nh vá»›i:</span>
-              <span id="perf_compare_label" style="font-weight:700; color:#1e293b; margin-left: 0.5rem;">Tá»± Ä‘á»™ng (Ká»³
-                trÆ°á»›c)</span>
+              <span style="font-weight:600; color:#64748b;">So sánh với:</span>
+              <span id="perf_compare_label" style="font-weight:700; color:#1e293b; margin-left: 0.5rem;">Tự động (Kỳ
+                trước)</span>
               <i class="fa-solid fa-chevron-down" style="font-size:1.1rem; color:#94a3b8; margin-left: 0.5rem;"></i>
             </div>
 
@@ -2466,11 +2466,11 @@
               <div class="time_picker_sidebar">
                 <ul>
                   <li onclick="setPerfCompareType('auto', this)" class="active">
-                    <span class="radio_box"></span> <span>Tá»± Ä‘á»™ng (Ká»³ trÆ°á»›c)</span>
+                    <span class="radio_box"></span> <span>Tự động (Kỳ trước)</span>
                   </li>
 
                   <li onclick="setPerfCompareType('custom', this)">
-                    <span class="radio_box"></span> <span>TÃ¹y chá»n khoáº£ng ngÃ y</span>
+                    <span class="radio_box"></span> <span>Tùy chọn khoảng ngày</span>
                   </li>
                 </ul>
               </div>
@@ -2483,18 +2483,18 @@
                 <div class="time_picker_footer">
                   <div class="picker_inputs" style="display:flex; align-items:center; gap:0.6rem;">
                     <div style="display:flex; flex-direction:column; gap:0.2rem;">
-                      <span style="font-size:1rem; color:#94a3b8; font-weight:700;">Tá»« ngÃ y:</span>
+                      <span style="font-size:1rem; color:#94a3b8; font-weight:700;">Từ ngày:</span>
                       <input type="date" id="perf_start_date_input" />
                     </div>
                     <span style="margin-top:1.5rem; color:#cbd5e1;">-</span>
                     <div style="display:flex; flex-direction:column; gap:0.2rem;">
-                      <span style="font-size:1rem; color:#94a3b8; font-weight:700;">Äáº¿n ngÃ y:</span>
+                      <span style="font-size:1rem; color:#94a3b8; font-weight:700;">Đến ngày:</span>
                       <input type="date" id="perf_end_date_input" />
                     </div>
                   </div>
                   <div class="picker_actions">
-                    <button class="btn_cancel" onclick="togglePerfDatePicker()">Há»§y</button>
-                    <button class="btn_update" onclick="applyPerfCompareDate()">Ãp dá»¥ng</button>
+                    <button class="btn_cancel" onclick="togglePerfDatePicker()">Hủy</button>
+                    <button class="btn_update" onclick="applyPerfCompareDate()">Áp dụng</button>
                   </div>
                 </div>
               </div>
@@ -2509,7 +2509,7 @@
             <div class="flex" style="padding: 0 1rem;">
               <img id="perf_selected_brand_img" src=""
                 style="width: 2.2rem; height: 2.2rem; border-radius: 50%; object-fit: cover; margin-right: 0.8rem; display: none;" />
-              <p id="perf_selected_brand" class="dom_selected" style="font-weight: 700; color: #1e293b;">Táº¥t cáº£</p>
+              <p id="perf_selected_brand" class="dom_selected" style="font-weight: 700; color: #1e293b;">Tất cả</p>
             </div>
             <i class="fa-solid fa-angle-down" style="right: 1rem; color: #94a3b8;"></i>
             <ul id="perf_brand_list" class="dom_select_show" style="width: 100%; top: calc(100% + 5px);">
@@ -2527,7 +2527,7 @@
         </div>
         <div class="perf_loading" style="display:none; text-align:center; padding: 5rem;">
           <div class="ai_loader_dots"><span></span><span></span><span></span></div>
-          <p style="margin-top:1.5rem; color:#64748b; font-weight:600;">Äang chuáº©n bá»‹ dá»¯ liá»‡u so sÃ¡nh...</p>
+          <p style="margin-top:1.5rem; color:#64748b; font-weight:600;">Đang chuẩn bị dữ liệu so sánh...</p>
         </div>
       </div>
     </div>
@@ -2539,14 +2539,14 @@
         style="padding: 1.8rem 2.4rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
         <h3
           style="font-size: 1.8rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 1rem; margin: 0;">
-          <i class="fa-solid fa-gear" style="color: var(--mainClr);"></i> CÃ i Ä‘áº·t chá»‰ sá»‘ tÃ³m táº¯t
+          <i class="fa-solid fa-gear" style="color: var(--mainClr);"></i> Cài đặt chỉ số tóm tắt
         </h3>
         <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 2rem; color: #94a3b8;"
           onclick="closeSummarySettings()"></i>
       </div>
       <div style="padding: 2rem; overflow-y: auto;">
-        <p style="font-size: 1.35rem; color: #64748b; margin-bottom: 2rem; line-height: 1.6;">Chá»n Ä‘Ãºng <b>3 chá»‰ sá»‘</b>
-          quan trá»ng nháº¥t (ngoÃ i Spent) Ä‘á»ƒ hiá»ƒn thá»‹ vÃ  nháº­n Ä‘á»‹nh nhanh.</p>
+        <p style="font-size: 1.35rem; color: #64748b; margin-bottom: 2rem; line-height: 1.6;">Chọn đúng <b>3 chỉ số</b>
+          quan trọng nhất (ngoài Spent) để hiển thị và nhận định nhanh.</p>
         <div id="summary_available_list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
           <!-- Options rendered by JS -->
         </div>
@@ -2554,30 +2554,30 @@
       <div
         style="padding: 1.5rem 2.4rem; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; gap: 1.2rem; background: #f8fafc;">
         <button onclick="closeSummarySettings()"
-          style="padding: 0.8rem 1.6rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; font-weight: 600; cursor: pointer; color: #64748b;">Há»§y</button>
+          style="padding: 0.8rem 1.6rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; font-weight: 600; cursor: pointer; color: #64748b;">Hủy</button>
         <button onclick="saveSummarySettings()"
-          style="padding: 0.8rem 2.4rem; border-radius: 8px; background: var(--mainClr); color: #fff; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 169, 0, 0.3);">LÆ°u
-          cáº¥u hÃ¬nh</button>
+          style="padding: 0.8rem 2.4rem; border-radius: 8px; background: var(--mainClr); color: #fff; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 169, 0, 0.3);">Lưu
+          cấu hình</button>
       </div>
     </div>
   </div>
 
-  <!-- âš ï¸ Custom Alert Modal -->
+  <!-- ⚠️ Custom Alert Modal -->
   <div id="dom_alert_modal" class="ai_modal_overlay" style="display: none; z-index: 200000;">
     <div class="ai_modal_box" style="width: 400px; padding: 2.4rem;" id="dom_alert_content">
       <div
         style="width: 5rem; height: 5rem; background: #fff7ed; color: #f97316; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.4rem;">
         <i class="fa-solid fa-circle-exclamation"></i>
       </div>
-      <h3 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin-bottom: 1rem;">ThÃ´ng bÃ¡o</h3>
+      <h3 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin-bottom: 1rem;">Thông báo</h3>
       <p id="dom_alert_message" style="font-size: 1.4rem; color: #64748b; margin-bottom: 2rem; line-height: 1.5;"></p>
       <button onclick="closeDomAlert()"
-        style="width: 100%; padding: 1.2rem; border-radius: 10px; background: var(--mainClr); color: #fff; border: none; font-weight: 700; cursor: pointer; font-size: 1.4rem;">ÄÃ£
-        hiá»ƒu</button>
+        style="width: 100%; padding: 1.2rem; border-radius: 10px; background: var(--mainClr); color: #fff; border: none; font-weight: 700; cursor: pointer; font-size: 1.4rem;">Đã
+        hiểu</button>
     </div>
   </div>
 
-  <!-- ðŸ†š Compare Modal -->
+  <!-- 🆚 Compare Modal -->
   <div id="compare_modal"
     style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.55); z-index:300000; align-items:center; justify-content:center; padding:2rem;">
     <div id="compare_modal_box"
@@ -2696,15 +2696,15 @@
       <!-- Footer -->
       <div class="ai_modal_footer" style="justify-content:flex-end;">
         <button class="ai_back_btn" onclick="window._closeKeywordModal()">
-          <i class="fa-solid fa-xmark"></i> ÄÃ³ng
+          <i class="fa-solid fa-xmark"></i> Đóng
         </button>
       </div>
     </div>
   </div>
   <script>
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    //  ðŸŽ¨ CONSOLE BANNER
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ══════════════════════════════════════════════════════
+    //  🎨 CONSOLE BANNER
+    // ══════════════════════════════════════════════════════
     (function () {
       const line = 'color:#f5a623;font-weight:bold;font-size:11px;font-family:monospace';
       const title = 'color:#f5a623;font-weight:bold;font-size:18px;font-family:monospace;text-shadow:0 0 10px #f5a623';
@@ -2712,41 +2712,41 @@
       const tag = 'background:#f5a623;color:#000;font-weight:bold;padding:2px 8px;border-radius:4px;font-size:11px';
       const link = 'color:#60a5fa;font-size:11px;font-family:monospace';
       const warn = 'color:#ef4444;font-weight:bold;font-size:11px;font-family:monospace';
-      console.log('%câ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—\nâ•‘  â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•—  â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•— â–ˆâ–ˆâ–ˆâ•—   â–ˆâ–ˆâ–ˆâ•—       â•‘\nâ•‘  â–ˆâ–ˆâ•”â•â•â–ˆâ–ˆâ•—â–ˆâ–ˆâ•”â•â•â•â–ˆâ–ˆâ•—â–ˆâ–ˆâ–ˆâ–ˆâ•— â–ˆâ–ˆâ–ˆâ–ˆâ•‘       â•‘\nâ•‘  â–ˆâ–ˆâ•‘  â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘   â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•”â–ˆâ–ˆâ–ˆâ–ˆâ•”â–ˆâ–ˆâ•‘       â•‘\nâ•‘  â–ˆâ–ˆâ•‘  â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘   â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘â•šâ–ˆâ–ˆâ•”â•â–ˆâ–ˆâ•‘       â•‘\nâ•‘  â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•”â•â•šâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•”â•â–ˆâ–ˆâ•‘ â•šâ•â• â–ˆâ–ˆâ•‘       â•‘\nâ•‘  â•šâ•â•â•â•â•â•  â•šâ•â•â•â•â•â• â•šâ•â•     â•šâ•â•       â•‘\nâ•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•', line);
+      console.log('%c╔═══════════════════════════════════════╗\n║  ██████╗  ██████╗ ███╗   ███╗       ║\n║  ██╔══██╗██╔═══██╗████╗ ████║       ║\n║  ██║  ██║██║   ██║██╔████╔██║       ║\n║  ██║  ██║██║   ██║██║╚██╔╝██║       ║\n║  ██████╔╝╚██████╔╝██║ ╚═╝ ██║       ║\n║  ╚═════╝  ╚═════╝ ╚═╝     ╚═╝       ║\n╚═══════════════════════════════════════╝', line);
       console.log('%c DOM MARKETING REPORT', title);
-      console.log('%c Meta Ads Â· Google Ads Â· AI Analysis', sub);
+      console.log('%c Meta Ads · Google Ads · AI Analysis', sub);
       console.log(' ');
       console.log('%c v2.0 %c  by Ampersand Agency', tag, sub);
-      console.log('%cðŸ”— https://ampersand-reports-dom.netlify.app', link);
+      console.log('%c🔗 https://ampersand-reports-dom.netlify.app', link);
       console.log(' ');
-      console.log('%câš ï¸  ÄÃ¢y lÃ  cÃ´ng cá»¥ ná»™i bá»™.', warn);
-      console.log('%c   KhÃ´ng chia sáº» token hoáº·c dá»¯ liá»‡u tá»« console nÃ y.', sub);
-      console.log('%câ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€', sub);
-      console.log('%cðŸ’¡ Tip: resetLogo() â†’ reset logo vá» máº·c Ä‘á»‹nh', sub);
+      console.log('%c⚠️  Đây là công cụ nội bộ.', warn);
+      console.log('%c   Không chia sẻ token hoặc dữ liệu từ console này.', sub);
+      console.log('%c───────────────────────────────────────', sub);
+      console.log('%c💡 Tip: resetLogo() → reset logo về mặc định', sub);
     })();
 
-    // â”€â”€ Logo URL handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Logo URL handler ──────────────────────────────────
     const _LOGO_KEY = 'dom_custom_logo';
     const _LOGO_DEFAULT = 'https://ampersand-reports-dom.netlify.app/DOM-img/DOM_LOGO.png';
 
-    // Restore logo tá»« localStorage khi load
+    // Restore logo từ localStorage khi load
     (function () {
       const saved = localStorage.getItem(_LOGO_KEY);
       if (saved) { const el = document.getElementById('sidebar_logo'); if (el) el.src = saved; }
     })();
 
-    // Inject popup vÃ o <body> (1 láº§n) Ä‘á»ƒ thoÃ¡t stacking context cá»§a sidebar
+    // Inject popup vào <body> (1 lần) để thoát stacking context của sidebar
     function _ensureLogoPopup() {
       if (document.getElementById('logo_url_popup')) return;
       const el = document.createElement('div');
       el.id = 'logo_url_popup';
       el.className = 'logo_url_popup';
       el.innerHTML = `
-        <label>ðŸ”— Link áº£nh logo má»›i</label>
+        <label>🔗 Link ảnh logo mới</label>
         <input type="text" id="logo_url_input" placeholder="https://example.com/logo.png" />
         <div class="popup_actions">
-          <button class="btn_cancel_logo" onclick="closeLogoPopup()">Há»§y</button>
-          <button class="btn_apply" onclick="applyLogoUrl()">Ãp dá»¥ng</button>
+          <button class="btn_cancel_logo" onclick="closeLogoPopup()">Hủy</button>
+          <button class="btn_apply" onclick="applyLogoUrl()">Áp dụng</button>
         </div>`;
       document.body.appendChild(el);
     }
@@ -2760,7 +2760,7 @@
       const curr = document.getElementById('sidebar_logo')?.src || '';
       const inp = document.getElementById('logo_url_input');
       if (inp) inp.value = (curr === _LOGO_DEFAULT || curr.endsWith(_LOGO_DEFAULT)) ? '' : curr;
-      // Vá»‹ trÃ­ fixed theo button
+      // Vị trí fixed theo button
       const rect = e.currentTarget.getBoundingClientRect();
       popup.style.top = (rect.bottom + 8) + 'px';
       popup.style.left = rect.left + 'px';
@@ -2786,10 +2786,10 @@
       if (logoEl) logoEl.src = url;
       try { localStorage.setItem(_LOGO_KEY, url); } catch (_) { }
       closeLogoPopup();
-      if (typeof showToast === 'function') showToast('âœ… Logo Ä‘Ã£ Ä‘Æ°á»£c cáº­p nháº­t!');
+      if (typeof showToast === 'function') showToast('✅ Logo đã được cập nhật!');
     }
 
-    // Enter Ä‘á»ƒ Ã¡p dá»¥ng khi popup Ä‘ang má»Ÿ
+    // Enter để áp dụng khi popup đang mở
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && document.getElementById('logo_url_popup')?.classList.contains('open')) {
         applyLogoUrl();
@@ -2805,83 +2805,83 @@
 </body>
 <!-- Foundation: lib/ (token, auth, settings, setup) -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="./lib/token.js?v=16"></script>
-<script src="./lib/settings.js?v=16"></script>
-<script src="./lib/auth.js?v=16"></script>
+<script src="./lib/token.js?v=9"></script>
+<script src="./lib/settings.js?v=9"></script>
+<script src="./lib/auth.js?v=14"></script>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     JS MODULES â€” Thá»© tá»± load quan trá»ng (dependency order)
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ═══════════════════════════════════════════════════
+     JS MODULES — Thứ tự load quan trọng (dependency order)
+     ═══════════════════════════════════════════════════ -->
 
 <!-- 1. Core: config, metrics, column, preset -->
-<script src="./js/core/config.js?v=16"></script>
-<script src="./js/core/metric_config.js?v=16"></script>
-<script src="./js/core/column_config.js?v=16"></script>
-<script src="./js/core/preset_view.js?v=16"></script>
-<script src="./js/core/utils.js?v=16"></script>
-<script src="./js/core/chart_theme.js?v=16"></script>
+<script src="./js/core/config.js?v=9"></script>
+<script src="./js/core/metric_config.js?v=9"></script>
+<script src="./js/core/column_config.js?v=9"></script>
+<script src="./js/core/preset_view.js?v=9"></script>
+<script src="./js/core/utils.js?v=9"></script>
+<script src="./js/core/chart_theme.js?v=9"></script>
 
 <!-- 2. API layer -->
-<script src="./js/api/constants.js?v=16"></script>
-<script src="./js/api/fetch.js?v=16"></script>
-<script src="./js/api/account.js?v=17"></script>
-<script src="./js/api/meta_insights.js?v=16"></script>
+<script src="./js/api/constants.js?v=9"></script>
+<script src="./js/api/fetch.js?v=9"></script>
+<script src="./js/api/account.js?v=18"></script>
+<script src="./js/api/meta_insights.js?v=9"></script>
 
-<!-- 3. Data helpers (pháº£i load sá»›m vÃ¬ toggleSkeletons, getResults Ä‘Æ°á»£c dÃ¹ng á»Ÿ nhiá»u nÆ¡i) -->
-<script src="./js/data/helpers.js?v=16"></script>
+<!-- 3. Data helpers (phải load sớm vì toggleSkeletons, getResults được dùng ở nhiều nơi) -->
+<script src="./js/data/helpers.js?v=9"></script>
 
 <!-- 4. Data processing -->
-<script src="./js/data/group.js?v=16"></script>
-<script src="./js/data/year_data.js?v=16"></script>
-<script src="./js/data/year_filter.js?v=16"></script>
+<script src="./js/data/group.js?v=9"></script>
+<script src="./js/data/year_data.js?v=9"></script>
+<script src="./js/data/year_filter.js?v=9"></script>
 
 <!-- 4. Charts -->
-<script src="./js/charts/goal_chart.js?v=16"></script>
-<script src="./js/charts/daily_filter.js?v=16"></script>
-<script src="./js/charts/detail_daily.js?v=16"></script>
-<script src="./js/charts/platform_chart.js?v=17"></script>
-<script src="./js/charts/platform_position.js?v=16"></script>
-<script src="./js/charts/dashboard_charts.js?v=16"></script>
-<script src="./js/charts/age_gender_chart.js?v=16"></script>
-<script src="./js/charts/render_age_gender.js?v=16"></script>
-<script src="./js/charts/region_chart.js?v=16"></script>
-<script src="./js/charts/monthly_chart.js?v=16"></script>
+<script src="./js/charts/goal_chart.js?v=9"></script>
+<script src="./js/charts/daily_filter.js?v=9"></script>
+<script src="./js/charts/detail_daily.js?v=9"></script>
+<script src="./js/charts/platform_chart.js?v=9"></script>
+<script src="./js/charts/platform_position.js?v=9"></script>
+<script src="./js/charts/dashboard_charts.js?v=9"></script>
+<script src="./js/charts/age_gender_chart.js?v=9"></script>
+<script src="./js/charts/render_age_gender.js?v=9"></script>
+<script src="./js/charts/region_chart.js?v=9"></script>
+<script src="./js/charts/monthly_chart.js?v=9"></script>
 
 <!-- 5. UI Components -->
-<script src="./js/ui/render_campaign.js?v=16"></script>
-<script src="./js/ui/platform_summary.js?v=16"></script>
-<script src="./js/ui/selection_bar.js?v=16"></script>
-<script src="./js/ui/adset_modal.js?v=16"></script>
-<script src="./js/ui/ad_detail_modal.js?v=16"></script>
-<script src="./js/ui/ad_library.js?v=16"></script>
-<script src="./js/ui/ai_report.js?v=16"></script>
-<script src="./js/ui/ai_modal_setup.js?v=16"></script>
-<script src="./js/ui/year_dropdown.js?v=16"></script>
-<script src="./js/ui/performance_detail.js?v=16"></script>
-<script src="./js/ui/extra_details.js?v=16"></script>
+<script src="./js/ui/render_campaign.js?v=10"></script>
+<script src="./js/ui/platform_summary.js?v=9"></script>
+<script src="./js/ui/selection_bar.js?v=9"></script>
+<script src="./js/ui/adset_modal.js?v=9"></script>
+<script src="./js/ui/ad_detail_modal.js?v=9"></script>
+<script src="./js/ui/ad_library.js?v=5"></script>
+<script src="./js/ui/ai_report.js?v=9"></script>
+<script src="./js/ui/ai_modal_setup.js?v=9"></script>
+<script src="./js/ui/year_dropdown.js?v=9"></script>
+<script src="./js/ui/performance_detail.js?v=9"></script>
+<script src="./js/ui/extra_details.js?v=9"></script>
 
 <!-- 6. Filters -->
-<script src="./js/filters/campaign_filter.js?v=16"></script>
-<script src="./js/filters/quick_filter.js?v=16"></script>
+<script src="./js/filters/campaign_filter.js?v=9"></script>
+<script src="./js/filters/quick_filter.js?v=9"></script>
 
 <!-- 7. Settings -->
-<script src="./js/settings/perf_brand_ui.js?v=16"></script>
-<script src="./js/settings/brand_settings.js?v=16"></script>
-<script src="./js/settings/goal_settings.js?v=16"></script>
+<script src="./js/settings/perf_brand_ui.js?v=9"></script>
+<script src="./js/settings/brand_settings.js?v=10"></script>
+<script src="./js/settings/goal_settings.js?v=9"></script>
 
 <!-- 8. Export & Share -->
-<script src="./js/export/export_csv.js?v=16"></script>
-<script src="./js/share/share.js?v=16"></script>
+<script src="./js/export/export_csv.js?v=9"></script>
+<script src="./js/share/share.js?v=10"></script>
 
-<!-- 9. App wiring (dashboard trÆ°á»›c â†’ startup gá»i main() cuá»‘i cÃ¹ng) -->
-<script src="./js/core/listeners.js?v=16"></script>
-<script src="./js/core/dashboard.js?v=16"></script>
-<script src="./js/api/account_manager.js?v=17"></script>
-<script src="./js/core/startup.js?v=16"></script>
+<!-- 9. App wiring (dashboard trước → startup gọi main() cuối cùng) -->
+<script src="./js/core/listeners.js?v=9"></script>
+<script src="./js/core/dashboard.js?v=9"></script>
+<script src="./js/api/account_manager.js?v=20"></script>
+<script src="./js/core/startup.js?v=9"></script>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+<!-- ═══════════════════════════════════════════════════
      ACCOUNT MANAGER MODAL
-     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+     ═══════════════════════════════════════════════════ -->
 <div id="account_manager_modal" class="modal_overlay"
   style="display: none; align-items: center; justify-content: center; z-index: 10000; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px);">
   <div
@@ -2897,10 +2897,10 @@
             style="width: 36px; height: 36px; background: linear-gradient(135deg, #ffa900, #d88200); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
             <i class="fa-solid fa-layer-group" style="color: #fff; font-size: 1.4rem;"></i>
           </div>
-          Quáº£n lÃ½ TÃ i khoáº£n (Workspace)
+          Quản lý Tài khoản (Workspace)
         </h2>
-        <p style="margin: 0.4rem 0 0; color: #64748b; font-size: 1.2rem;">Quáº£n lÃ½ vÃ  chuyá»ƒn Ä‘á»•i giá»¯a cÃ¡c Ad Accounts /
-          Tokens Ä‘Æ°á»£c káº¿t ná»‘i.</p>
+        <p style="margin: 0.4rem 0 0; color: #64748b; font-size: 1.2rem;">Quản lý và chuyển đổi giữa các Ad Accounts /
+          Tokens được kết nối.</p>
       </div>
       <button onclick="closeAccountManagerModal()"
         style="background: #f1f5f9; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; font-size: 1.4rem; transition: background 0.2s;"
@@ -2914,7 +2914,7 @@
       <!-- Loading state -->
       <div style="text-align: center; padding: 4rem 0; color: #94a3b8;">
         <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
-        <p style="font-size: 1.4rem; margin: 0;">Äang táº£i danh sÃ¡ch tÃ i khoáº£n...</p>
+        <p style="font-size: 1.4rem; margin: 0;">Đang tải danh sách tài khoản...</p>
       </div>
     </div>
 
@@ -2922,17 +2922,17 @@
     <div
       style="padding: 1.6rem 2.4rem; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: space-between; align-items: center;"
       id="account_manager_footer">
-      <p style="margin: 0; color: #64748b; font-size: 1.2rem;">CÃ¡c thay Ä‘á»•i sáº½ cÃ³ hiá»‡u lá»±c ngay láº­p tá»©c.</p>
+      <p style="margin: 0; color: #64748b; font-size: 1.2rem;">Các thay đổi sẽ có hiệu lực ngay lập tức.</p>
       <button id="am_add_token_btn" onclick="openAddTokenView()"
         style="padding: 0.8rem 1.6rem; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 10px; font-weight: 700; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; gap: 0.6rem; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);"
         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.4)'"
         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)'">
         <i class="fa-solid fa-plus"></i>
-        ThÃªm Token Má»›i
+        Thêm Token Mới
       </button>
     </div>
 
-    <!-- MÃ n hÃ¬nh Add Token Má»›i (áº©n máº·c Ä‘á»‹nh) -->
+    <!-- Màn hình Add Token Mới (ẩn mặc định) -->
     <div id="am_add_view"
       style="display: none; position: absolute; inset: 0; background: #fff; z-index: 10; flex-direction: column;">
       <div
@@ -2943,15 +2943,15 @@
           <i class="fa-solid fa-arrow-left"></i>
         </button>
         <div>
-          <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1e293b;">Káº¿t ná»‘i Token Má»›i</h2>
-          <p style="margin: 0.2rem 0 0; color: #64748b; font-size: 1.2rem;">Nháº­p Access Token Ä‘á»ƒ táº£i danh sÃ¡ch BM & Ad
+          <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1e293b;">Kết nối Token Mới</h2>
+          <p style="margin: 0.2rem 0 0; color: #64748b; font-size: 1.2rem;">Nhập Access Token để tải danh sách BM & Ad
             Accounts.</p>
         </div>
       </div>
       <div style="flex: 1; overflow-y: auto; padding: 2.4rem;">
         <div style="margin-bottom: 2rem;">
           <label
-            style="display: block; font-weight: 700; color: #334155; margin-bottom: 0.6rem; font-size: 1.3rem;">Nháº­p
+            style="display: block; font-weight: 700; color: #334155; margin-bottom: 0.6rem; font-size: 1.3rem;">Nhập
             Meta Access Token</label>
           <div style="display: flex; gap: 1rem;">
             <input type="text" id="am_new_token_input" placeholder="EAAGm0PX4ZC..."
@@ -2960,20 +2960,20 @@
             <button id="am_fetch_accounts_btn" onclick="fetchAccountsFromNewToken()"
               style="padding: 0 1.6rem; background: #3b82f6; color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 1.3rem; cursor: pointer; transition: background 0.2s;"
               onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
-              <i class="fa-solid fa-magnifying-glass"></i> Táº£i ID
+              <i class="fa-solid fa-magnifying-glass"></i> Tải ID
             </button>
           </div>
           <p style="margin: 0.6rem 0 0; color: #94a3b8; font-size: 1.15rem;"><i class="fa-solid fa-circle-info"></i>
-            Token sáº½ Ä‘Æ°á»£c lÆ°u láº¡i Ä‘á»ƒ táº£i dá»¯ liá»‡u cho cÃ¡c ID báº¡n chá»n.</p>
+            Token sẽ được lưu lại để tải dữ liệu cho các ID bạn chọn.</p>
         </div>
 
         <div id="am_fetched_accounts_container"
           style="display: none; border-top: 1px dashed #e2e8f0; padding-top: 2rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
-            <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #1e293b;">Chá»n Ad Accounts Ä‘á»ƒ lÆ°u</h3>
+            <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #1e293b;">Chọn Ad Accounts để lưu</h3>
             <span id="am_fetched_count"
               style="background: #e2e8f0; color: #475569; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 1.2rem;">0
-              tÃ¬m tháº¥y</span>
+              tìm thấy</span>
           </div>
           <div id="am_fetched_accounts_list"
             style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; max-height: 300px; overflow-y: auto; padding-right: 0.5rem;">
@@ -2986,12 +2986,12 @@
         id="am_add_footer">
         <button onclick="closeAddTokenView()"
           style="padding: 0.8rem 1.6rem; background: #f1f5f9; color: #475569; border: none; border-radius: 10px; font-weight: 700; font-size: 1.3rem; cursor: pointer; transition: background 0.2s;"
-          onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Há»§y</button>
+          onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Hủy</button>
         <button id="am_save_token_btn" onclick="saveSelectedAccounts()"
           style="padding: 0.8rem 1.6rem; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none; border-radius: 10px; font-weight: 700; font-size: 1.3rem; cursor: not-allowed; opacity: 0.5; display: flex; align-items: center; gap: 0.6rem; transition: transform 0.15s, box-shadow 0.15s;"
           disabled>
           <i class="fa-solid fa-floppy-disk"></i>
-          LÆ°u Token & Accounts
+          Lưu Token & Accounts
         </button>
       </div>
     </div>
@@ -3000,5 +3000,3 @@
 
 
 </html>
-
-
