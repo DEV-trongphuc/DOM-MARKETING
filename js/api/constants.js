@@ -44,7 +44,8 @@ const goalMapping = {
   Awareness:   ["REACH", "AD_RECALL_LIFT", "IMPRESSIONS"],
   Engagement:  ["POST_ENGAGEMENT", "THRUPLAY", "EVENT_RESPONSES"],
   Message:     ["REPLIES"],
-  Traffic:     ["OFFSITE_CONVERSIONS", "LINK_CLICKS", "PROFILE_VISIT", "LANDING_PAGE_VIEWS"],
+  Traffic:     ["LINK_CLICKS", "PROFILE_VISIT", "LANDING_PAGE_VIEWS"],
+  Sales:       ["OFFSITE_CONVERSIONS", "VALUE", "CONVERSIONS"],
   Pagelike:    ["PAGE_LIKES"],
 };
 
@@ -60,6 +61,9 @@ const resultMapping = {
   REPLIES:         "onsite_conversion.messaging_conversation_started_7d",
   IMPRESSIONS:     "impressions",
   PAGE_LIKES:      "page_like",
+  OFFSITE_CONVERSIONS: "offsite_conversion.fb_pixel_custom",
+  VALUE:           "offsite_conversion.fb_pixel_purchase",
+  CONVERSIONS:     "offsite_conversion.fb_pixel_custom",
   DEFAULT:         "reach",
 };
 
@@ -69,6 +73,7 @@ const campaignIconMapping = {
   Engagement:  "fa-solid fa-star",
   Message:     "fa-solid fa-comments",
   Traffic:     "fa-solid fa-mouse-pointer",
+  Sales:       "fa-solid fa-bag-shopping",
   Pagelike:    "fa-solid fa-thumbs-up",
   DEFAULT:     "fa-solid fa-crosshairs",
 };

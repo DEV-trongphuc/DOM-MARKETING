@@ -76,10 +76,10 @@ function renderCompareCampaigns() {
   list.innerHTML = campaigns.map((c, i) => {
     const adsets = c.adsets || [];
     const adsetCnt = adsets.length;
-    const spend = fmt(c.spend);
+    const spend = window.formatMoney ? window.formatMoney(c.spend) : fmt(c.spend) + 'đ';
     const reach = fmtShort(c.reach);
     const result = fmt(c.result);
-    const cpr = c.result > 0 ? fmt(c.spend / c.result) + "đ" : "N/A";
+    const cpr = c.result > 0 ? (window.formatMoney ? window.formatMoney(c.spend / c.result) : fmt(c.spend / c.result) + 'đ') : "N/A";
     const spendPct = Math.round((c.spend / maxSpend) * 100);
 
     // Top adset theo chi phí
@@ -101,7 +101,7 @@ function renderCompareCampaigns() {
       <div class="ai_compare_item_body">
         <div class="ai_cmp_top_row">
           <div class="ai_compare_item_name">${c.name || "Campaign " + (i + 1)}</div>
-          <div class="ai_cmp_spend_badge">${spend}đ</div>
+          <div class="ai_cmp_spend_badge">${window.formatMoney ? window.formatMoney(c.spend) : spend}</div>
         </div>
         <div class="ai_cmp_spend_bar_wrap">
           <div class="ai_cmp_spend_bar" style="width:${spendPct}%"></div>
@@ -171,7 +171,7 @@ async function runAiCompare() {
   if (wordBtn) wordBtn.style.display = "none";
 
   const fmt = n => Math.round(n || 0).toLocaleString("vi-VN");
-  const fmtMoney = n => fmt(n) + "đ";
+  const fmtMoney = n => window.formatMoney ? window.formatMoney(n) : (fmt(n) + 'đ');
 
   const blocks = selected.map((c, idx) => {
     const adsetLines = (c.adsets || []).map(as =>
@@ -742,7 +742,7 @@ async function runAiSummary() {
 
     // ====== Xây dựng dữ liệu chi tiết từng campaign + adset ======
     const fmt = (n) => Math.round(n || 0).toLocaleString("vi-VN");
-    const fmtMoney = (n) => fmt(n) + "đ";
+    const fmtMoney = (n) => window.formatMoney ? window.formatMoney(n) : (fmt(n) + 'đ');
     const fmtCpr = (spend, result, goal) => {
       if (result <= 0) return "N/A";
       const factor = (goal === "REACH" || goal === "IMPRESSIONS") ? 1000 : 1;

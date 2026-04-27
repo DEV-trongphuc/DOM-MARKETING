@@ -727,12 +727,8 @@ async function fetchAdAccountInfo() {
     }
 
     // Cập nhật thông tin vào DOM
-    document.getElementById("detail_balance").innerHTML = `${(
-      balance * 1
-    ).toLocaleString("vi-VN")}đ`;
-    document.getElementById("detail_vat").innerHTML = `${(
-      vat * 1
-    ).toLocaleString("vi-VN")}đ`;
+    document.getElementById("detail_balance").innerHTML = formatMoney(balance * 1);
+    document.getElementById("detail_vat").innerHTML = formatMoney(vat * 1);
     document.getElementById("detail_method").innerHTML = paymentMethodDisplay;
 
     // Cập nhật Business Info

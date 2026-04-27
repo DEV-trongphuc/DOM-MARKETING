@@ -137,6 +137,16 @@ window._switchAccount = function(accountId, token) {
     window.ACCOUNT_ID = cleanId;
     window.APP_CONFIG.META_TOKEN = token;
     
+    // Cập nhật GLOBAL_CURRENCY từ account được chọn
+    const groups = _normalizeAccounts();
+    for (const g of groups) {
+        const found = (g.accounts || []).find(a => a.id === accountId || a.id.replace('act_', '') === cleanId);
+        if (found) {
+            window.GLOBAL_CURRENCY = found.currency || 'VND';
+            break;
+        }
+    }
+    
     // Lưu vào localStorage để lần sau load lại
     const slug = new URLSearchParams(window.location.search).get('slug') || window.location.pathname.replace(/^\/|\/$/g, '').split('?')[0];
     localStorage.setItem(`dom_last_account_${slug}`, cleanId);
@@ -186,7 +196,7 @@ window.fetchAccountsFromNewToken = async function() {
     btn.disabled = true;
     
     try {
-        const url = `https://graph.facebook.com/v20.0/me/adaccounts?fields=name,account_id&limit=100&access_token=${token}`;
+        const url = `https://graph.facebook.com/v20.0/me/adaccounts?fields=name,account_id,currency&limit=100&access_token=${token}`;
         const res = await fetch(url);
         const data = await res.json();
         
@@ -224,10 +234,10 @@ function _renderFetchedAccounts() {
         const accId = acc.account_id || acc.id.replace('act_', '');
         html += `
         <label style="display: flex; align-items: flex-start; gap: 1rem; padding: 1.2rem; border: 1.5px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#cbd5e1'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e2e8f0'">
-            <input type="checkbox" value="${accId}" data-name="${acc.name || `Account ${accId}`}" onchange="this.parentElement.style.borderColor = this.checked ? '#3b82f6' : '#e2e8f0'; this.parentElement.style.background = this.checked ? '#eff6ff' : 'transparent'; _checkAmSaveBtn()" style="width: 1.2rem; height: 1.2rem; margin-top: 0.2rem; accent-color: #3b82f6; cursor: pointer;">
+            <input type="checkbox" value="${accId}" data-name="${acc.name || `Account ${accId}`}" data-currency="${acc.currency || 'VND'}" onchange="this.parentElement.style.borderColor = this.checked ? '#3b82f6' : '#e2e8f0'; this.parentElement.style.background = this.checked ? '#eff6ff' : 'transparent'; _checkAmSaveBtn()" style="width: 1.2rem; height: 1.2rem; margin-top: 0.2rem; accent-color: #3b82f6; cursor: pointer;">
             <div>
                 <p style="margin: 0; font-size: 1.1rem; color: #1e293b; font-weight: 600;">${acc.name || `Tài khoản ${accId}`}</p>
-                <p style="margin: 0.2rem 0 0; font-size: 0.95rem; color: #64748b; font-family: monospace;">ID: ${accId}</p>
+                <p style="margin: 0.2rem 0 0; font-size: 0.95rem; color: #64748b; font-family: monospace;">ID: ${accId} • ${acc.currency || 'VND'}</p>
             </div>
         </label>
         `;
@@ -262,7 +272,8 @@ window.saveSelectedAccounts = async function() {
     
     const selectedAccounts = Array.from(checked).map(cb => ({
         id: cb.value,
-        name: cb.dataset.name
+        name: cb.dataset.name,
+        currency: cb.dataset.currency
     }));
     
     let groups = _normalizeAccounts();

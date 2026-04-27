@@ -88,7 +88,7 @@ function updateSummaryUI(campaigns) {
 
   document.querySelector(
     "#spent span"
-  ).textContent = `${totalSpend.toLocaleString("vi-VN")}đ`;
+  ).innerHTML = `${formatMoney(totalSpend)}`;
   document.querySelector(
     "#reach span"
   ).textContent = `${totalReach.toLocaleString("vi-VN")}`;
@@ -747,6 +747,10 @@ function renderFullActionsDetail(manualTotals, filterQuery = "") {
     "offsite_conversion.fb_pixel_search": "Leads",
     "offsite_conversion.fb_pixel_view_content": "Leads",
     "complete_registration": "Leads",
+    // Sales / Pixel Conversions
+    "offsite_conversion.fb_pixel_custom": "Sales / Conversions",
+    "offsite_conversion.fb_pixel_purchase": "Sales / Purchase",
+    "offsite_conversion.purchase": "Sales / Purchase",
     // Saves
     "onsite_conversion.post_save": "Saves",
     "post_save": "Saves",

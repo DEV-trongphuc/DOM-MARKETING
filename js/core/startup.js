@@ -88,7 +88,15 @@ window._afterTokenResolved = function () {
 };
 
 // ── Format helpers ───────────────────────────────────────────────
-const formatMoney  = (v) => v && !isNaN(v) ? Math.round(v).toLocaleString("vi-VN") + "đ" : "0đ";
+const formatMoney = (v) => {
+  if (v == null || isNaN(v)) {
+    const cur = window.GLOBAL_CURRENCY || 'VND';
+    return cur === 'VND' ? "0đ" : new Intl.NumberFormat("en-US", { style: "currency", currency: cur }).format(0);
+  }
+  const cur = window.GLOBAL_CURRENCY || 'VND';
+  if (cur === 'VND') return Math.round(v).toLocaleString("vi-VN") + "đ";
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: cur }).format(v);
+};
 const formatNumber = (v) => v && !isNaN(v) ? Math.round(v).toLocaleString("vi-VN") : "0";
 const calcCpm      = (spend, reach) => reach ? (spend / reach) * 1000 : 0;
 const calcFrequency = (impr, reach) => reach ? (impr / reach).toFixed(1) : "0.0";

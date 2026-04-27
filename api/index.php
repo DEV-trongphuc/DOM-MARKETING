@@ -80,17 +80,24 @@ function _verify_admin_for_slug(PDO $pdo, string $slug, string $admin_email): bo
     return $tenant && strtolower($admin_email) === strtolower($tenant['google_email']);
 }
 
-// Returns true if $email is an active member (owner or viewer) of $slug tenant.
+// Returns true if $email is an active member (owner or viewer) of $slug tenant AND tenant is not expired.
 function _verify_tenant_member(PDO $pdo, string $slug, string $email): bool {
     if (!$slug || !$email) return false;
     // Super admin always passes
     if (strtolower($email) === 'dom.marketing.vn@gmail.com') return true;
-    // Check owner
-    $stmt = $pdo->prepare("SELECT google_email FROM saas_tenants WHERE slug = ?");
+    // Check owner and tenant expiry
+    $stmt = $pdo->prepare("SELECT google_email, status, expires_at FROM saas_tenants WHERE slug = ?");
     $stmt->execute([$slug]);
     $tenant = $stmt->fetch();
     if (!$tenant) return false;
+
+    // Reject if expired or locked
+    if ($tenant['status'] === 'locked' || ($tenant['expires_at'] && strtotime($tenant['expires_at']) < time())) {
+        return false;
+    }
+
     if (strtolower($email) === strtolower($tenant['google_email'])) return true;
+    
     // Check active viewer
     $vstmt = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ? AND status = 'active'");
     $vstmt->execute([$slug, $email]);
@@ -168,6 +175,15 @@ try {
             $plan = $body['plan'] ?? 'trial';
             
             if (!$slug || !$name || !$token) _json(["ok" => false, "error" => "Missing required fields"], 400);
+
+            // KIỂM TRA EMAIL ĐÃ TẠO WORKSPACE CHƯA (Mỗi email chỉ được 1 lần dùng thử)
+            if ($plan === 'trial' && $email && $email !== 'dom.marketing.vn@gmail.com') {
+                $check_email = $pdo->prepare("SELECT id FROM saas_tenants WHERE google_email = ?");
+                $check_email->execute([$email]);
+                if ($check_email->fetch()) {
+                    _json(["ok" => false, "error" => "Tài khoản của bạn đã sử dụng quyền dùng thử. Để tạo thêm Workspace mới, vui lòng chọn gói trả phí!"], 403);
+                }
+            }
             
             // VERIFY TOKEN TRƯỚC KHI TẠO
             $verify_url = "https://graph.facebook.com/v19.0/me?access_token=" . urlencode($token);
@@ -318,6 +334,12 @@ try {
                 }
             }
             
+            // --- EXPIRY CHECK ---
+            // Nếu đã hết hạn hoặc bị khóa, không trả về token để bắt buộc phải gia hạn
+            if ($is_expired) {
+                $is_authorized = false;
+            }
+            
             if (!$is_authorized) {
                 // Return tenant info but without sensitive token
                 $tenant['meta_token'] = null;
@@ -357,7 +379,7 @@ try {
             $email = $body['email'] ?? '';
             if (!$slug) _json(["ok" => false, "error" => "Missing slug"], 400);
 
-            $stmt = $pdo->prepare("SELECT google_email, is_public, meta_token, ad_accounts FROM saas_tenants WHERE slug = ?");
+            $stmt = $pdo->prepare("SELECT google_email, is_public, meta_token, ad_accounts, status, expires_at FROM saas_tenants WHERE slug = ?");
             $stmt->execute([$slug]);
             $tenant = $stmt->fetch();
             if (!$tenant) _json(["ok" => false, "error" => "Workspace không tồn tại"], 404);
@@ -365,6 +387,18 @@ try {
             $is_super_admin = (strtolower($email) === 'dom.marketing.vn@gmail.com');
             $is_admin = (strtolower($email) === strtolower($tenant['google_email']));
             $is_public = $tenant['is_public'] == 1;
+            
+            // Expiry check
+            $is_expired = false;
+            if ($tenant['status'] === 'locked') {
+                $is_expired = true;
+            } elseif ($tenant['expires_at'] && strtotime($tenant['expires_at']) < time()) {
+                $is_expired = true;
+            }
+
+            // Strip tokens if expired
+            $safe_token = $is_expired ? null : $tenant['meta_token'];
+            $safe_accounts = $is_expired ? null : $tenant['ad_accounts'];
 
             if ($is_admin || $is_super_admin) {
                 _json([
@@ -372,8 +406,9 @@ try {
                     "role" => "admin", 
                     "status" => "active", 
                     "is_public" => $is_public,
-                    "meta_token" => $tenant['meta_token'],
-                    "ad_accounts" => $tenant['ad_accounts']
+                    "meta_token" => $safe_token,
+                    "ad_accounts" => $safe_accounts,
+                    "is_expired" => $is_expired
                 ]);
             }
 
@@ -388,11 +423,12 @@ try {
                     "role" => $viewer['role'], 
                     "status" => $viewer['status'], 
                     "is_public" => $is_public,
-                    "meta_token" => $is_active ? $tenant['meta_token'] : null,
-                    "ad_accounts" => $is_active ? $tenant['ad_accounts'] : null
+                    "meta_token" => ($is_active && !$is_expired) ? $safe_token : null,
+                    "ad_accounts" => ($is_active && !$is_expired) ? $safe_accounts : null,
+                    "is_expired" => $is_expired
                 ]);
             } else {
-                _json(["ok" => true, "role" => "viewer", "status" => "none", "is_public" => $is_public]);
+                _json(["ok" => true, "role" => "viewer", "status" => "none", "is_public" => $is_public, "is_expired" => $is_expired]);
             }
             break;
 

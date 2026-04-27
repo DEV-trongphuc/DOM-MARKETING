@@ -211,7 +211,7 @@ function formatMetric(value, format, metricId = "", formula = "") {
 
   // ─── Fallback: format chuẩn ───────────────────────────────────────────────
   switch (format) {
-    case "money": return Math.round(num).toLocaleString("vi-VN") + " đ";
+    case "money": return formatMoney ? formatMoney(num) : (Math.round(num).toLocaleString("vi-VN") + " đ");
     case "decimal": return num.toLocaleString("vi-VN", { minimumFractionDigits: 2 });
     default: return num.toLocaleString("vi-VN");
   }

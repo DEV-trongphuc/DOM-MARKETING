@@ -423,17 +423,11 @@ async function generateDeepReportDetailed({
   const formatMoney = (n) => {
     if (typeof window !== "undefined" && window.formatMoney)
       return window.formatMoney(n);
-    try {
-      return n === 0
-        ? "0đ"
-        : n.toLocaleString("vi-VN", {
-          style: "currency",
-          currency: "VND",
-          maximumFractionDigits: 0,
-        });
-    } catch {
-      return `${Math.round(n)}đ`;
-    }
+    if (n == null || isNaN(n)) return "0";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: window.GLOBAL_CURRENCY || "VND",
+    }).format(n);
   };
 
   const formatNumber = (n) => {
@@ -477,6 +471,8 @@ async function generateDeepReportDetailed({
       "onsite_conversion.total_messaging_connection", // ← key mess trong region breakdown
       "onsite_conversion.messaging_conversation_started_7d",
       "onsite_conversion.lead_grouped",
+      "offsite_conversion.fb_pixel_custom",   // Sales / OFFSITE_CONVERSIONS
+      "offsite_conversion.fb_pixel_purchase", // VALUE / purchase fallback
       "offsite_conversion.fb_pixel_lead",
       "offsite_conversion.purchase",
       "landing_page_view",
@@ -1176,7 +1172,7 @@ function createBreakdownTable(dataArray, type) {
 
   // Dùng hàm formatMoney và formatNumber (đảm bảo chúng tồn tại)
   const formatMoneySafe = (n) =>
-    window.formatMoney ? window.formatMoney(n) : `${Math.round(n || 0)}đ`;
+    window.formatMoney ? window.formatMoney(n) : `${Math.round(n || 0)}`;
   const formatNumberSafe = (n) =>
     window.formatNumber ? window.formatNumber(n) : Math.round(n || 0);
   const formatCPRSafe = (n, goal) =>

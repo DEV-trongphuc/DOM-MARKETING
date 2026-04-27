@@ -581,7 +581,7 @@ function renderChartByDevice(dataByDevice) {
   validEntries.slice(0, 5).forEach((entry, i) => {
     const val = values[i];
     const displayVal = useSpend
-      ? parseInt(val).toLocaleString('vi-VN') + '₫'
+      ? formatMoney(parseInt(val))
       : formatNumber(val) + ' results';
     const item = document.createElement('div');
     item.style.cssText = `
@@ -638,7 +638,7 @@ function renderChartByDevice(dataByDevice) {
             callbacks: {
               label: (c) => {
                 const pct = ((c.raw / total) * 100).toFixed(1);
-                const val = useSpend ? parseInt(c.raw).toLocaleString('vi-VN') + '₫' : formatNumber(c.raw);
+                const val = useSpend ? formatMoney(parseInt(c.raw)) : formatNumber(c.raw);
                 return `${c.label}: ${val} (${pct}%)`;
               }
             }
@@ -1076,9 +1076,7 @@ function renderChartByPlatform(allData) {
           <img src="${getLogo(p.key, groupKey)}" alt="${p.key}" />
           <span>${formatName(p.key)}</span>
         </p>
-        <p><span class="total_spent"><i class="fa-solid fa-money-bill"></i> ${p.spend.toLocaleString(
-        "vi-VN"
-      )}đ</span></p>
+        <p><span class="total_spent"><i class="fa-solid fa-money-bill"></i> ${formatMoney(p.spend)}</span></p>
         <p><span class="total_result"><i class="fa-solid fa-bullseye"></i> ${p.result > 0 ? formatNumber(p.result) : "—"
         }</span></p>
         <p class="toplist_percent" style="color:${color};background:${bg}">

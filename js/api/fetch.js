@@ -16,7 +16,16 @@ async function fetchJSON(url, options = {}, retries = 3) {
       let msg = `HTTP ${res.status} - ${res.statusText}`;
       try {
         const errData = JSON.parse(text);
-        if (errData.error) msg = `Meta API Error: ${errData.error.message} (Code: ${errData.error.code})`;
+        if (errData.error) {
+          msg = `Meta API Error: ${errData.error.message} (Code: ${errData.error.code})`;
+          // Bắt lỗi Hết hạn Token (OAuthException code 190 hoặc 102)
+          if (errData.error.code === 190 || errData.error.code === 102) {
+            console.error("Token Expired or Invalid! Triggering modal...");
+            if (typeof window._openTokenModal === 'function') {
+              window._openTokenModal();
+            }
+          }
+        }
         if (errData.error?.code === 4 && retries > 0) {
           console.warn(`Rate limit reached. Waiting 5s then retry... (${retries} retries left)`);
           await new Promise((r) => setTimeout(r, 5000));

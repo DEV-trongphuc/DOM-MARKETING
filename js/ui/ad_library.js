@@ -125,8 +125,12 @@ window.renderAdLibraryCurrentPage = function() {
               <i class="fa-solid fa-coins" style="color:#f59e0b;"></i> ${spendFormatted}
             </div>
           </div>
-          <div class="ad_library_iframe_wrap" style="position:relative; height: 400px; overflow-y: auto; overflow-x: hidden;" id="ad_lib_wrap_${ad.ad_id}" data-ad-id="${ad.ad_id}" data-thumb="${ad.thumbnail}" data-post="${ad.post_url}">
-             <div class="ad_lib_iframe_content" style="width:100%; min-height:100%;">
+          <style>
+            .ad-hide-scroll::-webkit-scrollbar { display: none; }
+            .ad-hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+          </style>
+          <div class="ad_library_iframe_wrap ad-hide-scroll" style="position:relative; height: 400px; overflow-y: auto; overflow-x: hidden;" id="ad_lib_wrap_${ad.ad_id}" data-ad-id="${ad.ad_id}" data-thumb="${ad.thumbnail}" data-post="${ad.post_url}">
+             <div class="ad_lib_iframe_content" style="width:100%; min-height:100%; display:flex; justify-content:center; overflow:hidden;">
                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#f1f5f9; flex-direction:column; gap: 1rem; z-index:1;">
                  <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; color:#cbd5e1;"></i>
                  <span style="color:#94a3b8; font-size: 0.9rem; font-weight:500;">Đang tải nội dung...</span>
@@ -215,7 +219,9 @@ async function loadAdLibraryPreviews() {
         contentWrap.innerHTML = iframeHtml;
         const iframe = contentWrap.querySelector('iframe');
         if (iframe) {
-          iframe.style.width = '100%';
+          iframe.style.setProperty('width', '100%', 'important');
+          iframe.style.setProperty('min-width', '100%', 'important');
+          iframe.style.setProperty('max-width', '100%', 'important');
           iframe.style.height = '100%';
           iframe.style.border = 'none';
           iframe.style.overflow = 'hidden';

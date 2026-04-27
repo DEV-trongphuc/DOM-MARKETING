@@ -337,7 +337,7 @@
         </li>
         <li class="" data-view="ad_library">
           <i class="fa-solid fa-images"></i>
-          <span>Ad Library</span>
+          <span>Ads Library</span>
         </li>
         <li class="" data-view="account">
           <i class="fa-solid fa-money-check"></i>
@@ -443,7 +443,8 @@
               <i class="fa-solid fa-wand-magic-sparkles"></i>
               <span>AI Phân tích</span>
             </button>
-            <button id="share_url_btn" class="toolbar_btn" title="Share (Ctrl+Shift+S)" onclick="window.openShareModal && window.openShareModal()">
+            <button id="share_url_btn" class="toolbar_btn" title="Share (Ctrl+Shift+S)"
+              onclick="window.openShareModal && window.openShareModal()">
               <i class="fa-solid fa-share-nodes"></i>
               <span>Share</span>
             </button>
@@ -1014,18 +1015,26 @@
         </div>
 
       </div>
-      
+
       <!-- AD LIBRARY VIEW -->
-      <div class="dom_row flex ad_library" id="dom_ad_library" style="display:none; flex-direction:column; gap:1.5rem; width:100%; padding: 0.5rem 0;">
-        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; background: #fff; padding: 1.5rem 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
-          <h2 style="margin:0; font-size:1.6rem; font-weight:800; color:#1e293b;"><i class="fa-solid fa-images" style="color:#f59e0b; margin-right:0.5rem;"></i> Ad Library</h2>
+      <div class="dom_row flex ad_library" id="dom_ad_library"
+        style="display:none; flex-direction:column; gap:1.5rem; width:100%; padding: 0.5rem 0;">
+        <div
+          style="display:flex; justify-content:space-between; align-items:center; width:100%; background: #fff; padding: 1.5rem 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+          <h2 style="margin:0; font-size:1.6rem; font-weight:800; color:#1e293b;"><i class="fa-solid fa-images"
+              style="color:#f59e0b; margin-right:0.5rem;"></i> Ad Library</h2>
           <div style="color:#64748b; font-size:1rem; display:flex; gap: 1rem; align-items:center;">
-             <span style="background:#dcfce7; color:#166534; padding:0.3rem 0.8rem; border-radius:20px; font-weight:700; font-size:0.9rem;"><i class="fa-solid fa-circle" style="font-size:0.6rem; vertical-align:middle; margin-right:0.3rem; margin-top:-2px;"></i> ACTIVE</span>
-             Hiển thị quảng cáo đang chạy
+            <span
+              style="background:#dcfce7; color:#166534; padding:0.3rem 0.8rem; border-radius:20px; font-weight:700; font-size:0.9rem;"><i
+                class="fa-solid fa-circle"
+                style="font-size:0.6rem; vertical-align:middle; margin-right:0.3rem; margin-top:-2px;"></i>
+              ACTIVE</span>
+            Hiển thị quảng cáo đang chạy
           </div>
         </div>
         <div id="ad_library_content" style="width:100%;">
-           <div style="text-align:center; padding: 4rem; color: #94a3b8;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem; margin-bottom:1rem; color:#f59e0b;"></i><br>Đang tải thư viện quảng cáo...</div>
+          <div style="text-align:center; padding: 4rem; color: #94a3b8;"><i class="fa-solid fa-circle-notch fa-spin"
+              style="font-size:2rem; margin-bottom:1rem; color:#f59e0b;"></i><br>Đang tải thư viện quảng cáo...</div>
         </div>
       </div>
 
@@ -1392,10 +1401,16 @@
                 <span id="activity_count_badge"
                   style="background:#f1f5f9; color:#64748b; font-size:1.1rem; font-weight:600; padding:0.2rem 0.8rem; border-radius:20px; display:none;"></span>
               </h2>
-              <button id="activity_refresh_btn" onclick="loadAccountActivities(true)"
-                style="background:var(--mainClr); color:#fff; border:none; padding:0.7rem 1.4rem; border-radius:8px; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; gap:0.6rem;">
-                <i class="fa-solid fa-rotate-right"></i> Refresh
-              </button>
+              <div style="display:flex; gap: 1.2rem; align-items: center;">
+                <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; color:#475569; font-weight:600; font-size:1.1rem; user-select: none;">
+                  <input type="checkbox" id="activity_filter_meta_toggle" checked onchange="window.toggleMetaActivityFilter()" style="width:1.2rem; height:1.2rem; accent-color:var(--mainClr); cursor:pointer;">
+                  Lọc Hệ thống Meta
+                </label>
+                <button id="activity_refresh_btn" onclick="loadAccountActivities(true)"
+                  style="background:var(--mainClr); color:#fff; border:none; padding:0.7rem 1.4rem; border-radius:8px; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; gap:0.6rem;">
+                  <i class="fa-solid fa-rotate-right"></i> Refresh
+                </button>
+              </div>
             </div>
             <!-- Filter chips -->
             <div id="activity_filters" style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:1.4rem;">
@@ -1928,10 +1943,6 @@
               style="padding: 0 0 1.2rem 0; border: none; background: none; font-weight: 700; font-size: 1.3rem; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s; white-space: nowrap;">
               <i class="fa-solid fa-pen-to-square"></i> Edit Workspace
             </button>
-            <button class="setting-tab-btn" onclick="switchSettingTab('tab-share')" id="btn-tab-share"
-              style="padding: 0 0 1.2rem 0; border: none; background: none; font-weight: 700; font-size: 1.3rem; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s; white-space: nowrap;">
-              <i class="fa-solid fa-share-nodes"></i> Share Workspace
-            </button>
           </div>
         </div>
         <button class="ai_close_btn" onclick="closeFilterSettings()" style="transform: translateY(-0.6rem);"><i
@@ -2026,12 +2037,6 @@
           </div>
         </div>
 
-        <!-- TAB 3: SHARE WORKSPACE -->
-        <div id="tab-share" class="setting-tab-content"
-          style="display:none; padding: 0; height: 100%; flex-direction: column;">
-          <!-- Content will be injected by lib/auth.js __openShareModal -->
-        </div>
-
       </div>
     </div>
   </div>
@@ -2047,7 +2052,7 @@
 
       const content = document.getElementById(tabId);
       if (content) {
-        content.style.display = tabId === 'tab-brand' || tabId === 'tab-workspace' || tabId === 'tab-share' ? 'flex' : 'block';
+        content.style.display = tabId === 'tab-brand' || tabId === 'tab-workspace' ? 'flex' : 'block';
       }
 
       const btn = document.getElementById('btn-' + tabId);
@@ -2055,10 +2060,6 @@
         btn.classList.add('active');
         btn.style.color = 'var(--mainClr)';
         btn.style.borderBottomColor = 'var(--mainClr)';
-      }
-
-      if (tabId === 'tab-share' && !skipShareInit && window.openShareModal && !document.getElementById('_slink')) {
-        window.openShareModal();
       }
     }
 
@@ -2539,7 +2540,7 @@
 <script src="./js/ui/selection_bar.js?v=9"></script>
 <script src="./js/ui/adset_modal.js?v=9"></script>
 <script src="./js/ui/ad_detail_modal.js?v=9"></script>
-<script src="./js/ui/ad_library.js?v=4"></script>
+<script src="./js/ui/ad_library.js?v=5"></script>
 <script src="./js/ui/ai_report.js?v=9"></script>
 <script src="./js/ui/ai_modal_setup.js?v=9"></script>
 <script src="./js/ui/year_dropdown.js?v=9"></script>

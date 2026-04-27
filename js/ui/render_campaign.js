@@ -259,13 +259,13 @@ function renderCampaignView(data) {
 
         if (dailyBudget > 0) {
           label = `<span class="status-label">Daily Budget</span>`;
-          value = `<span class="status-value">${dailyBudget.toLocaleString("vi-VN")}đ</span>`;
+          value = `<span class="status-value">${formatMoney(dailyBudget)}</span>`;
           timeText = endDateFmt
             ? `<i class="fa-regular fa-clock" style="opacity: 0.5"></i> ${startDateFmt} to ${endDateFmt}`
             : `<i class="fa-regular fa-clock" style="opacity: 0.5"></i> START: ${startDateFmt}`;
         } else if (lifetimeBudget > 0) {
           label = `<span class="status-label">Lifetime Budget</span>`;
-          value = `<span class="status-value">${lifetimeBudget.toLocaleString("vi-VN")}đ</span>`;
+          value = `<span class="status-value">${formatMoney(lifetimeBudget)}</span>`;
           timeText = `<i class="fa-regular fa-clock" style="opacity: 0.5"></i> ${startDateFmt} to ${endDateFmt}`;
         }
 

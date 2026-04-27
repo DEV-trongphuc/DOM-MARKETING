@@ -1,4 +1,4 @@
-
+﻿
 // =================== COLOR PALETTE ===================
 const COLORS = {
     // Metric overview
@@ -17,11 +17,11 @@ const COLORS = {
     // Goal chart grid
     gridLine:   'rgba(0,0,0,0.03)',
 
-    // Goal chart gradient – gold (top goal)
+    // Goal chart gradient â€“ gold (top goal)
     gradGoldStart: 'rgba(255,169,0,1)',
     gradGoldEnd:   'rgba(255,169,0,0.4)',
 
-    // Goal chart gradient – gray (other goals)
+    // Goal chart gradient â€“ gray (other goals)
     gradGrayStart: 'rgba(210,210,210,0.9)',
     gradGrayEnd:   'rgba(160,160,160,0.4)',
 
@@ -117,7 +117,7 @@ function setupShowAllDetails() {
 
 /**
  * Single-pass aggregation over the full campaign tree.
- * Replaces 4 independent forEach walks with 1, reducing iterations ~4×.
+ * Replaces 4 independent forEach walks with 1, reducing iterations ~4Ã—.
  */
 function _aggregateExtraStats(campaigns) {
   const sVal = window.safeGetActionValue;
@@ -210,7 +210,7 @@ async function loadExtraCharts() {
     }
     window._extraChartsKey = _cacheKey;
 
-    // Single-pass aggregation — shared by all render functions below
+    // Single-pass aggregation â€” shared by all render functions below
     const stats = _aggregateExtraStats(campaigns);
 
     if (stats.totalSpend === 0 && stats.impressions === 0) {
@@ -265,7 +265,7 @@ function renderExtraOverview(stats) {
     wrap.style.overflowY = "unset";
     wrap.style.paddingRight = "0";
 
-    const fmt  = (v) => Math.round(v).toLocaleString("vi-VN") + "đ";
+    const fmt  = (v) => formatMoney(v);
     const fmtN = (v) => Math.round(v).toLocaleString("vi-VN");
 
     wrap.innerHTML = `
@@ -368,7 +368,7 @@ function renderExtraGoalChart(goalSpend) {
     });
 }
 
-// ── Platform Positions helpers (khai báo ngoài forEach — tránh redeclare) ──
+// â”€â”€ Platform Positions helpers (khai bÃ¡o ngoÃ i forEach â€” trÃ¡nh redeclare) â”€â”€
 function _getPlatformLogo(pub) {
     if (pub.includes('facebook')) return 'https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png';
     if (pub.includes('instagram')) return 'https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg';
@@ -425,7 +425,7 @@ function renderExtraPlatformPositions(data) {
                 <span style="font-size:1.1rem;font-weight:600;color:${COLORS.platformName};">${_formatPlatformName(publisher, position)}</span>
             </div>
             <div style="flex:1;text-align:center;">
-                <span style="font-weight:600;font-size:1.1rem;color:${COLORS.platformSpend};"><i class="fa-solid fa-money-bill" style="color:${COLORS.platformMoneyIcon};margin-right:5px;font-size:0.9rem;"></i>${spend.toLocaleString("vi-VN")}đ</span>
+                <span style="font-weight:600;font-size:1.1rem;color:${COLORS.platformSpend};"><i class="fa-solid fa-money-bill" style="color:${COLORS.platformMoneyIcon};margin-right:5px;font-size:0.9rem;"></i>${formatMoney(spend)}</span>
             </div>
             <div style="flex:0 0 80px;text-align:right;">
                 <span style="background:${COLORS.platformBadgeBg};color:${COLORS.platformBadgeText};padding:0.4rem 0.8rem;border-radius:20px;font-size:0.95rem;font-weight:700;">${percent.toFixed(1)}%</span>
@@ -440,7 +440,7 @@ function renderExtraPlatformPositions(data) {
     }
 }
 
-// =================== 5. VIDEO FUNNEL (CSS-only, y hệt detail modal) ===================
+// =================== 5. VIDEO FUNNEL (CSS-only, y há»‡t detail modal) ===================
 function renderVideoFunnelChart(stats) {
     const content = document.getElementById("extra_video_funnel_content");
     if (!content) return;
@@ -449,12 +449,12 @@ function renderVideoFunnelChart(stats) {
 
     if (!plays) {
         content.innerHTML = `<p style="text-align:center;padding:2rem;color:${COLORS.noData};font-size:1.3rem;">
-          <i class="fa-solid fa-circle-info"></i> Không có dữ liệu video.
+          <i class="fa-solid fa-circle-info"></i> KhÃ´ng cÃ³ dá»¯ liá»‡u video.
         </p>`;
         return;
     }
 
-    // Dùng cùng logic và cùng CSS classes với renderVideoFunnel() trong main.js
+    // DÃ¹ng cÃ¹ng logic vÃ  cÃ¹ng CSS classes vá»›i renderVideoFunnel() trong main.js
     const steps = [
         { val: plays, label: "Video View (3s)", color: "gold" },
         { val: vp25, label: "Video 25%", color: "gold" },
@@ -509,7 +509,7 @@ function renderTopCampaignsChart(campSpend) {
 
     const total  = sorted.reduce((s, [, v]) => s + v, 0);
     const maxVal = sorted[0][1];
-    const medals = ['🥇', '🥈', '🥉', '4', '5'];
+    const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰', '4', '5'];
     const barColors = [
         COLORS.barGold,
         COLORS.barGray,
@@ -521,7 +521,7 @@ function renderTopCampaignsChart(campSpend) {
     sorted.forEach(([name, spend], i) => {
         const pct = total > 0 ? ((spend / total) * 100).toFixed(1) : 0;
         const barW = maxVal > 0 ? ((spend / maxVal) * 100).toFixed(1) : 0;
-        const spendFmt = parseInt(spend).toLocaleString('vi-VN');
+        const spendFmt = formatMoney(spend);
         const isTop = i === 0;
 
         const item = document.createElement('div');
@@ -545,7 +545,7 @@ function renderTopCampaignsChart(campSpend) {
                     <span style="font-size:1.15rem;font-weight:600;color:${COLORS.campNameColor};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${name}">${name}</span>
                 </div>
                 <div style="flex-shrink:0;text-align:right;">
-                    <span style="font-size:1.25rem;font-weight:700;color:${isTop ? COLORS.campSpendTop : COLORS.campSpendOther}">${spendFmt}đ</span>
+                    <span style="font-size:1.25rem;font-weight:700;color:${isTop ? COLORS.campSpendTop : COLORS.campSpendOther}">${spendFmt}</span>
                     <span style="display:block;font-size:1rem;color:${COLORS.campPctColor};font-weight:500;">${pct}%</span>
                 </div>
             </div>
@@ -580,7 +580,7 @@ function renderEngagementMixChart(stats) {
     ].filter((m) => m.val > 0).sort((a, b) => b.val - a.val);
 
     if (!metrics.length) {
-        wrap.innerHTML = `<p style="text-align:center;color:${COLORS.engagementNoData};padding:2rem;font-size:1.2rem;">Không có dữ liệu tương tác.</p>`;
+        wrap.innerHTML = `<p style="text-align:center;color:${COLORS.engagementNoData};padding:2rem;font-size:1.2rem;">KhÃ´ng cÃ³ dá»¯ liá»‡u tÆ°Æ¡ng tÃ¡c.</p>`;
         return;
     }
 
@@ -688,7 +688,7 @@ async function loadDeviceChart() {
                 <i class="fa-solid ${icon}" style="color:${COLORS.devColors[i]};font-size:1.2rem;"></i>
                 <span>${label.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</span>
             </p>
-            <p style="font-weight:700;font-size:1.4rem;color:${COLORS.deviceValue};padding-left:2rem;">${parseInt(spend).toLocaleString('vi-VN')}₫</p>`;
+            <p style="font-weight:700;font-size:1.4rem;color:${COLORS.deviceValue};padding-left:2rem;">${formatMoney(spend)}</p>`;
         listContainer.appendChild(item);
     });
 
@@ -715,3 +715,4 @@ async function loadDeviceChart() {
 
 // Run immediately when loaded
 setupShowAllDetails();
+

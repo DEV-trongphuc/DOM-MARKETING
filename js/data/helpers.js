@@ -157,6 +157,12 @@ function getResults(item, goal) {
         }
       }
     }
+    // Sales fallback: try fb_pixel_purchase if fb_pixel_custom is 0
+    if (goalKey === 'Sales') {
+      for (let i = 0; i < actions.length; i++) {
+        if (actions[i].action_type === 'offsite_conversion.fb_pixel_purchase') return +actions[i].value || 0;
+      }
+    }
     return 0;
   } else {
     if (actions[resultType]) return +actions[resultType];

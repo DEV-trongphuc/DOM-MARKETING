@@ -49,9 +49,7 @@ function renderPlatformPosition(data) {
         <img src="${getLogo(publisher)}" alt="${publisher}" />
         <span>${formatNamePst(publisher, position)}</span>
       </p>
-      <p><span class="total_spent"><i class="fa-solid fa-money-bill"></i> ${spend.toLocaleString(
-      "vi-VN"
-    )}đ</span></p>
+      <p><span class="total_spent"><i class="fa-solid fa-money-bill"></i> ${formatMoney(spend)}</span></p>
       <p class="toplist_percent" style="color:rgb(226,151,0);background:rgba(255,169,0,0.05)">
         <!-- color: CHART_WARN | background: CHART_GOLD_BG -->
         ${percent.toFixed(1)}%

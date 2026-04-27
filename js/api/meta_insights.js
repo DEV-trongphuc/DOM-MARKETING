@@ -71,6 +71,12 @@ async function fetchAdsAndInsights(adsetIds, onBatchProcessedCallback) {
       // Xử lý kết quả từ API
       const processed = [];
       for (const item of adsResp) {
+        if (item?.code === 190) {
+          console.error("Token Expired detected inside batch! Triggering modal...");
+          if (typeof window._openTokenModal === 'function') window._openTokenModal();
+          continue;
+        }
+        
         if (item?.code !== 200 || !item?.body) continue;
 
         let body;
@@ -120,7 +126,11 @@ async function fetchAdsAndInsights(adsetIds, onBatchProcessedCallback) {
               purchase_roas: Array.isArray(insights.purchase_roas) ? insights.purchase_roas : [],
               account_id: insights.account_id || "",
               account_name: insights.account_name || "",
-              account_currency: insights.account_currency || "",
+              account_currency: (function() {
+                  const curr = insights.account_currency || "";
+                  if (curr && window.GLOBAL_CURRENCY === 'VND') window.GLOBAL_CURRENCY = curr;
+                  return curr;
+              })(),
               buying_type: insights.buying_type || "",
               objective: insights.objective || "",
               actions: Array.isArray(insights.actions) ? insights.actions : [],

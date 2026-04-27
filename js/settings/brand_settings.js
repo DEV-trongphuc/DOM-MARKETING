@@ -534,11 +534,14 @@ function renderActivityList(items) {
   const container = document.getElementById("activity_log_list");
   if (!container) return;
 
-  // 1. Filter out system/Meta actor
-  let display = items.filter(item => {
-    const a = (item.actor_name || "").trim();
-    return a.length > 0 && a.toLowerCase() !== "meta";
-  });
+  // 1. Filter out system/Meta actor (nếu được bật)
+  let display = items;
+  if (window._filterOutMeta !== false) {
+    display = display.filter(item => {
+      const a = (item.actor_name || "").trim();
+      return a.length > 0 && a.toLowerCase() !== "meta";
+    });
+  }
 
   // 2. Client-side category filter
   if (_activityCategory && ACTIVITY_CATEGORY_MAP[_activityCategory]) {
@@ -719,6 +722,30 @@ window.loadMoreActivities = loadMoreActivities;
 window.setActivityCategory = setActivityCategory;
 window.handleActivitySearch = handleActivitySearch;
 window.navigateToAdObject = navigateToAdObject;
+window._filterOutMeta = true; // Mặc định là bật lọc meta
+window.toggleMetaActivityFilter = function() {
+  const cb = document.getElementById("activity_filter_meta_toggle");
+  window._filterOutMeta = cb ? cb.checked : true;
+  if (_activityAllData && _activityAllData.length > 0) {
+    renderActivityList(_activityAllData);
+    // Cập nhật lại số lượng badge
+    const badge = document.getElementById("activity_count_badge");
+    if (badge) {
+      const allowed = _activityCategory && ACTIVITY_CATEGORY_MAP[_activityCategory]
+        ? new Set(ACTIVITY_CATEGORY_MAP[_activityCategory])
+        : null;
+      let filtered = _activityAllData;
+      if (window._filterOutMeta) {
+        filtered = filtered.filter(i => {
+            const a = (i.actor_name || "").trim();
+            return a.length > 0 && a.toLowerCase() !== "meta";
+        });
+      }
+      const count = allowed ? filtered.filter(i => allowed.has(i.event_type)).length : filtered.length;
+      badge.textContent = `${count}${_activityHasMore ? "+" : ""} entries`;
+    }
+  }
+};
 
 // ================================================================
 // =================== KEYBOARD SHORTCUTS =========================

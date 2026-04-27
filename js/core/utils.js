@@ -1,13 +1,26 @@
 function formatMoneyShort(v) {
-  if (v >= 1_000_000) {
-    const m = Math.floor(v / 1_000_000);
-    const k = Math.floor((v % 1_000_000) / 10000);
-    return k > 0 ? `${m}.${k.toString().padStart(2, "0")}M` : `${m}M`;
+  if (v == null || isNaN(v)) return window.GLOBAL_CURRENCY === 'VND' ? "0" : new Intl.NumberFormat("en-US", { style: "currency", currency: window.GLOBAL_CURRENCY || 'USD' }).format(0);
+  
+  const cur = window.GLOBAL_CURRENCY || 'VND';
+  if (cur === 'VND') {
+    if (v >= 1_000_000) {
+      const m = Math.floor(v / 1_000_000);
+      const k = Math.floor((v % 1_000_000) / 10000);
+      return k > 0 ? `${m}.${k.toString().padStart(2, "0")}M` : `${m}M`;
+    }
+    if (v >= 1_000) {
+      return `${Math.floor(v / 1_000)}k`;
+    }
+    return v ? Math.round(v).toLocaleString("vi-VN") : "0";
+  } else {
+    return new Intl.NumberFormat("en-US", { 
+      style: "currency", 
+      currency: cur, 
+      notation: "compact", 
+      compactDisplay: "short",
+      maximumFractionDigits: 2 
+    }).format(v);
   }
-  if (v >= 1_000) {
-    return `${Math.floor(v / 1_000)}k`;
-  }
-  return v ? Math.round(v).toLocaleString("vi-VN") : "0";
 }
 
 let currentDetailDailyType = "spend";
