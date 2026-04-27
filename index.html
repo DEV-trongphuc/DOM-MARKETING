@@ -2053,6 +2053,18 @@
                   class="fa-solid fa-link" style="color: #94a3b8;"></i> <span
                   id="preview_workspace_url">https://meta.domation.net/...</span></p>
             </div>
+            
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed #e2e8f0;">
+              <label
+                style="display:flex; align-items:center; gap: 0.5rem; font-weight:700; color: #475569; margin-bottom:0.8rem; font-size: 1.25rem;">
+                <i class="fa-solid fa-microchip" style="color: #10b981;"></i> Gemini API Key (Tùy chọn)
+              </label>
+              <input type="password" id="edit_workspace_gemini_key" class="dom-input" placeholder="Để trống để dùng key mặc định..."
+                style="width:100%; padding: 1.2rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1.35rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s;"
+                onfocus="this.style.borderColor='var(--mainClr)'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
+              <p style="margin: 0.8rem 0 0; font-size: 1.15rem; color: #64748b; font-weight: 500;">Sử dụng API Key riêng của bạn để xuất báo cáo AI (Gemini 2.5 Flash). Tính năng này chỉ hiển thị với Owner.</p>
+            </div>
           </div>
 
           <div style="display: flex; justify-content: flex-end; margin-top: auto;">
@@ -2249,9 +2261,37 @@
       }
     }
 
-    function saveWorkspaceInfo() {
-      // Stub cho tính năng lưu workspace
-      showToast("Đã lưu thông tin workspace thành công!", 3000);
+    async function saveWorkspaceInfo() {
+      if (!window.SAAS_ROUTER || !window.SAAS_ROUTER.tenant) {
+          showToast("Lỗi: Không tìm thấy thông tin tenant hiện tại", 3000);
+          return;
+      }
+      const slug = window.SAAS_ROUTER.tenant.slug;
+      const keyInp = document.getElementById('edit_workspace_gemini_key');
+      const gemini_api_key = keyInp ? keyInp.value.trim() : '';
+
+      try {
+          const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                  action: 'auth_update_settings',
+                  slug: slug,
+                  admin_email: window.SAAS_ROUTER.userEmail || '',
+                  gemini_api_key: gemini_api_key
+              })
+          });
+          const data = await res.json();
+          if (data.ok) {
+              showToast("Đã lưu thông tin cài đặt thành công!", 3000);
+              window.SAAS_ROUTER.tenant.gemini_api_key = gemini_api_key;
+          } else {
+              alert("Lỗi: " + (data.error || "Không thể cập nhật cấu hình"));
+          }
+      } catch (e) {
+          console.error(e);
+          alert("Lỗi kết nối");
+      }
     }
 
     async function submitPlanExtension() {

@@ -214,13 +214,16 @@ YÊU CẦU PHÂN TÍCH SO SÁNH:
 
 ⚠️ QUY TẮC: Dùng bảng markdown cho phần so sánh số liệu, viết bằng tiếng Việt, có số liệu cụ thể.`;
 
-  try {
-    const PROXY_URL = (window.APP_CONFIG?.SAAS_API_URL || "api/index.php") + "?action=ai_generate";
-    const resp = await fetch(PROXY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
-    });
+    try {
+      const PROXY_URL = (window.APP_CONFIG?.SAAS_API_URL || "api/index.php") + "?action=ai_generate";
+      const resp = await fetch(PROXY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          prompt: prompt,
+          slug: window.SAAS_ROUTER?.tenant?.slug || ''
+        }),
+      });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data?.error || `Proxy error: ${resp.status}`);
     const text = data?.text || "Không nhận được phản hồi.";
@@ -236,10 +239,26 @@ YÊU CẦU PHÂN TÍCH SO SÁNH:
 
   } catch (err) {
     if (loading) loading.style.display = "none";
-    if (content) content.innerHTML = `<div style="color:#ef4444;padding:2rem;text-align:center;">
-      <i class="fa-solid fa-circle-exclamation" style="font-size:2rem;margin-bottom:1rem;display:block;"></i>
-      ❌ Lỗi: ${err.message}
-    </div>`;
+    if (content) {
+      let errorHtml = `<div style="color:#ef4444;padding:2rem;text-align:center;">
+        <i class="fa-solid fa-circle-exclamation" style="font-size:2rem;margin-bottom:1rem;display:block;"></i>
+        ❌ Lỗi: ${err.message}
+      </div>`;
+      
+      if (err.message && err.message.includes("Chưa cấu hình GEMINI API KEY")) {
+          errorHtml += `
+            <div style="background:#fffbeb; border:1px solid #fde68a; padding:1.5rem; border-radius:8px; margin-top:1rem; max-width: 500px; margin-left: auto; margin-right: auto; text-align: left;">
+              <p style="color:#d97706; font-weight:600; margin-bottom:0.5rem;"><i class="fa-solid fa-key"></i> Bạn chưa cấu hình API Key</p>
+              <p style="color:#92400e; font-size:1.1rem; margin-bottom:1rem;">Nhập Gemini API Key của bạn để sử dụng tính năng phân tích (Chỉ dành cho Admin).</p>
+              <div style="display:flex; gap:0.5rem;">
+                <input type="password" id="quick_api_key_input" placeholder="Nhập API Key..." class="dom-input" style="flex:1; padding:0.8rem; border-radius:6px; border:1px solid #cbd5e1; outline:none;" onfocus="this.style.borderColor='var(--mainClr)'" onblur="this.style.borderColor='#cbd5e1'">
+                <button onclick="saveQuickApiKey('quick_api_key_input')" style="background:var(--mainClr); color:#fff; border:none; padding:0 1.5rem; border-radius:6px; font-weight:600; cursor:pointer; transition:all 0.2s;">Lưu lại</button>
+              </div>
+            </div>
+          `;
+      }
+      content.innerHTML = errorHtml;
+    }
     console.error("❌ AI Compare error:", err);
   }
 }
@@ -850,7 +869,10 @@ YÊU CẦU PHÂN TÍCH (đầy đủ, chi tiết, có số liệu cụ thể)
     const resp = await fetch(PROXY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({ 
+        prompt: prompt,
+        slug: window.SAAS_ROUTER?.tenant?.slug || ''
+      }),
       signal,
     });
 
@@ -880,7 +902,23 @@ YÊU CẦU PHÂN TÍCH (đầy đủ, chi tiết, có số liệu cụ thể)
       return;
     }
     console.error("❌ AI Summary error:", err);
-    if (content) content.innerHTML = `<p style="color:#e05c1a">❌ Lỗi: ${err.message}</p>`;
+    if (content) {
+      let errorHtml = `<p style="color:#e05c1a">❌ Lỗi: ${err.message}</p>`;
+      
+      if (err.message && err.message.includes("Chưa cấu hình GEMINI API KEY")) {
+          errorHtml += `
+            <div style="background:#fffbeb; border:1px solid #fde68a; padding:1.5rem; border-radius:8px; margin-top:1rem; max-width: 500px; text-align: left;">
+              <p style="color:#d97706; font-weight:600; margin-bottom:0.5rem;"><i class="fa-solid fa-key"></i> Bạn chưa cấu hình API Key</p>
+              <p style="color:#92400e; font-size:1.1rem; margin-bottom:1rem;">Nhập Gemini API Key của bạn để sử dụng tính năng phân tích (Chỉ dành cho Admin).</p>
+              <div style="display:flex; gap:0.5rem;">
+                <input type="password" id="quick_api_key_input_2" placeholder="Nhập API Key..." class="dom-input" style="flex:1; padding:0.8rem; border-radius:6px; border:1px solid #cbd5e1; outline:none;" onfocus="this.style.borderColor='var(--mainClr)'" onblur="this.style.borderColor='#cbd5e1'">
+                <button onclick="saveQuickApiKey('quick_api_key_input_2')" style="background:var(--mainClr); color:#fff; border:none; padding:0 1.5rem; border-radius:6px; font-weight:600; cursor:pointer; transition:all 0.2s;">Lưu lại</button>
+              </div>
+            </div>
+          `;
+      }
+      content.innerHTML = errorHtml;
+    }
   } finally {
     if (loading) loading.style.display = "none";
     _aiController = null;
@@ -984,3 +1022,54 @@ function simpleMarkdown(text) {
 
   return out.join("\n").replace(/<p><\/p>/g, "");
 }
+
+// Quick Save API Key from Error UI
+window.saveQuickApiKey = async function(inputId) {
+    if (!window.SAAS_ROUTER || !window.SAAS_ROUTER.tenant) {
+        alert("Lỗi: Không tìm thấy thông tin tenant hiện tại.");
+        return;
+    }
+    const slug = window.SAAS_ROUTER.tenant.slug;
+    const inp = document.getElementById(inputId);
+    const gemini_api_key = inp ? inp.value.trim() : '';
+
+    if (!gemini_api_key) {
+        alert("Vui lòng nhập API Key!");
+        return;
+    }
+
+    const btn = inp.nextElementSibling;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                action: 'auth_update_settings',
+                slug: slug,
+                admin_email: window.SAAS_ROUTER.userEmail || '',
+                gemini_api_key: gemini_api_key
+            })
+        });
+        const data = await res.json();
+        if (data.ok) {
+            showToast("Đã lưu API Key thành công! Vui lòng thử lại chức năng AI.", 4000);
+            window.SAAS_ROUTER.tenant.gemini_api_key = gemini_api_key;
+            // Hide the error
+            if (inp.parentElement && inp.parentElement.parentElement) {
+               inp.parentElement.parentElement.style.display = 'none';
+            }
+        } else {
+            alert("Lỗi: " + (data.error || "Không thể cập nhật cấu hình. Có thể bạn không phải Admin."));
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Lỗi kết nối khi lưu API Key");
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};

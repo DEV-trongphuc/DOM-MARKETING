@@ -13,6 +13,7 @@ function openFilterSettings() {
       // Workspace info
       const nameInp = document.getElementById('edit_workspace_name');
       const slugInp = document.getElementById('edit_workspace_slug');
+      const keyInp = document.getElementById('edit_workspace_gemini_key');
       const preview = document.getElementById('preview_workspace_url');
       if (nameInp) nameInp.value = t.name || '';
       if (slugInp) {
@@ -20,6 +21,14 @@ function openFilterSettings() {
           slugInp.readOnly = true; // Slug should not be easily changed
           slugInp.style.backgroundColor = '#f1f5f9';
           slugInp.style.cursor = 'not-allowed';
+      }
+      if (keyInp) {
+          keyInp.value = t.gemini_api_key || '';
+          // Hide API Key container entirely if the user is not owner
+          // (it might just be returned as null if not owner, but better to hide the UI too if they don't have permission)
+          if (t.gemini_api_key === undefined && !t.unauthorized && t.google_email && window.SAAS_ROUTER?.userEmail && t.google_email.toLowerCase() !== window.SAAS_ROUTER.userEmail.toLowerCase()) {
+             keyInp.parentElement.style.display = 'none';
+          }
       }
       if (preview) preview.textContent = 'https://meta.domation.net/' + (t.slug || '');
       

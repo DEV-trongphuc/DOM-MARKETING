@@ -359,7 +359,7 @@ try {
             $email = $_GET['email'] ?? ''; // Optional, for soft security auth
             if (!$slug) _json(["ok" => false, "error" => "Missing slug"], 400);
 
-            $stmt = $pdo->prepare("SELECT id, slug, name, google_email, status, expires_at, meta_token, ad_account_id, ad_accounts, brand_filter_enabled, is_public FROM saas_tenants WHERE slug = ?");
+            $stmt = $pdo->prepare("SELECT id, slug, name, google_email, status, expires_at, meta_token, gemini_api_key, ad_account_id, ad_accounts, brand_filter_enabled, is_public FROM saas_tenants WHERE slug = ?");
             $stmt->execute([$slug]);
             $tenant = $stmt->fetch();
 
@@ -408,6 +408,11 @@ try {
                 $tenant['ad_account_id'] = null;
                 $tenant['ad_accounts'] = null;
                 $tenant['unauthorized'] = true;
+            }
+
+            // ONLY owner can see their Gemini API Key
+            if (strtolower($email) !== strtolower($tenant['google_email'])) {
+                $tenant['gemini_api_key'] = null;
             }
 
             _json(["ok" => true, "tenant" => $tenant]);
@@ -636,6 +641,28 @@ try {
             _json(["ok" => true, "message" => "Cập nhật tài khoản thành công"]);
             break;
 
+        case 'auth_update_settings':
+            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            $slug = $body['slug'] ?? '';
+            $admin_email = $body['admin_email'] ?? '';
+            $gemini_api_key = $body['gemini_api_key'] ?? '';
+            
+            if (!$slug) _json(["ok" => false, "error" => "Missing data"], 400);
+
+            $stmt = $pdo->prepare("SELECT google_email FROM saas_tenants WHERE slug = ?");
+            $stmt->execute([$slug]);
+            $tenant = $stmt->fetch();
+            $is_super_admin = (strtolower($admin_email) === 'dom.marketing.vn@gmail.com');
+            if (!$tenant || (strtolower($admin_email) !== strtolower($tenant['google_email']) && !$is_super_admin)) {
+                _json(["ok" => false, "error" => "Unauthorized"], 403);
+            }
+
+            $pdo->prepare("UPDATE saas_tenants SET gemini_api_key = ? WHERE slug = ?")
+                ->execute([$gemini_api_key, $slug]);
+            
+            _json(["ok" => true, "message" => "Cập nhật cài đặt thành công"]);
+            break;
+
         // --- 2. ADMIN ENDPOINTS ---
         case 'admin_login':
             if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
@@ -862,12 +889,24 @@ try {
                 _json(["ok" => false, "error" => "Prompt quá dài"], 400);
             }
             
-            if (!defined('GEMINI_API_KEY') || empty(GEMINI_API_KEY)) {
-                _json(["ok" => false, "error" => "Chưa cấu hình GEMINI_API_KEY trên server"], 500);
+            $slug = $body['slug'] ?? '';
+            $active_api_key = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
+
+            if ($slug) {
+                $stmt = $pdo->prepare("SELECT gemini_api_key FROM saas_tenants WHERE slug = ?");
+                $stmt->execute([$slug]);
+                $tenant = $stmt->fetch();
+                if ($tenant && !empty($tenant['gemini_api_key'])) {
+                    $active_api_key = $tenant['gemini_api_key'];
+                }
             }
 
-            $GEMINI_MODEL = "gemini-2.5-flash-lite";
-            $GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{$GEMINI_MODEL}:generateContent?key=" . GEMINI_API_KEY;
+            if (empty($active_api_key)) {
+                _json(["ok" => false, "error" => "Chưa cấu hình GEMINI API KEY"], 500);
+            }
+
+            $GEMINI_MODEL = "gemini-2.5-flash";
+            $GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{$GEMINI_MODEL}:generateContent?key=" . $active_api_key;
 
             $payload = json_encode([
                 "contents" => [
