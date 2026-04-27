@@ -20,6 +20,20 @@
   <script src="./lib/config_env.js?v=12"></script>
   <!-- SaaS Router -->
   <script src="./js/core/router.js?v=3"></script>
+  <script>
+    // Lock viewport scaling for consistent layout across laptops/desktops
+    function fixDashboardScale() {
+       if (window.innerWidth >= 1024) {
+           const scale = window.innerWidth / 1920;
+           document.body.style.zoom = scale;
+       } else {
+           document.body.style.zoom = 1;
+       }
+    }
+    window.addEventListener('resize', fixDashboardScale);
+    document.addEventListener('DOMContentLoaded', fixDashboardScale);
+    fixDashboardScale();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DOM META REPORTS</title>
   <!-- <link rel="stylesheet" href="css/main.css" /> -->
@@ -1902,27 +1916,27 @@
   <!-- ========== SETTINGS MODAL ========== -->
   <div id="filter_settings_modal" class="ai_modal_overlay" style="display:none">
     <div class="ai_modal_box" style="width: min(800px, 96vw); height: 85vh; max-height: 800px; display:flex; flex-direction:column; padding: 0; overflow: hidden;">
-      <div class="ai_modal_header" style="border-bottom: 1px solid #e2e8f0; padding: 2rem 2.4rem 0 2.4rem;">
-        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 1.5rem;">
-          <div class="ai_modal_header_left" style="font-size: 1.8rem;">
+      <div class="ai_modal_header" style="border-bottom: 1px solid #e2e8f0; padding: 2rem 2.4rem 0 2.4rem; display: flex; justify-content: space-between; align-items: flex-start;">
+        <div style="display: flex; align-items: center; gap: 3rem;">
+          <div class="ai_modal_header_left" style="font-size: 1.8rem; flex-shrink: 0; transform: translateY(-0.6rem);">
             <i class="fa-solid fa-gear" style="color: var(--mainClr);"></i>
             <span style="font-weight: 800; color: #1e293b;">Workspace Settings</span>
           </div>
-          <button class="ai_close_btn" onclick="closeFilterSettings()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
 
-        <!-- Tab Navigation -->
-        <div style="display: flex; gap: 2rem;">
-          <button class="setting-tab-btn active" onclick="switchSettingTab('tab-brand')" id="btn-tab-brand" style="padding: 0 0 1.2rem 0; border: none; background: none; font-weight: 700; font-size: 1.3rem; color: var(--mainClr); border-bottom: 3px solid var(--mainClr); cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s;">
-            <i class="fa-solid fa-tags"></i> Brand Settings
-          </button>
-          <button class="setting-tab-btn" onclick="switchSettingTab('tab-workspace')" id="btn-tab-workspace" style="padding: 0 0 1.2rem 0; border: none; background: none; font-weight: 700; font-size: 1.3rem; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s;">
-            <i class="fa-solid fa-pen-to-square"></i> Edit Workspace
-          </button>
-          <button class="setting-tab-btn" onclick="switchSettingTab('tab-share')" id="btn-tab-share" style="padding: 0 0 1.2rem 0; border: none; background: none; font-weight: 700; font-size: 1.3rem; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s;">
-            <i class="fa-solid fa-share-nodes"></i> Share Workspace
-          </button>
+          <!-- Tab Navigation -->
+          <div style="display: flex; gap: 2rem; flex-wrap: nowrap; overflow-x: auto;">
+            <button class="setting-tab-btn active" onclick="switchSettingTab('tab-brand')" id="btn-tab-brand" style="padding: 0 0 1.2rem 0; border: none; background: none; font-weight: 700; font-size: 1.3rem; color: var(--mainClr); border-bottom: 3px solid var(--mainClr); cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s; white-space: nowrap;">
+              <i class="fa-solid fa-tags"></i> Brand Settings
+            </button>
+            <button class="setting-tab-btn" onclick="switchSettingTab('tab-workspace')" id="btn-tab-workspace" style="padding: 0 0 1.2rem 0; border: none; background: none; font-weight: 700; font-size: 1.3rem; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s; white-space: nowrap;">
+              <i class="fa-solid fa-pen-to-square"></i> Edit Workspace
+            </button>
+            <button class="setting-tab-btn" onclick="switchSettingTab('tab-share')" id="btn-tab-share" style="padding: 0 0 1.2rem 0; border: none; background: none; font-weight: 700; font-size: 1.3rem; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s; white-space: nowrap;">
+              <i class="fa-solid fa-share-nodes"></i> Share Workspace
+            </button>
+          </div>
         </div>
+        <button class="ai_close_btn" onclick="closeFilterSettings()" style="transform: translateY(-0.6rem);"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <div class="ai_modal_body" style="flex:1; overflow-y:auto; position: relative; background: #f8fafc; padding: 0;">
@@ -1988,19 +2002,8 @@
         </div>
 
         <!-- TAB 3: SHARE WORKSPACE -->
-        <div id="tab-share" class="setting-tab-content" style="display:none; padding: 3rem; height: 100%;">
-            <div style="background: #fff; border-radius: 16px; padding: 5rem 3rem; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-               <div style="width: 88px; height: 88px; border-radius: 50%; background: #eff6ff; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
-                 <i class="fa-solid fa-share-nodes" style="font-size: 3.8rem; color: var(--mainClr);"></i>
-               </div>
-               <h3 style="font-size: 2.2rem; font-weight: 900; color: #1e293b; margin-bottom: 1.2rem; letter-spacing: -0.02em;">Chia sẻ Workspace</h3>
-               <p style="color: #64748b; font-size: 1.35rem; margin-bottom: 3.5rem; max-width: 440px; margin-inline: auto; line-height: 1.6;">
-                 Sao chép đường dẫn bên dưới để chia sẻ báo cáo hiện tại. Bộ lọc theo ngày và theo brand cũng sẽ được lưu trữ tự động.
-               </p>
-               <button onclick="shareCurrentView()" style="background: var(--mainClr); color:#fff; padding: 1.4rem 3.5rem; border-radius: 50px; border:none; cursor:pointer; font-size: 1.4rem; font-weight:700; display:inline-flex; align-items:center; gap:1rem; transition: all 0.2s; box-shadow: 0 4px 12px rgba(59,130,246,0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(59,130,246,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(59,130,246,0.3)'" onmousedown="this.style.transform='scale(0.97)'">
-                  <i class="fa-solid fa-link"></i> Sao chép liên kết
-               </button>
-            </div>
+        <div id="tab-share" class="setting-tab-content" style="display:none; padding: 0; height: 100%; flex-direction: column;">
+            <!-- Content will be injected by lib/auth.js __openShareModal -->
         </div>
 
       </div>
@@ -2008,7 +2011,7 @@
   </div>
 
   <script>
-    function switchSettingTab(tabId) {
+    function switchSettingTab(tabId, skipShareInit = false) {
       document.querySelectorAll('.setting-tab-content').forEach(el => el.style.display = 'none');
       document.querySelectorAll('.setting-tab-btn').forEach(el => {
         el.classList.remove('active');
@@ -2018,7 +2021,7 @@
       
       const content = document.getElementById(tabId);
       if (content) {
-        content.style.display = tabId === 'tab-brand' || tabId === 'tab-workspace' ? 'flex' : 'block';
+        content.style.display = tabId === 'tab-brand' || tabId === 'tab-workspace' || tabId === 'tab-share' ? 'flex' : 'block';
       }
       
       const btn = document.getElementById('btn-' + tabId);
@@ -2026,6 +2029,10 @@
         btn.classList.add('active');
         btn.style.color = 'var(--mainClr)';
         btn.style.borderBottomColor = 'var(--mainClr)';
+      }
+      
+      if (tabId === 'tab-share' && !skipShareInit && window.__openShareModal && !document.getElementById('_slink')) {
+         window.__openShareModal(true);
       }
     }
 

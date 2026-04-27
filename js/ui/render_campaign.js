@@ -143,8 +143,14 @@ function renderCampaignView(data) {
 
     const campaignStatusClass = hasActiveAdset ? "active" : "inactive";
     const campaignStatusText = hasActiveAdset
-      ? `${activeAdsetCountForDisplay} ACTIVE`
-      : "INACTIVE";
+      ? `<div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
+           <span style="width:1rem;height:1rem;border-radius:50%;background:green;flex-shrink:0;"></span>
+           <span>${activeAdsetCountForDisplay} ACTIVE</span>
+         </div>`
+      : `<div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
+           <span style="width:1rem;height:1rem;border-radius:50%;background:#a1a1a1;flex-shrink:0;"></span>
+           <span>INACTIVE</span>
+         </div>`;
 
     const firstGoal = adsets?.[0]?.optimization_goal || "";
     const iconClass = getCampaignIcon(firstGoal);
@@ -239,9 +245,14 @@ function renderCampaignView(data) {
         value = `<span class="status-value">COMPLETE</span>`;
 
         adsetStatusText = `
-          ${label}
-          ${value}
-          ${timeText ? `<span class="status-date">${timeText}</span>` : ""}
+          <div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
+            <span style="width:1rem;height:1rem;border-radius:50%;background:#a1a1a1;flex-shrink:0;"></span>
+            <div style="display:flex;flex-direction:column;">
+              ${label}
+              ${value}
+            </div>
+          </div>
+          ${timeText ? `<span class="status-date" style="margin-top:0.4rem;">${timeText}</span>` : ""}
         `;
       } else if (hasActiveAd && (dailyBudget > 0 || lifetimeBudget > 0)) {
         adsetStatusClass = "active budget";
@@ -259,13 +270,23 @@ function renderCampaignView(data) {
         }
 
         adsetStatusText = `
-          ${label}
-          ${value}
-          ${timeText ? `<span class="status-date">${timeText}</span>` : ""}
+          <div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
+            <span style="width:1rem;height:1rem;border-radius:50%;background:green;flex-shrink:0;"></span>
+            <div style="display:flex;flex-direction:column;">
+              ${label}
+              ${value}
+            </div>
+          </div>
+          ${timeText ? `<span class="status-date" style="margin-top:0.4rem;">${timeText}</span>` : ""}
         `;
       } else if (hasActiveAd) {
         adsetStatusClass = "active";
-        adsetStatusText = `<span>ACTIVE</span>`;
+        adsetStatusText = `
+          <div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
+            <span style="width:1rem;height:1rem;border-radius:50%;background:green;flex-shrink:0;"></span>
+            <span>ACTIVE</span>
+          </div>
+        `;
       } else {
         if (startDateFmt && endDateFmt) {
           timeText = `<i class="fa-regular fa-clock" style="opacity: 0.5"></i> ${startDateFmt} to ${endDateFmt}`;
@@ -282,9 +303,14 @@ function renderCampaignView(data) {
         value = `<span class="status-value">INACTIVE</span>`;
 
         adsetStatusText = `
-          ${label}
-          ${value}
-          ${timeText ? `<span class="status-date">${timeText}</span>` : ""}
+          <div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
+            <span style="width:1rem;height:1rem;border-radius:50%;background:#a1a1a1;flex-shrink:0;"></span>
+            <div style="display:flex;flex-direction:column;">
+              ${label}
+              ${value}
+            </div>
+          </div>
+          ${timeText ? `<span class="status-date" style="margin-top:0.4rem;">${timeText}</span>` : ""}
         `;
       }
 
@@ -356,8 +382,12 @@ function renderCampaignView(data) {
                 </p>
               </a>
             </div>
-            <div class="ad_status ${isActive ? "active" : "inactive"}">${ad.status
-          }</div>
+            <div class="ad_status ${isActive ? "active" : "inactive"}">
+              <div style="display:flex;align-items:center;gap:0.8rem;position:relative;left:-1.8rem;">
+                <span style="width:1rem;height:1rem;border-radius:50%;background:${isActive ? 'green' : '#a1a1a1'};flex-shrink:0;"></span>
+                <span>${ad.status}</span>
+              </div>
+            </div>
             ${renderCells(ad)}
             <div class="ad_view"
               data-ad-id="${ad.id}"

@@ -4928,23 +4928,7 @@ tbody {
   transform: translateX(-1rem);
 }
 
-.ad_status::after,
-.ad_status::after {
-  position: absolute;
-  content: "";
-  top: 50%;
-  left: 1rem;
-  transform: translateY(-50%);
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50rem;
-  background-color: rgb(161, 161, 161);
-}
 
-.ad_status.active::after,
-.ad_status.active::after {
-  background-color: green;
-}
 
 .ad_spent {
   /* font-weight: bold; */
@@ -5081,9 +5065,7 @@ tbody {
   background: var(--mainClr, var(--colorWarn)) !important;
 }
 
-.view_campaign_header .ad_status::after {
-  display: none;
-}
+
 
 .dom_container.dashboard .dom_dashboard {
   padding-bottom: 1rem;
