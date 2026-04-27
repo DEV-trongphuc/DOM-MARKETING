@@ -121,7 +121,7 @@ window.renderAdLibraryCurrentPage = function() {
             <div class="ad_library_card_status">
               <i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> Active
             </div>
-            <div class="ad_library_card_id" title="Spend: ${spendFormatted}đ">
+            <div class="ad_library_card_id" title="Spend: ${spendFormatted}">
               <i class="fa-solid fa-coins" style="color:#f59e0b;"></i> ${spendFormatted}
             </div>
           </div>

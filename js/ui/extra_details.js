@@ -1,4 +1,4 @@
-﻿
+
 // =================== COLOR PALETTE ===================
 const COLORS = {
     // Metric overview
@@ -304,12 +304,12 @@ function renderExtraGoalChart(goalSpend) {
     gradGray.addColorStop(0, COLORS.gradGrayStart);
     gradGray.addColorStop(1, COLORS.gradGrayEnd);
 
-    const formatMoney = (v) => {
-        if (v >= 1e9) return (v / 1e9).toFixed(2) + 'B';
-        if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
-        if (v >= 1e3) return (v / 1e3).toFixed(0) + 'K';
-        return v;
-    };
+    // Dùng formatMoneyShort global (hỗ trợ đa tiền tệ)
+    const fmtShort = (v) => window.formatMoneyShort ? window.formatMoneyShort(v) : (
+        v >= 1e9 ? (v / 1e9).toFixed(2) + 'B' :
+        v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' :
+        v >= 1e3 ? (v / 1e3).toFixed(0) + 'K' : String(v)
+    );
 
     const SHORT_GOALS = {
         "TWO_SECOND_CONTINUOUS_VIDEO_VIEWS": "2S VIDEO VIEWS",
@@ -343,12 +343,12 @@ function renderExtraGoalChart(goalSpend) {
             animation: { duration: 600, easing: "easeOutQuart" },
             plugins: {
                 legend: { display: false },
-                tooltip: { callbacks: { label: (c) => `Spend: ${formatMoney(c.raw)}` } },
+                tooltip: { callbacks: { label: (c) => `Spend: ${fmtShort(c.raw)}` } },
                 datalabels: {
                     anchor: "end", align: "end", offset: 2,
                     font: { size: 11, weight: "600", family: "'Roboto', sans-serif" },
                     color: COLORS.chartLabel,
-                    formatter: (v) => v > 0 ? formatMoney(v) : ""
+                    formatter: (v) => v > 0 ? fmtShort(v) : ""
                 }
             },
             scales: {

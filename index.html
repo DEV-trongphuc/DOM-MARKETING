@@ -1968,6 +1968,10 @@
               style="padding: 0 0 1.2rem 0; border: none; background: none; font-weight: 700; font-size: 1.3rem; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s; white-space: nowrap;">
               <i class="fa-solid fa-pen-to-square"></i> Edit Workspace
             </button>
+            <button class="setting-tab-btn" onclick="switchSettingTab('tab-plan')" id="btn-tab-plan"
+              style="padding: 0 0 1.2rem 0; border: none; background: none; font-weight: 700; font-size: 1.3rem; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s; white-space: nowrap;">
+              <i class="fa-solid fa-crown"></i> Gói & Gia Hạn
+            </button>
           </div>
         </div>
         <button class="ai_close_btn" onclick="closeFilterSettings()" style="transform: translateY(-0.6rem);"><i
@@ -2061,6 +2065,63 @@
             </button>
           </div>
         </div>
+        </div>
+
+        <!-- TAB 3: PLAN -->
+        <div id="tab-plan" class="setting-tab-content"
+          style="display:none; padding: 3rem; flex-direction: column; gap: 2rem; min-height: 100%;">
+          
+          <div style="background: #fff; padding: 2.5rem; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <h3 style="font-size: 1.6rem; font-weight: 800; color: #1e293b; margin-bottom: 2rem; display:flex; align-items:center; gap:0.8rem;">
+              <i class="fa-solid fa-crown" style="color: #f59e0b;"></i> Thông tin gói dịch vụ
+            </h3>
+            
+            <div style="display:flex; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
+                <div style="flex: 1; background: #f8fafc; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div style="font-size: 1.1rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase;">Trạng Thái</div>
+                    <div id="plan_current_status" style="font-size: 1.4rem; font-weight: 800; color: #10b981; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fa-solid fa-circle-check"></i> Đang tải...
+                    </div>
+                </div>
+                <div style="flex: 1; background: #f8fafc; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div style="font-size: 1.1rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase;">Hạn Sử Dụng</div>
+                    <div id="plan_current_expiry" style="font-size: 1.4rem; font-weight: 800; color: #1e293b; font-family: monospace;">
+                        Đang tải...
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0;">
+
+            <h3 style="font-size: 1.4rem; font-weight: 800; color: #1e293b; margin-bottom: 1.5rem; display:flex; align-items:center; gap:0.8rem;">
+              <i class="fa-solid fa-bolt" style="color: var(--mainClr);"></i> Yêu cầu gia hạn
+            </h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div>
+                  <label style="display:block; font-weight:700; color: #475569; margin-bottom:0.8rem; font-size: 1.15rem;">Chọn Gói</label>
+                  <select id="extend_plan_type" style="width:100%; padding: 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1.15rem; font-family: 'Inter', sans-serif; outline: none; background: #fff;">
+                      <option value="1_month">Gói 1 Tháng</option>
+                      <option value="1_year">Gói 1 Năm (Tiết kiệm 20%)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="display:block; font-weight:700; color: #475569; margin-bottom:0.8rem; font-size: 1.15rem;">SĐT Zalo (Admin sẽ liên hệ)</label>
+                  <input type="text" id="extend_phone" placeholder="VD: 0987.654.321" style="width:100%; padding: 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1.15rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s;" onfocus="this.style.borderColor='var(--mainClr)'" onblur="this.style.borderColor='#cbd5e1'">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+                <button id="btn_submit_extend" onclick="submitPlanExtension()"
+                  style="background: #f59e0b; color:#fff; padding: 1.2rem 3rem; border-radius: 8px; border:none; cursor:pointer; font-weight:800; font-size: 1.35rem; display:flex; align-items:center; gap:0.8rem; transition: all 0.15s; box-shadow: 0 4px 6px rgba(245,158,11,0.2);"
+                  onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(245,158,11,0.3)'"
+                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(245,158,11,0.2)'">
+                  <i class="fa-solid fa-paper-plane"></i> Gửi Yêu Cầu
+                </button>
+            </div>
+            
+          </div>
+        </div>
 
       </div>
     </div>
@@ -2077,7 +2138,7 @@
 
       const content = document.getElementById(tabId);
       if (content) {
-        content.style.display = tabId === 'tab-brand' || tabId === 'tab-workspace' ? 'flex' : 'block';
+        content.style.display = ['tab-brand', 'tab-workspace', 'tab-plan'].includes(tabId) ? 'flex' : 'block';
       }
 
       const btn = document.getElementById('btn-' + tabId);
@@ -2091,6 +2152,54 @@
     function saveWorkspaceInfo() {
       // Stub cho tính năng lưu workspace
       showToast("Đã lưu thông tin workspace thành công!", 3000);
+    }
+
+    async function submitPlanExtension() {
+      if (!window.SAAS_ROUTER || !window.SAAS_ROUTER.tenant) {
+          showToast("Lỗi: Không tìm thấy thông tin tenant hiện tại", 3000);
+          return;
+      }
+      const slug = window.SAAS_ROUTER.tenant.slug;
+      const phone = document.getElementById('extend_phone').value.trim();
+      const plan = document.getElementById('extend_plan_type').value;
+
+      if (!phone) {
+          alert("Vui lòng nhập Số Điện Thoại Zalo để Admin liên hệ!");
+          return;
+      }
+
+      const btn = document.getElementById('btn_submit_extend');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang Gửi...';
+      btn.disabled = true;
+
+      try {
+          const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                  action: 'submit_renewal',
+                  slug: slug,
+                  plan: plan,
+                  phone: phone,
+                  email: window.SAAS_ROUTER.tenant.google_email || ''
+              })
+          });
+          const data = await res.json();
+          if (data.ok) {
+              showToast("Yêu cầu đã gửi! Admin sẽ liên hệ Zalo bạn sớm.", 4000);
+              btn.innerHTML = '<i class="fa-solid fa-check"></i> Đã Gửi Thành Công';
+          } else {
+              alert("Lỗi: " + (data.error || "Không thể gửi yêu cầu"));
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+          }
+      } catch (e) {
+          console.error(e);
+          alert("Lỗi kết nối");
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+      }
     }
   </script>
 

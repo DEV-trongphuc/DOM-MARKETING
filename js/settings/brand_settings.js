@@ -5,6 +5,59 @@ function openFilterSettings() {
     setTimeout(() => modal.classList.add("active"), 10);
   }
   renderBrandSettingsToModal();
+  
+  // Fill Workspace & Plan Info
+  if (window.SAAS_ROUTER && window.SAAS_ROUTER.tenant) {
+      const t = window.SAAS_ROUTER.tenant;
+      
+      // Workspace info
+      const nameInp = document.getElementById('edit_workspace_name');
+      const slugInp = document.getElementById('edit_workspace_slug');
+      const preview = document.getElementById('preview_workspace_url');
+      if (nameInp) nameInp.value = t.name || '';
+      if (slugInp) {
+          slugInp.value = t.slug || '';
+          slugInp.readOnly = true; // Slug should not be easily changed
+          slugInp.style.backgroundColor = '#f1f5f9';
+          slugInp.style.cursor = 'not-allowed';
+      }
+      if (preview) preview.textContent = 'https://domation.net/w/' + (t.slug || '');
+      
+      // Plan info
+      const statusEl = document.getElementById('plan_current_status');
+      const expiryEl = document.getElementById('plan_current_expiry');
+      if (statusEl) {
+          if (t.status === 'active') {
+              statusEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đang hoạt động';
+              statusEl.style.color = '#10b981';
+          } else if (t.status === 'trial') {
+              statusEl.innerHTML = '<i class="fa-solid fa-clock"></i> Dùng thử (Trial)';
+              statusEl.style.color = '#f59e0b';
+          } else if (t.status === 'expired') {
+              statusEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Đã hết hạn';
+              statusEl.style.color = '#ef4444';
+          } else {
+              statusEl.innerHTML = `<i class="fa-solid fa-circle-info"></i> ${t.status}`;
+              statusEl.style.color = '#64748b';
+          }
+      }
+      
+      if (expiryEl) {
+          if (t.expires_at) {
+              const d = new Date(t.expires_at);
+              expiryEl.textContent = d.toLocaleDateString('vi-VN') + ' ' + d.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+              // If expired, turn red
+              if (d.getTime() < Date.now()) {
+                  expiryEl.style.color = '#ef4444';
+              } else {
+                  expiryEl.style.color = '#1e293b';
+              }
+          } else {
+              expiryEl.textContent = 'Không giới hạn';
+              expiryEl.style.color = '#1e293b';
+          }
+      }
+  }
 }
 
 window.setGoalChartMode = function (mode) {
