@@ -481,25 +481,31 @@
             
             <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.5rem;">
                 <label style="border:2px solid var(--border-color); border-radius:14px; padding:1.2rem; cursor:pointer; transition:all 0.2s; position:relative;" class="plan-option" onclick="selectPlan(this)">
-                    <input type="radio" name="plan" value="1_month" checked style="display:none;">
+                    <input type="radio" name="plan" value="1_month" style="display:none;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-weight:800; font-size:1.1rem; color:var(--text-dark);">Gói Tháng</div>
-                            <div style="font-size:0.85rem; color:var(--text-muted);">Thanh toán mỗi tháng</div>
+                            <div style="font-weight:800; font-size:1.1rem; color:var(--text-dark);">Gói 1 Tháng</div>
+                            <div style="font-size:0.85rem; color:var(--text-muted);">Phù hợp để trải nghiệm</div>
                         </div>
-                        <div style="font-weight:800; font-size:1.2rem; color:var(--primary);">690.000đ</div>
+                        <div style="text-align: right;">
+                            <div style="font-weight:800; font-size:1.2rem; color:var(--text-dark);">690.000đ</div>
+                            <div style="font-size:0.85rem; color:var(--text-muted);">/tháng</div>
+                        </div>
                     </div>
                 </label>
 
                 <label style="border:2px solid var(--primary); background:#fffbeb; border-radius:14px; padding:1.2rem; cursor:pointer; transition:all 0.2s; position:relative;" class="plan-option active" onclick="selectPlan(this)">
-                    <input type="radio" name="plan" value="1_year" style="display:none;">
-                    <div style="position:absolute; top:-10px; right:15px; background:#ef4444; color:#fff; font-size:0.75rem; font-weight:800; padding:2px 8px; border-radius:10px;">Giảm 10%</div>
+                    <input type="radio" name="plan" value="1_year" checked style="display:none;">
+                    <div style="position:absolute; top:-10px; right:15px; background: linear-gradient(135deg, #ef4444, #f97316); color:#fff; font-size:0.75rem; font-weight:800; padding:2px 10px; border-radius:12px; box-shadow: 0 2px 5px rgba(239,68,68,0.3);">TIẾT KIỆM 29%</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-weight:800; font-size:1.1rem; color:var(--text-dark);">Gói Năm</div>
-                            <div style="font-size:0.85rem; color:var(--text-muted);">Thanh toán 1 lần</div>
+                            <div style="font-weight:800; font-size:1.1rem; color:#92400e;">Gói 1 Năm</div>
+                            <div style="font-size:0.85rem; color:#b45309;">Thanh toán 5.880.000đ/năm</div>
                         </div>
-                        <div style="font-weight:800; font-size:1.2rem; color:var(--primary);">7.452.000đ</div>
+                        <div style="text-align: right;">
+                            <div style="font-weight:800; font-size:1.2rem; color:var(--primary);">490.000đ</div>
+                            <div style="font-size:0.85rem; color:#b45309;">/tháng</div>
+                        </div>
                     </div>
                 </label>
             </div>
