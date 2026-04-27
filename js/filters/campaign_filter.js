@@ -5,6 +5,7 @@ async function applyCampaignFilter(keyword) {
   if (typeof updateBrandDropdownUI === "function") updateBrandDropdownUI();
   if (typeof updatePerfBrandDropdownUI === "function") updatePerfBrandDropdownUI();
   if (typeof refreshGoogleAds === "function") refreshGoogleAds();
+  if (typeof window.renderAdLibrary === "function") window.renderAdLibrary();
 
   const domContainer = document.querySelector(".dom_container");
   const isGoogleAdsView = domContainer && domContainer.classList.contains("google_ads");

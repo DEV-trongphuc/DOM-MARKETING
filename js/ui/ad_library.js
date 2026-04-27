@@ -55,38 +55,66 @@ window.renderAdLibrary = function () {
     return;
   }
 
-  // 2. Group by Brand
+  // Apply Global Brand Filter
+  let filteredAds = activeAds;
+  if (typeof CURRENT_CAMPAIGN_FILTER !== 'undefined' && CURRENT_CAMPAIGN_FILTER && CURRENT_CAMPAIGN_FILTER !== "RESET") {
+    filteredAds = activeAds.filter(ad => ad.brand === CURRENT_CAMPAIGN_FILTER);
+  }
+
+  if (filteredAds.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center; padding: 4rem; color: #94a3b8;">
+        <i class="fa-solid fa-filter" style="font-size:3rem; margin-bottom:1rem; color:#cbd5e1;"></i>
+        <br><span style="font-size:1.1rem; font-weight:600;">Không có quảng cáo nào phù hợp với bộ lọc.</span>
+      </div>`;
+    return;
+  }
+
+  // Sort globally by spend desc before pagination
+  filteredAds.sort((a, b) => b.spend - a.spend);
+
+  window._adLibraryFilteredAds = filteredAds;
+  window._adLibraryCurrentPage = 1;
+  window.renderAdLibraryCurrentPage();
+};
+
+window.renderAdLibraryCurrentPage = function() {
+  const container = document.getElementById("ad_library_content");
+  if (!container) return;
+
+  const ads = window._adLibraryFilteredAds || [];
+  const page = window._adLibraryCurrentPage || 1;
+  const itemsPerPage = 15;
+  const totalPages = Math.ceil(ads.length / itemsPerPage);
+  
+  const startIndex = (page - 1) * itemsPerPage;
+  const pagedAds = ads.slice(startIndex, startIndex + itemsPerPage);
+
+  // Group by Brand for the current page
   const adsByBrand = {};
-  activeAds.forEach((ad) => {
+  pagedAds.forEach((ad) => {
     if (!adsByBrand[ad.brand]) adsByBrand[ad.brand] = [];
     adsByBrand[ad.brand].push(ad);
   });
 
-  // Sort brands alphabetically
   const sortedBrands = Object.keys(adsByBrand).sort();
 
-  // 3. Render
   let html = "";
   
   sortedBrands.forEach((brand) => {
-    const ads = adsByBrand[brand];
+    const brandAds = adsByBrand[brand];
     
-    // Sort ads by spend desc
-    ads.sort((a, b) => b.spend - a.spend);
-
     html += `
       <div class="ad_library_brand_group">
         <h3 class="ad_library_brand_title">
           <i class="fa-solid fa-tags" style="color:#f59e0b; font-size: 1.6rem;"></i>
-          ${brand} <span style="font-size:0.9rem; color:#94a3b8; background:#f1f5f9; padding: 0.2rem 0.6rem; border-radius: 20px;">${ads.length} ads</span>
+          ${brand} <span style="font-size:0.9rem; color:#94a3b8; background:#f1f5f9; padding: 0.2rem 0.6rem; border-radius: 20px;">${brandAds.length} ads (Trang ${page})</span>
         </h3>
         <div class="ad_library_grid">
     `;
 
-    ads.forEach((ad) => {
-      // Format spend
+    brandAds.forEach((ad) => {
       const spendFormatted = window.formatMoneyShort ? window.formatMoneyShort(ad.spend) : ad.spend;
-
       html += `
         <div class="ad_library_card">
           <div class="ad_library_card_header">
@@ -117,10 +145,41 @@ window.renderAdLibrary = function () {
     `;
   });
 
+  // Pagination Controls
+  if (totalPages > 1) {
+    html += `
+      <div style="display:flex; justify-content:center; align-items:center; gap:1rem; padding: 2rem 0; margin-top: 1rem; border-top: 1px solid #f1f5f9;">
+        <button onclick="window._changeAdLibraryPage(-1)" ${page <= 1 ? 'disabled' : ''} style="padding: 0.8rem 1.2rem; border-radius: 8px; border: 1px solid #e2e8f0; background: ${page <= 1 ? '#f8fafc' : '#fff'}; color: ${page <= 1 ? '#cbd5e1' : '#64748b'}; font-weight: 600; cursor: ${page <= 1 ? 'not-allowed' : 'pointer'};">
+          <i class="fa-solid fa-chevron-left"></i> Trước
+        </button>
+        <span style="font-weight: 700; color: #1e293b; font-size: 1.1rem;">Trang ${page} / ${totalPages}</span>
+        <button onclick="window._changeAdLibraryPage(1)" ${page >= totalPages ? 'disabled' : ''} style="padding: 0.8rem 1.2rem; border-radius: 8px; border: 1px solid #e2e8f0; background: ${page >= totalPages ? '#f8fafc' : '#fff'}; color: ${page >= totalPages ? '#cbd5e1' : '#64748b'}; font-weight: 600; cursor: ${page >= totalPages ? 'not-allowed' : 'pointer'};">
+          Sau <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    `;
+  }
+
   container.innerHTML = html;
   
   // After HTML is inserted, load previews asynchronously
   loadAdLibraryPreviews();
+};
+
+window._changeAdLibraryPage = function(delta) {
+  const ads = window._adLibraryFilteredAds || [];
+  const totalPages = Math.ceil(ads.length / 15);
+  let newPage = (window._adLibraryCurrentPage || 1) + delta;
+  
+  if (newPage < 1) newPage = 1;
+  if (newPage > totalPages) newPage = totalPages;
+  
+  window._adLibraryCurrentPage = newPage;
+  window.renderAdLibraryCurrentPage();
+  
+  // Scroll to top of ad library
+  const tab = document.getElementById("tab-ad-library");
+  if (tab) tab.scrollTop = 0;
 };
 
 async function loadAdLibraryPreviews() {
