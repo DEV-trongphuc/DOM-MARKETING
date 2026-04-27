@@ -15,19 +15,17 @@ jobs:
       with:
         fetch-depth: 0 # Yêu cầu để biết file nào đã thay đổi
 
-    - name: 📂 Sync files
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+    - name: 🗑️ Xoá các file không cần upload
+      run: rm -rf .git .github node_modules venv .env README.md
+
+    - name: 📂 Sync files via SFTP
+      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
       with:
         server: ${{ secrets.FTP_SERVER }}
+        port: 22
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: /meta.domation.net/
-        protocol: ftp
-        port: 21
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/node_modules/**
-          **/venv/**
-          .env
-          README.md
+        local_path: './'
+        remote_path: '/meta.domation.net/'
+        sftp_only: true
+        sftpArgs: '-o StrictHostKeyChecking=no'
