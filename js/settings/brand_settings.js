@@ -742,7 +742,6 @@ window.navigateToAdObject = navigateToAdObject;
     { keys: [mod, "3"], desc: "Quick range: Last 30 days", group: "Date" },
     { keys: [mod, "4"], desc: "Quick range: This month", group: "Date" },
     { keys: [mod, "5"], desc: "Quick range: Last month", group: "Date" },
-    { keys: [mod, "R"], desc: "Refresh data", group: "Data" },
     { keys: [mod, "Shift", "R"], desc: "Reset all filters", group: "Data" },
     { keys: [mod, "Shift", "A"], desc: "Expand all campaigns", group: "Campaigns" },
     { keys: [mod, "Shift", "C"], desc: "Collapse all campaigns", group: "Campaigns" },
@@ -830,13 +829,6 @@ window.navigateToAdObject = navigateToAdObject;
     if (ctrl && key.toLowerCase() === "e") {
       e.preventDefault();
       document.getElementById("export_csv_btn")?.click();
-      return;
-    }
-
-    // Ctrl/Cmd + R → refresh
-    if (ctrl && !shift && key.toLowerCase() === "r") {
-      e.preventDefault();
-      if (typeof loadDashboardData === "function") loadDashboardData();
       return;
     }
 

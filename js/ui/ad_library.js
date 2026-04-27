@@ -137,7 +137,7 @@ async function loadAdLibraryPreviews() {
     if (!adId) continue;
     
     try {
-      const url = \`\${window.BASE_URL}/\${adId}/previews?ad_format=DESKTOP_FEED_STANDARD&access_token=\${window.META_TOKEN}\`;
+      const url = `${window.BASE_URL}/${adId}/previews?ad_format=DESKTOP_FEED_STANDARD&access_token=${window.META_TOKEN}`;
       const data = await window.fetchJSON(url);
       const iframeHtml = data?.data?.[0]?.body || "";
       
@@ -162,12 +162,12 @@ async function loadAdLibraryPreviews() {
 }
 
 function renderAdLibraryFallback(wrap, thumb, postUrl) {
-  wrap.innerHTML = \`
-    <img src="\${thumb}" class="ad_library_fallback" loading="lazy" onerror="this.src='https://ideas.edu.vn/wp-content/uploads/2025/10/520821295_122209126670091888_6779497482843304564_n.webp'">
-    <a href="\${postUrl && postUrl !== '#' ? postUrl : '#'}" target="_blank" class="ad_library_fallback_btn" \${!postUrl || postUrl === '#' ? 'onclick="alert(\\'Không thể xem trực tiếp quảng cáo này.\\'); return false;"' : ''}>
+  wrap.innerHTML = `
+    <img src="${thumb}" class="ad_library_fallback" loading="lazy" onerror="this.src='https://ideas.edu.vn/wp-content/uploads/2025/10/520821295_122209126670091888_6779497482843304564_n.webp'">
+    <a href="${postUrl && postUrl !== '#' ? postUrl : '#'}" target="_blank" class="ad_library_fallback_btn" ${!postUrl || postUrl === '#' ? 'onclick="alert(\'Không thể xem trực tiếp quảng cáo này.\'); return false;"' : ''}>
        <i class="fa-brands fa-meta"></i> Xem Quảng Cáo
     </a>
-  \`;
+  `;
 }
 
 // Global error handler for iframe loading failures (e.g. non-public posts)
