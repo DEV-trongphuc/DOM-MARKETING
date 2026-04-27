@@ -1,6 +1,20 @@
 function updatePerfBrandDropdownUI() {
   const brands     = loadBrandSettings();
+  const filterWrapper = document.querySelector(".perf_brand_filter_wrapper");
   const dropdownUl = document.getElementById("perf_brand_list");
+
+  if (brands.length === 0) {
+      if (filterWrapper) filterWrapper.style.display = "none";
+      return;
+  } else {
+      if (filterWrapper && window.APP_CONFIG?.BRAND_FILTER_ENABLED !== false) {
+          filterWrapper.style.display = "flex";
+      } else if (filterWrapper) {
+          filterWrapper.style.display = "none";
+          return;
+      }
+  }
+
   if (!dropdownUl) return;
 
   const current = (CURRENT_CAMPAIGN_FILTER || "").toUpperCase() === "RESET"

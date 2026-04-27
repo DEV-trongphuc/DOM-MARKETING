@@ -21,24 +21,31 @@ function openFilterSettings() {
           slugInp.style.backgroundColor = '#f1f5f9';
           slugInp.style.cursor = 'not-allowed';
       }
-      if (preview) preview.textContent = 'https://domation.net/w/' + (t.slug || '');
+      if (preview) preview.textContent = 'https://meta.domation.net/' + (t.slug || '');
       
       // Plan info
       const statusEl = document.getElementById('plan_current_status');
       const expiryEl = document.getElementById('plan_current_expiry');
+      const statusIndicator = document.getElementById('plan_status_indicator');
+      const expiryIndicator = document.getElementById('plan_expiry_indicator');
+      
       if (statusEl) {
           if (t.status === 'active') {
               statusEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đang hoạt động';
               statusEl.style.color = '#10b981';
+              if(statusIndicator) statusIndicator.style.background = '#10b981';
           } else if (t.status === 'trial') {
               statusEl.innerHTML = '<i class="fa-solid fa-clock"></i> Dùng thử (Trial)';
               statusEl.style.color = '#f59e0b';
+              if(statusIndicator) statusIndicator.style.background = '#f59e0b';
           } else if (t.status === 'expired') {
               statusEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Đã hết hạn';
               statusEl.style.color = '#ef4444';
+              if(statusIndicator) statusIndicator.style.background = '#ef4444';
           } else {
               statusEl.innerHTML = `<i class="fa-solid fa-circle-info"></i> ${t.status}`;
               statusEl.style.color = '#64748b';
+              if(statusIndicator) statusIndicator.style.background = '#64748b';
           }
       }
       
@@ -49,12 +56,15 @@ function openFilterSettings() {
               // If expired, turn red
               if (d.getTime() < Date.now()) {
                   expiryEl.style.color = '#ef4444';
+                  if(expiryIndicator) expiryIndicator.style.background = '#ef4444';
               } else {
                   expiryEl.style.color = '#1e293b';
+                  if(expiryIndicator) expiryIndicator.style.background = '#3b82f6';
               }
           } else {
               expiryEl.textContent = 'Không giới hạn';
               expiryEl.style.color = '#1e293b';
+              if(expiryIndicator) expiryIndicator.style.background = '#3b82f6';
           }
       }
   }
