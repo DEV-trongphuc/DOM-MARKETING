@@ -5039,14 +5039,7 @@ tbody {
   transition: 0.3s ease;
 }
 
-.ad_view i::after {
-  content: "";
-  position: absolute;
-  width: calc(100% - 30rem);
-  height: 100%;
-  top: 0;
-  right: 0;
-}
+
 
 .adset_view:hover i,
 .ad_view:hover i {

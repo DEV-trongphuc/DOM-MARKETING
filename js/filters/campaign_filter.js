@@ -24,13 +24,13 @@ async function applyCampaignFilter(keyword) {
     ? window._ALL_CAMPAIGNS.filter((c) => {
       const lowerKw = keyword.toLowerCase();
       if ((c.name || "").toLowerCase().includes(lowerKw)) return true;
-      if (c.id === keyword) return true;
+      if (c.id && c.id.includes(keyword)) return true;
       const hasAdset = (c.adsets || []).some(
-        (as) => (as.name || "").toLowerCase().includes(lowerKw) || as.id === keyword
+        (as) => (as.name || "").toLowerCase().includes(lowerKw) || (as.id && as.id.includes(keyword))
       );
       if (hasAdset) return true;
       return (c.adsets || []).some((as) =>
-        (as.ads || []).some((ad) => (ad.name || "").toLowerCase().includes(lowerKw) || ad.id === keyword)
+        (as.ads || []).some((ad) => (ad.name || "").toLowerCase().includes(lowerKw) || (ad.id && ad.id.includes(keyword)))
       );
     })
     : window._ALL_CAMPAIGNS;

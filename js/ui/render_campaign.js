@@ -185,7 +185,16 @@ function renderCampaignView(data) {
               <span class="row_checkbox_box"></span>
             </label>
             ${fanHtml}
-            <p class="ad_name">${c.name}</p>
+            <p class="ad_name" style="display:flex;flex-direction:column;gap:0.25rem;min-width:0;">
+               <span class="ad_name_text" title="${c.name}">${c.name}</span>
+               <span class="ad_name_meta">
+                 <i class="fa-regular fa-copy ad_copy_id" 
+                    data-id="${c.id}"
+                    title="Copy ID"
+                    onclick="event.stopPropagation();navigator.clipboard.writeText('${c.id}').then(()=>{this.className='fa-solid fa-circle-check ad_copy_id copied';setTimeout(()=>this.className='fa-regular fa-copy ad_copy_id',1500)});"
+                    style="cursor:pointer;font-size:1.1rem;opacity:0.4;transition:all 0.2s;flex-shrink:0;"></i>
+               </span>
+            </p>
           </div>
           <div class="ad_status ${campaignStatusClass}">${campaignStatusText}</div>
           ${renderCells(c, isMixed)}
@@ -368,7 +377,7 @@ function renderCampaignView(data) {
 
       campaignHtml.push(`
         <div class="adset_item ${adsetStatusClass}" data-campaign-id="${c.id}">
-          <div class="ads_name" style="cursor: pointer;" onclick="const b = this.closest('.adset_item').querySelector('.adset_insight_btn'); if(b) handleAdsetInsightClick(b);">
+          <div class="ads_name">
             <label class="row_checkbox_wrap" onclick="event.stopPropagation()">
               <input type="checkbox" class="row_checkbox" data-level="adset" data-id="${as.id}" data-parent-campaign="${c.id}" data-name="${as.name.replace(/"/g, '&quot;')}" />
               <span class="row_checkbox_box"></span>
@@ -378,7 +387,7 @@ function renderCampaignView(data) {
                 <i class="${getCampaignIcon(as.optimization_goal)}"></i>
               </div>
               <p class="ad_name" style="display:flex;flex-direction:column;gap:0.25rem;min-width:0;">
-                <span class="ad_name_text">${as.name}</span>
+                <span class="ad_name_text" title="${as.name}">${as.name}</span>
                 <span class="ad_name_meta">
                   ${(() => {
           const asCpr = as.result > 0 ? as.spend / as.result : null;
@@ -401,6 +410,11 @@ function renderCampaignView(data) {
             badges.push(`<span class="dom_smart_badge badge_stale" title="Active nhưng không có spend"><i class="fa-solid fa-ban"></i> No spend</span>`);
           return badges.join('');
         })()}
+                  <i class="fa-regular fa-copy ad_copy_id" 
+                     data-id="${as.id}"
+                     title="Copy ID"
+                     onclick="event.stopPropagation();navigator.clipboard.writeText('${as.id}').then(()=>{this.className='fa-solid fa-circle-check ad_copy_id copied';setTimeout(()=>this.className='fa-regular fa-copy ad_copy_id',1500)});"
+                     style="cursor:pointer;font-size:1.1rem;opacity:0.4;transition:all 0.2s;flex-shrink:0;"></i>
                   <span class="adset_inline_insight_btn"
                     data-adset-id="${as.id}"
                     data-name="${as.name}"
