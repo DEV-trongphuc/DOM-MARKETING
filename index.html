@@ -23,16 +23,22 @@
   <script>
     // Lock viewport scaling for consistent layout across laptops/desktops
     function fixDashboardScale() {
+       if (!document.body) return;
        if (window.innerWidth >= 1024) {
            const scale = window.innerWidth / 1920;
            document.body.style.zoom = scale;
+           // Fix white space at bottom by scaling up the min-height
+           document.documentElement.style.minHeight = (100 / scale) + "vh";
+           document.body.style.minHeight = (100 / scale) + "vh";
+           document.documentElement.style.backgroundColor = "#f1f5f9"; // match bgPage
        } else {
            document.body.style.zoom = 1;
+           document.documentElement.style.minHeight = "100vh";
+           document.body.style.minHeight = "100vh";
        }
     }
     window.addEventListener('resize', fixDashboardScale);
     document.addEventListener('DOMContentLoaded', fixDashboardScale);
-    fixDashboardScale();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DOM META REPORTS</title>
