@@ -224,7 +224,8 @@ body {
 }
 
 html {
-  font-size: 62.5%; /* default 10px (62.5% of 16px) */
+  font-size: 62.5%;
+  /* default 10px (62.5% of 16px) */
   scroll-behavior: smooth;
   overflow: hidden;
   scrollbar-gutter: stable;
@@ -250,34 +251,39 @@ html {
 /* Lớn hơn 1800px nhưng vẫn cần scale nhẹ */
 @media (max-width: 1800px) {
   html {
-    font-size: 58%; /* ~9.3px */
+    font-size: 58%;
+    /* ~9.3px */
   }
 }
 
 /* Laptop 15.6 inch ~ 1536px width */
 @media (max-width: 1600px) {
   html {
-    font-size: 54%; /* ~8.6px */
+    font-size: 54%;
+    /* ~8.6px */
   }
 }
 
 /* Laptop 14 inch ~ 1366px width */
 @media (max-width: 1400px) {
   html {
-    font-size: 50%; /* 8px */
+    font-size: 50%;
+    /* 8px */
   }
 }
 
 /* Laptop nhỏ hơn 1280px */
 @media (max-width: 1280px) {
   html {
-    font-size: 45%; /* 7.2px */
+    font-size: 45%;
+    /* 7.2px */
   }
 }
 
 @media (max-width: 1080px) {
   html {
-    font-size: 40%; /* 6.4px */
+    font-size: 40%;
+    /* 6.4px */
   }
 }
 
@@ -4797,7 +4803,7 @@ tbody {
   height: 100%;
   display: flex;
   align-items: center;
-  padding-left: 3rem;
+  /* padding-left: 3rem; */
   position: relative;
   border-right: 1px solid rgb(0, 0, 0, 0.05);
 }
@@ -4918,14 +4924,16 @@ tbody {
   opacity: 0.8;
   font-size: 0.9rem;
   align-self: flex-start;
-  transform: translateX(-2rem);
+  transform: translate(-3rem, -1rem);
 }
 
 .budget .status-date {
   opacity: 0.8;
   font-size: 0.9rem;
+  width: 100%;
+  position: absolute;
   align-self: flex-end;
-  transform: translateX(-1rem);
+  transform: translate(-5rem, 2rem);
 }
 
 
@@ -5541,6 +5549,7 @@ tbody {
 .dom_container.ad_library .dom_row {
   display: none !important;
 }
+
 .dom_container.ad_library .dom_row.ad_library {
   display: flex !important;
 }
@@ -5550,7 +5559,7 @@ tbody {
   background: #fff;
   padding: 2.5rem;
   border-radius: 20px;
-  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
   border: 1px solid #f1f5f9;
 }
 
@@ -5571,11 +5580,13 @@ tbody {
   grid-template-columns: repeat(3, 1fr);
   gap: 2.5rem;
 }
+
 @media (max-width: 1200px) {
   .ad_library_grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
 @media (max-width: 768px) {
   .ad_library_grid {
     grid-template-columns: 1fr;
@@ -5590,10 +5601,11 @@ tbody {
   display: flex;
   flex-direction: column;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
 }
+
 .ad_library_card:hover {
-  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
   transform: translateY(-5px);
   border-color: #cbd5e1;
 }
@@ -5637,6 +5649,7 @@ tbody {
   justify-content: center;
   overflow: hidden;
 }
+
 .ad_library_iframe_wrap iframe {
   width: 100% !important;
   height: 100%;
@@ -5650,6 +5663,7 @@ tbody {
   object-fit: cover;
   background: #e2e8f0;
 }
+
 .ad_library_fallback_btn {
   position: absolute;
   bottom: 2rem;
@@ -5660,12 +5674,13 @@ tbody {
   text-decoration: none;
   font-weight: 700;
   font-size: 1.1rem;
-  box-shadow: 0 10px 20px rgba(24,119,242,0.3);
+  box-shadow: 0 10px 20px rgba(24, 119, 242, 0.3);
   transition: all 0.2s;
   display: flex;
   align-items: center;
   gap: 0.8rem;
 }
+
 .ad_library_fallback_btn:hover {
   background: #166fe5;
   transform: scale(1.05);
