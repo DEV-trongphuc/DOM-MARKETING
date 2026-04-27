@@ -465,7 +465,7 @@ function renderScheduleIntelligence(dataByHour) {
     return `<span style="display:inline-flex;align-items:center;gap:0.4rem;background:#fff;
       border:1.5px solid ${i === 0 ? '#f59e0b' : '#fcd34d'};border-radius:6px;
       padding:0.2rem 0.8rem;font-weight:700;color:${i === 0 ? '#92400e' : '#b45309'};white-space:nowrap;">
-      ${medalIcons[i]} ${s.hour}h–${s.hour + 1}h${s.cpr ? `<span style="font-weight:400;opacity:0.6;font-size:0.9em;">(${(s.cpr / 1000).toFixed(1)}k CPR)</span>` : ''}
+      ${medalIcons[i]} ${s.hour}h–${s.hour + 1}h${s.cpr ? `<span style="font-weight:400;opacity:0.6;font-size:0.9em;">(${formatMoneyShort(s.cpr)} CPR)</span>` : ''}
     </span>`;
   }).join("");
 

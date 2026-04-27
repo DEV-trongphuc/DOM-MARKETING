@@ -76,10 +76,10 @@ function renderCompareCampaigns() {
   list.innerHTML = campaigns.map((c, i) => {
     const adsets = c.adsets || [];
     const adsetCnt = adsets.length;
-    const spend = window.formatMoney ? window.formatMoney(c.spend) : fmt(c.spend) + 'đ';
+    const spend = window.formatMoney ? window.formatMoney(c.spend) : fmt(c.spend);
     const reach = fmtShort(c.reach);
     const result = fmt(c.result);
-    const cpr = c.result > 0 ? (window.formatMoney ? window.formatMoney(c.spend / c.result) : fmt(c.spend / c.result) + 'đ') : "N/A";
+    const cpr = c.result > 0 ? (window.formatMoney ? window.formatMoney(c.spend / c.result) : fmt(c.spend / c.result)) : "N/A";
     const spendPct = Math.round((c.spend / maxSpend) * 100);
 
     // Top adset theo chi phí
