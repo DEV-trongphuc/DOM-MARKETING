@@ -137,8 +137,8 @@ async function loadAdLibraryPreviews() {
     if (!adId) continue;
     
     try {
-      const url = `${window.BASE_URL}/${adId}/previews?ad_format=DESKTOP_FEED_STANDARD&access_token=${window.META_TOKEN}`;
-      const data = await window.fetchJSON(url);
+      const url = `${BASE_URL}/${adId}/previews?ad_format=DESKTOP_FEED_STANDARD&access_token=${META_TOKEN}`;
+      const data = await fetchJSON(url);
       const iframeHtml = data?.data?.[0]?.body || "";
       
       if (iframeHtml) {
@@ -164,9 +164,6 @@ async function loadAdLibraryPreviews() {
 function renderAdLibraryFallback(wrap, thumb, postUrl) {
   wrap.innerHTML = `
     <img src="${thumb}" class="ad_library_fallback" loading="lazy" onerror="this.src='https://ideas.edu.vn/wp-content/uploads/2025/10/520821295_122209126670091888_6779497482843304564_n.webp'">
-    <a href="${postUrl && postUrl !== '#' ? postUrl : '#'}" target="_blank" class="ad_library_fallback_btn" ${!postUrl || postUrl === '#' ? 'onclick="alert(\'Không thể xem trực tiếp quảng cáo này.\'); return false;"' : ''}>
-       <i class="fa-brands fa-meta"></i> Xem Quảng Cáo
-    </a>
   `;
 }
 
@@ -176,7 +173,6 @@ window.handleIframeError = function(iframeEl, fallbackThumbnail) {
   if (!wrap) return;
   wrap.innerHTML = `
     <img src="${fallbackThumbnail}" class="ad_library_fallback" loading="lazy" onerror="this.src='https://ideas.edu.vn/wp-content/uploads/2025/10/520821295_122209126670091888_6779497482843304564_n.webp'">
-    <a href="#" class="ad_library_fallback_btn" onclick="alert('Không thể xem trực tiếp quảng cáo này do giới hạn quyền riêng tư của Meta.'); return false;"><i class="fa-solid fa-eye-slash"></i> Quảng cáo ẩn (Dark Post)</a>
   `;
 };
 
