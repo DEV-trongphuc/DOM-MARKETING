@@ -2039,8 +2039,8 @@
         btn.style.borderBottomColor = 'var(--mainClr)';
       }
 
-      if (tabId === 'tab-share' && !skipShareInit && window.__openShareModal && !document.getElementById('_slink')) {
-        window.__openShareModal(true);
+      if (tabId === 'tab-share' && !skipShareInit && window.openShareModal && !document.getElementById('_slink')) {
+        window.openShareModal();
       }
     }
 
