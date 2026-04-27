@@ -39,6 +39,9 @@ async function initAccountSelector() {
       // Lưu Global Currency, mặc định là VND nếu tài khoản cũ chưa có field này
       window.GLOBAL_CURRENCY = targetAccount.currency || 'VND';
       updateSelectedAccountUI(targetAccount.name, cleanId, targetAccount.avatar || "./assets/dom_avatar.jpg");
+      
+      // Tự động fetch avatar mới nhất (BM hoặc User)
+      fetchActiveAccountAvatar(cleanId, targetToken);
   } else {
       window.GLOBAL_CURRENCY = 'VND';
       updateSelectedAccountUI("Chưa có Account", "---", "./assets/dom_avatar.jpg");
@@ -53,7 +56,37 @@ function updateSelectedAccountUI(name, id, avatarUrl) {
   const nameEl = selectedInfo.querySelector(".account_item_name");
   const idEl   = selectedInfo.querySelector(".account_item_id");
 
-  if (avatar) avatar.src          = avatarUrl || "./assets/dom_avatar.jpg";
-  if (nameEl) nameEl.textContent  = name;
-  if (idEl)   idEl.textContent    = id;
+  if (avatar && avatarUrl) avatar.src = avatarUrl;
+  if (nameEl && name) nameEl.textContent = name;
+  if (idEl && id) idEl.textContent = id;
+}
+
+// Hàm tự động fetch avatar riêng cho account_id hiện tại khi mới load
+async function fetchActiveAccountAvatar(accountId, token) {
+    if (!accountId || !token) return;
+    try {
+        // Fetch song song avatar của User (mặc định) và avatar của Business (nếu có quyền)
+        const meUrl = `https://graph.facebook.com/v20.0/me?fields=picture.width(200).height(200)&access_token=${token}`;
+        const accUrl = `https://graph.facebook.com/v20.0/act_${accountId}?fields=business{profile_picture_uri}&access_token=${token}`;
+        
+        const [meRes, accRes] = await Promise.all([fetch(meUrl), fetch(accUrl)]);
+        const meData = await meRes.json();
+        const accData = await accRes.json();
+        
+        let finalAvatarUrl = null;
+        
+        // Ưu tiên ảnh BM nếu có và không bị lỗi permission
+        if (accData && accData.business && accData.business.profile_picture_uri) {
+            finalAvatarUrl = accData.business.profile_picture_uri;
+        } else if (meData && meData.picture && meData.picture.data && meData.picture.data.url) {
+            // Fallback ảnh user
+            finalAvatarUrl = meData.picture.data.url;
+        }
+        
+        if (finalAvatarUrl) {
+            updateSelectedAccountUI(null, null, finalAvatarUrl);
+        }
+    } catch (err) {
+        console.warn("Could not fetch active account avatar:", err);
+    }
 }

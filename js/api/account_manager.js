@@ -199,7 +199,8 @@ window.fetchAccountsFromNewToken = async function() {
     try {
         // Fetch user profile picture and ad accounts concurrently
         const meUrl = `https://graph.facebook.com/v20.0/me?fields=name,picture.width(200).height(200)&access_token=${token}`;
-        const accUrl = `https://graph.facebook.com/v20.0/me/adaccounts?fields=name,account_id,currency,business{profile_picture_uri}&limit=100&access_token=${token}`;
+        // Bỏ business{profile_picture_uri} để tránh lỗi (#100) Requires business_management permission
+        const accUrl = `https://graph.facebook.com/v20.0/me/adaccounts?fields=name,account_id,currency&limit=100&access_token=${token}`;
         
         const [meRes, accRes] = await Promise.all([fetch(meUrl), fetch(accUrl)]);
         const meData = await meRes.json();
@@ -244,7 +245,8 @@ function _renderFetchedAccounts() {
     window._am_fetched_accounts.forEach(acc => {
         // Loại bỏ act_ prefix nếu có
         const accId = acc.account_id || acc.id.replace('act_', '');
-        const avatarUri = (acc.business && acc.business.profile_picture_uri) ? acc.business.profile_picture_uri : (acc._default_avatar || "");
+        // Do đã bỏ fetch business_profile_picture_uri, ta luôn dùng ảnh của User làm default
+        const avatarUri = acc._default_avatar || "";
         html += `
         <label style="display: flex; align-items: center; gap: 1rem; padding: 1.2rem; border: 1.5px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#cbd5e1'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e2e8f0'">
             <input type="checkbox" value="${accId}" data-name="${acc.name || `Account ${accId}`}" data-currency="${acc.currency || 'VND'}" data-avatar="${avatarUri}" onchange="this.parentElement.style.borderColor = this.checked ? '#3b82f6' : '#e2e8f0'; this.parentElement.style.background = this.checked ? '#eff6ff' : 'transparent'; _checkAmSaveBtn()" style="width: 1.2rem; height: 1.2rem; margin-top: 0.2rem; accent-color: #3b82f6; cursor: pointer;">
@@ -301,6 +303,14 @@ window.saveSelectedAccounts = async function() {
         selectedAccounts.forEach(acc => {
             if (!existingIds.has(acc.id)) {
                 groups[existingGroupIndex].accounts.push(acc);
+            } else {
+                // Update avatar cho các bm cũ (existing account)
+                const existingAcc = groups[existingGroupIndex].accounts.find(a => a.id === acc.id);
+                if (existingAcc) {
+                    existingAcc.name = acc.name;
+                    existingAcc.currency = acc.currency;
+                    existingAcc.avatar = acc.avatar;
+                }
             }
         });
     } else {
