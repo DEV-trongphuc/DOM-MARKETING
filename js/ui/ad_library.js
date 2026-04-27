@@ -125,15 +125,23 @@ window.renderAdLibraryCurrentPage = function() {
               <i class="fa-solid fa-coins" style="color:#f59e0b;"></i> ${spendFormatted}
             </div>
           </div>
-          <div class="ad_library_iframe_wrap" id="ad_lib_wrap_${ad.ad_id}" data-ad-id="${ad.ad_id}" data-thumb="${ad.thumbnail}" data-post="${ad.post_url}">
-             <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#f1f5f9; flex-direction:column; gap: 1rem; z-index:1;">
-               <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; color:#cbd5e1;"></i>
-               <span style="color:#94a3b8; font-size: 0.9rem; font-weight:500;">Đang tải nội dung...</span>
+          <div class="ad_library_iframe_wrap" style="position:relative; height: 350px; overflow: hidden;" id="ad_lib_wrap_${ad.ad_id}" data-ad-id="${ad.ad_id}" data-thumb="${ad.thumbnail}" data-post="${ad.post_url}">
+             <div class="ad_lib_iframe_content" style="width:100%; height:100%; pointer-events:none;">
+               <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#f1f5f9; flex-direction:column; gap: 1rem; z-index:1;">
+                 <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; color:#cbd5e1;"></i>
+                 <span style="color:#94a3b8; font-size: 0.9rem; font-weight:500;">Đang tải nội dung...</span>
+               </div>
+             </div>
+             <!-- Overlay to capture click without preventing scroll (if pointer-events was auto on iframe, but we disable pointer events on iframe so it just acts as a thumbnail) -->
+             <div style="position:absolute; inset:0; z-index:2; cursor:pointer;" onclick="window._openAdIframeModal('${ad.ad_id}')">
+               <div style="position:absolute; top: 1rem; right: 1rem; width: 3.2rem; height: 3.2rem; background: rgba(0,0,0,0.5); border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #fff; font-size: 1.4rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">
+                 <i class="fa-solid fa-expand"></i>
+               </div>
              </div>
           </div>
-          <div style="padding: 1rem 1.2rem; background: #fff;">
-            <div style="font-weight: 700; color: #1e293b; font-size: 1rem; margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${ad.ad_name}">${ad.ad_name}</div>
-            <div style="font-size: 0.85rem; color: #64748b; font-family: monospace;">ID: ${ad.ad_id}</div>
+          <div style="padding: 1.4rem 1.6rem; background: #fff;">
+            <div style="font-weight: 700; color: #1e293b; font-size: 1.3rem; margin-bottom: 0.5rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="${ad.ad_name}">${ad.ad_name}</div>
+            <div style="font-size: 1.1rem; color: #64748b; font-family: monospace;">ID: ${ad.ad_id}</div>
           </div>
         </div>
       `;
@@ -200,22 +208,25 @@ async function loadAdLibraryPreviews() {
       const data = await fetchJSON(url);
       const iframeHtml = data?.data?.[0]?.body || "";
       
+      const contentWrap = wrap.querySelector('.ad_lib_iframe_content');
+      if (!contentWrap) continue;
+
       if (iframeHtml) {
-        // Strip out the width/height if we want to ensure it fits, but Meta's iframe is usually responsive
-        wrap.innerHTML = iframeHtml;
-        // Fix up the iframe to be 100% width and height
-        const iframe = wrap.querySelector('iframe');
+        contentWrap.innerHTML = iframeHtml;
+        const iframe = contentWrap.querySelector('iframe');
         if (iframe) {
           iframe.style.width = '100%';
           iframe.style.height = '100%';
           iframe.style.border = 'none';
+          iframe.style.overflow = 'hidden';
         }
       } else {
-        renderAdLibraryFallback(wrap, thumb, postUrl);
+        renderAdLibraryFallback(contentWrap, thumb, postUrl);
       }
     } catch (err) {
       console.warn("Ad Library preview load failed for ad:", adId, err);
-      renderAdLibraryFallback(wrap, thumb, postUrl);
+      const contentWrap = wrap.querySelector('.ad_lib_iframe_content');
+      if (contentWrap) renderAdLibraryFallback(contentWrap, thumb, postUrl);
     }
   }
 }
@@ -253,3 +264,41 @@ function extractBrandFromName(name) {
 
   return "KHÁC";
 }
+
+window._openAdIframeModal = function(adId) {
+  const wrap = document.getElementById(`ad_lib_wrap_${adId}`);
+  if (!wrap) return;
+  const contentWrap = wrap.querySelector('.ad_lib_iframe_content');
+  if (!contentWrap) return;
+  const iframeHtml = contentWrap.innerHTML;
+  
+  let modal = document.getElementById("ad_iframe_modal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "ad_iframe_modal";
+    modal.className = "ai_modal_overlay";
+    modal.style.cssText = "position:fixed;inset:0;background:rgba(15,23,42,0.85);backdrop-filter:blur(6px);z-index:999999;display:flex;align-items:center;justify-content:center;animation:aiModalFadeIn .3s ease-out forwards;";
+    modal.innerHTML = `
+      <div class="ai_modal_box" style="width:min(600px, 95vw);height:85vh;background:#fff;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;position:relative;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+        <button onclick="document.getElementById('ad_iframe_modal').style.display='none'" style="position:absolute;top:1.2rem;right:1.2rem;width:3.6rem;height:3.6rem;border-radius:50%;border:none;background:#f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;color:#64748b;font-size:1.6rem;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'"><i class="fa-solid fa-xmark"></i></button>
+        <div id="ad_iframe_modal_content" style="flex:1;overflow-y:auto;position:relative;background:#f8fafc;padding:2rem 0;"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
+  }
+  
+  modal.style.display = "flex";
+  const contentDest = document.getElementById("ad_iframe_modal_content");
+  contentDest.innerHTML = iframeHtml;
+  
+  // Make sure the iframe is fully expanded
+  const iframe = contentDest.querySelector('iframe');
+  if (iframe) {
+    iframe.style.width = '100%';
+    iframe.style.minHeight = '100%';
+    iframe.style.border = 'none';
+  }
+};
