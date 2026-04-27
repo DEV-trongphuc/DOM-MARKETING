@@ -250,9 +250,9 @@ function renderCampaignView(data) {
             <div style="display:flex;flex-direction:column;">
               ${label}
               ${value}
+              ${timeText ? `<span class="status-date" style="margin-top:0.4rem;">${timeText}</span>` : ""}
             </div>
           </div>
-          ${timeText ? `<span class="status-date" style="margin-top:0.4rem;">${timeText}</span>` : ""}
         `;
       } else if (hasActiveAd && (dailyBudget > 0 || lifetimeBudget > 0)) {
         adsetStatusClass = "active budget";
@@ -275,9 +275,9 @@ function renderCampaignView(data) {
             <div style="display:flex;flex-direction:column;">
               ${label}
               ${value}
+              ${timeText ? `<span class="status-date" style="margin-top:0.4rem;">${timeText}</span>` : ""}
             </div>
           </div>
-          ${timeText ? `<span class="status-date" style="margin-top:0.4rem;">${timeText}</span>` : ""}
         `;
       } else if (hasActiveAd) {
         adsetStatusClass = "active";
@@ -308,9 +308,9 @@ function renderCampaignView(data) {
             <div style="display:flex;flex-direction:column;">
               ${label}
               ${value}
+              ${timeText ? `<span class="status-date" style="margin-top:0.4rem;">${timeText}</span>` : ""}
             </div>
           </div>
-          ${timeText ? `<span class="status-date" style="margin-top:0.4rem;">${timeText}</span>` : ""}
         `;
       }
 
