@@ -252,7 +252,7 @@ window.handleIframeError = function(iframeEl, fallbackThumbnail) {
   `;
 };
 
-// Simple helper to extract brand from campaign name, e.g., "[Nava Store] - Áo sơ mi" -> "NAVA STORE"
+// Simple helper to extract brand from campaign name, e.g., "[Domation] - Áo sơ mi" -> "DOMATION"
 function extractBrandFromName(name) {
   if (!name) return "KHÁC";
   

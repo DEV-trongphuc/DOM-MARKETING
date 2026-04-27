@@ -45,6 +45,23 @@ function verify_admin_token($token) {
     return false;
 }
 
+// Fire-and-forget Email Webhook using cURL
+function _send_webhook_email($payload) {
+    if (!defined('WEBHOOK_EMAIL_URL') || !WEBHOOK_EMAIL_URL) return;
+    $ch = curl_init(WEBHOOK_EMAIL_URL);
+    $payload_json = json_encode($payload);
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => $payload_json,
+        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT_MS => 1500, // Short timeout to avoid blocking frontend
+        CURLOPT_NOSIGNAL => 1
+    ]);
+    curl_exec($ch);
+    curl_close($ch);
+}
+
 // Basic Routing
 $action = $_GET['action'] ?? $body['action'] ?? '';
 
@@ -224,6 +241,20 @@ try {
                     $stmt2->execute([$slug, $plan, $phone, $email]);
                 }
 
+                $stmt_exp = $pdo->prepare("SELECT expires_at FROM saas_tenants WHERE slug = ?");
+                $stmt_exp->execute([$slug]);
+                $t_exp = $stmt_exp->fetch();
+                $expires_at_str = $t_exp ? date('H:i d/m/Y', strtotime($t_exp['expires_at'])) : '';
+
+                // Bắn mail Welcome
+                _send_webhook_email([
+                    'type' => 'register',
+                    'email' => $email,
+                    'name' => $name,
+                    'slug' => $slug,
+                    'expires_at' => $expires_at_str
+                ]);
+
                 _json(["ok" => true, "message" => "Workspace created", "slug" => $slug]);
             } catch (PDOException $e) {
                 if ($e->getCode() == 23000) {
@@ -244,6 +275,20 @@ try {
             
             $stmt = $pdo->prepare("INSERT INTO saas_renewal_requests (tenant_slug, plan, phone, email) VALUES (?, ?, ?, ?)");
             $stmt->execute([$slug, $plan, $phone, $email]);
+
+            $tstmt = $pdo->prepare("SELECT name FROM saas_tenants WHERE slug = ?");
+            $tstmt->execute([$slug]);
+            $t = $tstmt->fetch();
+            
+            // Bắn mail Xin gia hạn
+            _send_webhook_email([
+                'type' => 'renewal',
+                'email' => $email,
+                'name' => $t ? $t['name'] : 'Quý khách',
+                'slug' => $slug,
+                'plan' => $plan
+            ]);
+
             _json(["ok" => true]);
             break;
 
@@ -687,6 +732,23 @@ try {
             $params[] = $slug;
             $stmt = $pdo->prepare("UPDATE saas_tenants SET " . implode(", ", $updates) . " WHERE slug = ?");
             $stmt->execute($params);
+
+            // Bắn mail nếu cộng ngày thành công
+            if ($add_days > 0) {
+                $tstmt = $pdo->prepare("SELECT name, google_email, expires_at FROM saas_tenants WHERE slug = ?");
+                $tstmt->execute([$slug]);
+                $t = $tstmt->fetch();
+                if ($t && $t['google_email']) {
+                    _send_webhook_email([
+                        'type' => 'upgrade',
+                        'email' => $t['google_email'],
+                        'name' => $t['name'],
+                        'slug' => $slug,
+                        'expires_at' => date('H:i d/m/Y', strtotime($t['expires_at'])),
+                        'add_days' => $add_days
+                    ]);
+                }
+            }
 
             _json(["ok" => true]);
             break;

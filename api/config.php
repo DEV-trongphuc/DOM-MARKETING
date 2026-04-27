@@ -36,6 +36,9 @@ define('ADMIN_SECRET_KEY', getenv('ADMIN_SECRET_KEY') ?: 'DOM_SAAS_SUPER_SECRET_
 define('RATE_LIMIT_WINDOW', 60);    // seconds
 define('RATE_LIMIT_MAX_REQUESTS', 30); // max requests per window per IP
 
-// 5. Timezone & Locale
+// 5. Google Apps Script Webhook for Email
+define('WEBHOOK_EMAIL_URL', getenv('WEBHOOK_EMAIL_URL') ?: 'https://script.google.com/macros/s/AKfycbwEeBobqWpRKZweIfIoS-7o9Z7R1TrnxxDfRrxYsCxvOEaTyLpF2c88rGbR7glfKtpw/exec');
+
+// 6. Timezone & Locale
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 ?>

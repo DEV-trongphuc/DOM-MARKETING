@@ -234,11 +234,11 @@ window.SAAS_ROUTER = {
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
                                 <div>
                                     <label style="display:block; font-size:0.85rem; font-weight:600; color:#94a3b8; margin-bottom:0.4rem; text-transform:uppercase;">Tên Workspace (Slug)</label>
-                                    <input type="text" id="new_slug" placeholder="vd: nava-store" style="width:100%; padding: 0.8rem 1rem; background:rgba(15,23,42,0.6); color:#fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.95rem; outline: none; transition: all 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#f59e0b'">
+                                    <input type="text" id="new_slug" placeholder="vd: domation" style="width:100%; padding: 0.8rem 1rem; background:rgba(15,23,42,0.6); color:#fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.95rem; outline: none; transition: all 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#f59e0b'">
                                 </div>
                                 <div>
                                     <label style="display:block; font-size:0.85rem; font-weight:600; color:#94a3b8; margin-bottom:0.4rem; text-transform:uppercase;">Tên Khách Hàng</label>
-                                    <input type="text" id="new_name" placeholder="Nava Store" style="width:100%; padding: 0.8rem 1rem; background:rgba(15,23,42,0.6); color:#fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.95rem; outline: none; transition: all 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#f59e0b'">
+                                    <input type="text" id="new_name" placeholder="Domation" style="width:100%; padding: 0.8rem 1rem; background:rgba(15,23,42,0.6); color:#fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.95rem; outline: none; transition: all 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#f59e0b'">
                                 </div>
                                 <div>
                                     <label style="display:block; font-size:0.85rem; font-weight:600; color:#94a3b8; margin-bottom:0.4rem; text-transform:uppercase;">Ad Account ID</label>
