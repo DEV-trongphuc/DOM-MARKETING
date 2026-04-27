@@ -866,13 +866,21 @@ function renderFullActionsDetail(manualTotals, filterQuery = "") {
 
   const filteredCore = coreMetrics.filter(m => matchesQuery(m.label));
 
+  const wrapper = listWrap.closest('.dom_row');
+
   if (!actionEntries.length && !filteredCore.length) {
+    if (!query) {
+      if (wrapper) wrapper.style.display = 'none';
+      return;
+    }
     listWrap.innerHTML = `<div style='grid-column: 1/-1; padding: 4rem 2rem; text-align: center; opacity: 0.5; color: #718096; font-size: 1.3rem;'>
       <i class="fa-solid fa-magnifying-glass" style="display: block; font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.2;"></i>
       Không tìm thấy chỉ số nào khớp với "${query}"
     </div>`;
     return;
   }
+
+  if (wrapper) wrapper.style.display = '';
 
   // ⭐ TỐI ƯU: Xây dựng reverse lookup map 1 lần, tránh iterate aliasGroupMap mỗi action entry
   const labelToAliasKey = Object.create(null);

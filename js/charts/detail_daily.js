@@ -517,7 +517,13 @@ function renderChartByDevice(dataByDevice) {
     .filter(e => e.spend > 0 || e.result > 0)
     .sort((a, b) => (b.spend || b.result) - (a.spend || a.result));
 
-  if (!validEntries.length) return;
+  const wrapper = ctx.closest('.dom_inner');
+
+  if (!validEntries.length) {
+    if (wrapper) wrapper.style.display = 'none';
+    return;
+  }
+  if (wrapper) wrapper.style.display = '';
 
   const useSpend = validEntries.some(e => e.spend > 0);
   const values = validEntries.map(e => useSpend ? e.spend : e.result);
@@ -673,34 +679,11 @@ function renderChartByRegion(dataByRegion) {
     if (acts["onsite_conversion.total_messaging_connection"] > 0)
       return +acts["onsite_conversion.total_messaging_connection"];
 
-    // 1. Thử getResults() bình thường trước
+    // 1. Dùng getResults() bình thường
     const normal = getResults(v);
     if (normal > 0) return normal;
 
-    // 2. Thử tất cả values trong resultMapping (kể cả phiên bản ngắn không có tiền tố)
-    const goal = VIEW_GOAL || "";
-    const goalKey = GOAL_GROUP_LOOKUP[goal] || "";
-    const triedTypes = new Set();
-
-    const main = resultMapping[goal];
-    if (main) triedTypes.add(main);
-
-    if (goalKey && goalMapping[goalKey]) {
-      for (const g of goalMapping[goalKey]) {
-        const t = resultMapping[g];
-        if (t) triedTypes.add(t);
-      }
-    }
-
-    for (const fullType of triedTypes) {
-      if (acts[fullType] > 0) return +acts[fullType];
-      const shortType = fullType.replace(/^onsite_conversion\./, "");
-      if (shortType !== fullType && acts[shortType] > 0) return +acts[shortType];
-    }
-
-    // 3. Fallback: lấy action value lớn nhất trong object
-    const vals = Object.values(acts).map(Number).filter(n => n > 0);
-    return vals.length ? Math.max(...vals) : 0;
+    return 0;
   };
 
   const entries = Object.entries(dataByRegion).map(([k, v]) => ({
@@ -714,12 +697,18 @@ function renderChartByRegion(dataByRegion) {
 
   const filtered = entries.filter((r) => r.spend >= minSpend);
 
+  const wrapper = ctx.closest('.dom_inner');
+
   if (window.chart_by_region_instance) {
     window.chart_by_region_instance.destroy();
     window.chart_by_region_instance = null;
   }
 
-  if (!filtered.length) return;
+  if (!filtered.length) {
+    if (wrapper) wrapper.style.display = 'none';
+    return;
+  }
+  if (wrapper) wrapper.style.display = '';
 
   // ✅ Top 5 cao nhất
   filtered.sort((a, b) => b.spend - a.spend);
@@ -890,6 +879,14 @@ function renderChartByAgeGender(dataByAgeGender) {
   }
 
   const ages = Object.keys(ageGroups);
+  const wrapper = ctx.closest('.dom_inner');
+
+  if (!ages.length) {
+    if (wrapper) wrapper.style.display = 'none';
+    return;
+  }
+  if (wrapper) wrapper.style.display = '';
+
   const maleData = ages.map((a) => ageGroups[a].male);
   const femaleData = ages.map((a) => ageGroups[a].female);
 

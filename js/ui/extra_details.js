@@ -189,15 +189,38 @@ function _aggregateExtraStats(campaigns) {
 
 async function loadExtraCharts() {
     const campaigns = window._ALL_CAMPAIGNS || [];
-    if (!campaigns.length) return;
+    const btnContainer = document.getElementById("show_all_btn")?.parentElement;
+    const extraContainer = document.getElementById("extra_details_container");
+    const chartsRow = document.getElementById("extra_charts_row");
+
+    if (!campaigns.length) {
+        if (btnContainer) btnContainer.style.display = "none";
+        if (extraContainer) extraContainer.style.display = "none";
+        if (chartsRow) chartsRow.style.display = "none";
+        return;
+    }
 
     // Guard: skip full re-render if date range and dataset haven't changed
     const _cacheKey = `${startDate}_${endDate}_${campaigns.length}`;
-    if (window._extraChartsKey === _cacheKey) return;
+    if (window._extraChartsKey === _cacheKey) {
+        if (btnContainer && btnContainer.style.display === "none") {
+            btnContainer.style.display = "flex";
+        }
+        return;
+    }
     window._extraChartsKey = _cacheKey;
 
     // Single-pass aggregation — shared by all render functions below
     const stats = _aggregateExtraStats(campaigns);
+
+    if (stats.totalSpend === 0 && stats.impressions === 0) {
+        if (btnContainer) btnContainer.style.display = "none";
+        if (extraContainer) extraContainer.style.display = "none";
+        if (chartsRow) chartsRow.style.display = "none";
+        return;
+    }
+
+    if (btnContainer) btnContainer.style.display = "flex";
 
     renderExtraOverview(stats);
     renderExtraGoalChart(stats.goalSpend);
