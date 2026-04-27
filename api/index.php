@@ -381,10 +381,21 @@ try {
             // If the workspace is NOT public, and the user is NOT the owner, and NOT an active viewer
             // then we REMOVE the meta_token from the response to prevent unauthorized access.
             $is_authorized = false;
-            if ($tenant['is_public'] == 1) {
+            $is_super_admin = false;
+
+            // Check if request comes from Super Admin
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if ($authHeader) {
+                $token = str_replace('Bearer ', '', $authHeader);
+                if (verify_admin_token($token)) {
+                    $is_super_admin = true;
+                }
+            }
+
+            if ($tenant['is_public'] == 1 || $is_super_admin) {
                 $is_authorized = true;
             } else if ($email) {
-                if (strtolower($email) === strtolower($tenant['google_email'])) {
+                if (strtolower($email) === strtolower($tenant['google_email']) || strtolower($email) === 'dom.marketing.vn@gmail.com') {
                     $is_authorized = true;
                 } else {
                     $chk = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ?");
@@ -452,6 +463,16 @@ try {
             if (!$tenant) _json(["ok" => false, "error" => "Workspace không tồn tại"], 404);
 
             $is_super_admin = (strtolower($email) === 'dom.marketing.vn@gmail.com');
+            
+            // Check if request comes from Super Admin via token
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if ($authHeader) {
+                $token = str_replace('Bearer ', '', $authHeader);
+                if (verify_admin_token($token)) {
+                    $is_super_admin = true;
+                }
+            }
+
             $is_admin = (strtolower($email) === strtolower($tenant['google_email']));
             $is_public = $tenant['is_public'] == 1;
             
@@ -890,7 +911,7 @@ try {
             }
             
             $slug = $body['slug'] ?? '';
-            $active_api_key = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
+            $active_api_key = '';
 
             if ($slug) {
                 $stmt = $pdo->prepare("SELECT gemini_api_key FROM saas_tenants WHERE slug = ?");

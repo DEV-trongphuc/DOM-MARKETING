@@ -509,7 +509,7 @@ function renderTopCampaignsChart(campSpend) {
 
     const total  = sorted.reduce((s, [, v]) => s + v, 0);
     const maxVal = sorted[0][1];
-    const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰', '4', '5'];
+    const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49', '4', '5'];
     const barColors = [
         COLORS.barGold,
         COLORS.barGray,

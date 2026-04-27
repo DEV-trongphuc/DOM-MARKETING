@@ -28,7 +28,7 @@ define('ALLOWED_ORIGINS', [
 ]);
 
 // 3. Third-party & Security Keys
-define('GEMINI_API_KEY', getenv('GEMINI_API_KEY') ?: '');
+// (GEMINI_API_KEY has been removed in favor of per-tenant API keys)
 // PRODUCTION: Đổi key này thành chuỗi ngẫu nhiên 256-bit, đặt trong env var
 define('ADMIN_SECRET_KEY', getenv('ADMIN_SECRET_KEY') ?: 'DOM_SAAS_SUPER_SECRET_KEY_2026');
 

@@ -1404,12 +1404,17 @@
               <div style="display:flex; gap: 1.2rem; align-items: center;">
                 <!-- Toggle switch đẹp -->
                 <div style="display:flex; align-items:center; gap:0.8rem;">
-                  <span style="color:#475569; font-weight:600; font-size:1.15rem; white-space:nowrap; user-select:none;">
+                  <span
+                    style="color:#475569; font-weight:600; font-size:1.15rem; white-space:nowrap; user-select:none;">
                     <i class="fa-solid fa-filter" style="font-size:1rem; opacity:0.6;"></i>
                     Lọc Meta
                   </span>
-                  <label id="meta_toggle_label" style="position:relative; display:inline-block; width:4.2rem; height:2.2rem; cursor:pointer;" title="Bật/tắt lọc hệ thống Meta">
-                    <input type="checkbox" id="activity_filter_meta_toggle" checked onchange="window.toggleMetaActivityFilter()" style="opacity:0; width:0; height:0; position:absolute;">
+                  <label id="meta_toggle_label"
+                    style="position:relative; display:inline-block; width:4.2rem; height:2.2rem; cursor:pointer;"
+                    title="Bật/tắt lọc hệ thống Meta">
+                    <input type="checkbox" id="activity_filter_meta_toggle" checked
+                      onchange="window.toggleMetaActivityFilter()"
+                      style="opacity:0; width:0; height:0; position:absolute;">
                     <span id="meta_toggle_track" style="
                       position:absolute; inset:0;
                       background: linear-gradient(135deg,#f59e0b,#d97706);
@@ -2053,17 +2058,17 @@
                   class="fa-solid fa-link" style="color: #94a3b8;"></i> <span
                   id="preview_workspace_url">https://meta.domation.net/...</span></p>
             </div>
-            
+
             <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed #e2e8f0;">
               <label
                 style="display:flex; align-items:center; gap: 0.5rem; font-weight:700; color: #475569; margin-bottom:0.8rem; font-size: 1.25rem;">
-                <i class="fa-solid fa-microchip" style="color: #10b981;"></i> Gemini API Key (Tùy chọn)
+                <i class="fa-solid fa-microchip" style="color: #10b981;"></i> Gemini API Key (Bắt buộc để dùng AI)
               </label>
-              <input type="password" id="edit_workspace_gemini_key" class="dom-input" placeholder="Để trống để dùng key mặc định..."
+              <input type="password" id="edit_workspace_gemini_key" class="dom-input" placeholder="Nhập Gemini API Key của bạn..."
                 style="width:100%; padding: 1.2rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1.35rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s;"
                 onfocus="this.style.borderColor='var(--mainClr)'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'"
                 onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
-              <p style="margin: 0.8rem 0 0; font-size: 1.15rem; color: #64748b; font-weight: 500;">Sử dụng API Key riêng của bạn để xuất báo cáo AI (Gemini 2.5 Flash). Tính năng này chỉ hiển thị với Owner.</p>
+              <p style="margin: 0.8rem 0 0; font-size: 1.15rem; color: #64748b; font-weight: 500;">Bắt buộc phải có API Key riêng để xuất báo cáo AI. Tính năng này chỉ hiển thị với Owner.</p>
             </div>
           </div>
 
@@ -2077,166 +2082,200 @@
             </button>
           </div>
         </div>
-        </div>
-
-        <!-- TAB 3: PLAN -->
-        <div id="tab-plan" class="setting-tab-content"
-          style="display:none; padding: 3rem; flex-direction: column; gap: 2rem; min-height: 100%; background: #f8fafc;">
-          
-          <div style="background: #fff; padding: 3rem; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); position: relative; overflow: hidden;">
-            
-            <!-- Decorative Background Element -->
-            <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(245,158,11,0.1) 0%, rgba(255,255,255,0) 70%); border-radius: 50%; pointer-events: none;"></div>
-
-            <h3 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin-bottom: 2.5rem; display:flex; align-items:center; gap:1rem;">
-              <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(245,158,11,0.3);">
-                <i class="fa-solid fa-crown" style="color: #fff; font-size: 1.4rem;"></i>
-              </div>
-              Thông tin gói dịch vụ
-            </h3>
-            
-            <div style="display:flex; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap;">
-                <!-- Card 1: Trạng thái -->
-                <div style="flex: 1; background: linear-gradient(145deg, #ffffff, #f8fafc); padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02); position: relative; overflow: hidden; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #10b981; border-radius: 4px 0 0 4px;" id="plan_status_indicator"></div>
-                    <div style="font-size: 1.1rem; color: #64748b; font-weight: 700; margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; display:flex; justify-content: space-between; align-items: center;">
-                      Trạng Thái
-                      <i class="fa-solid fa-bolt" style="color: #cbd5e1; font-size: 1.2rem;"></i>
-                    </div>
-                    <div id="plan_current_status" style="font-size: 1.6rem; font-weight: 800; color: #10b981; display:flex; align-items:center; gap:0.6rem;">
-                        <i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải...
-                    </div>
-                </div>
-                <!-- Card 2: Hạn sử dụng -->
-                <div style="flex: 1; background: linear-gradient(145deg, #ffffff, #f8fafc); padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02); position: relative; overflow: hidden; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #3b82f6; border-radius: 4px 0 0 4px;" id="plan_expiry_indicator"></div>
-                    <div style="font-size: 1.1rem; color: #64748b; font-weight: 700; margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; display:flex; justify-content: space-between; align-items: center;">
-                      Hạn Sử Dụng
-                      <i class="fa-solid fa-calendar-days" style="color: #cbd5e1; font-size: 1.2rem;"></i>
-                    </div>
-                    <div id="plan_current_expiry" style="font-size: 1.6rem; font-weight: 800; color: #1e293b; font-family: 'Inter', monospace; letter-spacing: -0.02em;">
-                        Đang tải...
-                    </div>
-                </div>
-            </div>
-
-            <div style="display:flex; align-items: center; margin: 3rem 0; gap: 1.5rem;">
-              <hr style="flex:1; border: none; border-top: 1px dashed #cbd5e1;">
-              <span style="background: #f1f5f9; padding: 0.4rem 1.2rem; border-radius: 20px; font-size: 1.1rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;"><i class="fa-solid fa-rocket" style="margin-right:0.5rem; color:#94a3b8;"></i> Gia Hạn</span>
-              <hr style="flex:1; border: none; border-top: 1px dashed #cbd5e1;">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: start;">
-                <!-- Chọn Gói UI -->
-                <div>
-                  <label style="display:block; font-weight:700; color: #334155; margin-bottom:1.2rem; font-size: 1.2rem;">Chọn Gói Nâng Cấp</label>
-                  
-                  <input type="hidden" id="extend_plan_type" value="1_year">
-                  
-                  <div style="display: flex; flex-direction: column; gap: 1rem;">
-                      <!-- Card Gói 1 Tháng -->
-                      <div class="plan-card" onclick="selectPlanCard('1_month')" id="plan_card_1_month"
-                           style="border: 2px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; background: #fff;">
-                          <div style="display: flex; align-items: center; gap: 1.2rem;">
-                              <div class="plan-radio" id="radio_1_month" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center;">
-                                  <div style="width: 10px; height: 10px; border-radius: 50%; background: transparent;" id="radio_inner_1_month"></div>
-                              </div>
-                              <div>
-                                  <div style="font-size: 1.3rem; font-weight: 700; color: #1e293b;">Gói 1 Tháng</div>
-                                  <div style="font-size: 1.1rem; color: #64748b; margin-top: 0.2rem;">Phù hợp để trải nghiệm</div>
-                              </div>
-                          </div>
-                          <div style="text-align: right;">
-                              <div style="font-size: 1.4rem; font-weight: 800; color: #1e293b;">690.000đ</div>
-                              <div style="font-size: 1rem; color: #64748b;">/tháng</div>
-                          </div>
-                      </div>
-
-                      <!-- Card Gói 1 Năm -->
-                      <div class="plan-card active" onclick="selectPlanCard('1_year')" id="plan_card_1_year"
-                           style="border: 2px solid #f59e0b; border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; background: rgba(245,158,11,0.03); position: relative; box-shadow: 0 4px 15px rgba(245,158,11,0.1);">
-                          <div style="position: absolute; top: -10px; right: 15px; background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; font-size: 0.9rem; font-weight: 800; padding: 0.3rem 0.8rem; border-radius: 20px; box-shadow: 0 2px 5px rgba(239,68,68,0.3);">
-                              TIẾT KIỆM 29%
-                          </div>
-                          <div style="display: flex; align-items: center; gap: 1.2rem;">
-                              <div class="plan-radio" id="radio_1_year" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center;">
-                                  <div style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;" id="radio_inner_1_year"></div>
-                              </div>
-                              <div>
-                                  <div style="font-size: 1.3rem; font-weight: 800; color: #92400e;">Gói 1 Năm</div>
-                                  <div style="font-size: 1.1rem; color: #b45309; margin-top: 0.2rem;">Thanh toán 5.880.000đ/năm</div>
-                              </div>
-                          </div>
-                          <div style="text-align: right;">
-                              <div style="font-size: 1.4rem; font-weight: 800; color: #92400e;">490.000đ</div>
-                              <div style="font-size: 1rem; color: #b45309;">/tháng</div>
-                          </div>
-                      </div>
-                  </div>
-                </div>
-
-                <!-- Form Liên Hệ -->
-                <div style="background: #f8fafc; padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0;">
-                  <h4 style="font-size: 1.2rem; font-weight: 700; color: #334155; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem;">
-                      <i class="fa-solid fa-address-card" style="color: #64748b;"></i> Thông Tin Liên Hệ
-                  </h4>
-                  <label style="display:block; font-weight:600; color: #475569; margin-bottom:0.6rem; font-size: 1.1rem;">SĐT Zalo <span style="color:#ef4444;">*</span></label>
-                  <input type="text" id="extend_phone" placeholder="Nhập SĐT để Admin liên hệ..." style="width:100%; padding: 1.2rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1.2rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 1.5rem;" onfocus="this.style.borderColor='var(--mainClr)'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.02)'">
-                  
-                  <div style="font-size: 1.05rem; color: #64748b; line-height: 1.5; margin-bottom: 2rem; display: flex; gap: 0.8rem; background: rgba(59,130,246,0.05); padding: 1rem; border-radius: 8px; border: 1px dashed rgba(59,130,246,0.2);">
-                      <i class="fa-solid fa-circle-info" style="color: #3b82f6; margin-top: 0.2rem;"></i>
-                      <span>Sau khi gửi yêu cầu, Admin sẽ liên hệ qua Zalo của bạn để hỗ trợ kích hoạt gói dịch vụ.</span>
-                  </div>
-
-                  <button id="btn_submit_extend" onclick="submitPlanExtension()"
-                    style="width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); color:#fff; padding: 1.2rem; border-radius: 8px; border:none; cursor:pointer; font-weight:800; font-size: 1.25rem; display:flex; align-items:center; justify-content:center; gap:0.8rem; transition: all 0.2s; box-shadow: 0 4px 15px rgba(245,158,11,0.3);"
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(245,158,11,0.4)'"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245,158,11,0.3)'"
-                    onmousedown="this.style.transform='scale(0.98)'">
-                    <i class="fa-solid fa-paper-plane"></i> Gửi Yêu Cầu Nâng Cấp
-                  </button>
-                </div>
-            </div>
-            
-          </div>
-        </div>
-
-        <script>
-            function selectPlanCard(plan) {
-                document.getElementById('extend_plan_type').value = plan;
-                
-                // Reset all
-                ['1_month', '1_year'].forEach(p => {
-                    const card = document.getElementById('plan_card_' + p);
-                    const radio = document.getElementById('radio_' + p);
-                    const inner = document.getElementById('radio_inner_' + p);
-                    
-                    if (card && radio && inner) {
-                        card.style.borderColor = '#e2e8f0';
-                        card.style.background = '#fff';
-                        card.style.boxShadow = 'none';
-                        radio.style.borderColor = '#cbd5e1';
-                        inner.style.background = 'transparent';
-                    }
-                });
-                
-                // Active selected
-                const activeCard = document.getElementById('plan_card_' + plan);
-                const activeRadio = document.getElementById('radio_' + plan);
-                const activeInner = document.getElementById('radio_inner_' + plan);
-                
-                if (activeCard && activeRadio && activeInner) {
-                    activeCard.style.borderColor = '#f59e0b';
-                    activeCard.style.background = 'rgba(245,158,11,0.03)';
-                    activeCard.style.boxShadow = '0 4px 15px rgba(245,158,11,0.1)';
-                    activeRadio.style.borderColor = '#f59e0b';
-                    activeInner.style.background = '#f59e0b';
-                }
-            }
-        </script>
-
       </div>
+
+      <!-- TAB 3: PLAN -->
+      <div id="tab-plan" class="setting-tab-content"
+        style="display:none; padding: 3rem; flex-direction: column; gap: 2rem; min-height: 100%; background: #f8fafc;">
+
+        <div
+          style="background: #fff; padding: 3rem; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); position: relative; overflow: hidden;">
+
+          <!-- Decorative Background Element -->
+          <div
+            style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(245,158,11,0.1) 0%, rgba(255,255,255,0) 70%); border-radius: 50%; pointer-events: none;">
+          </div>
+
+          <h3
+            style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin-bottom: 2.5rem; display:flex; align-items:center; gap:1rem;">
+            <div
+              style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(245,158,11,0.3);">
+              <i class="fa-solid fa-crown" style="color: #fff; font-size: 1.4rem;"></i>
+            </div>
+            Thông tin gói dịch vụ
+          </h3>
+
+          <div style="display:flex; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap;">
+            <!-- Card 1: Trạng thái -->
+            <div
+              style="flex: 1; background: linear-gradient(145deg, #ffffff, #f8fafc); padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02); position: relative; overflow: hidden; transition: transform 0.3s;"
+              onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+              <div
+                style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #10b981; border-radius: 4px 0 0 4px;"
+                id="plan_status_indicator"></div>
+              <div
+                style="font-size: 1.1rem; color: #64748b; font-weight: 700; margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; display:flex; justify-content: space-between; align-items: center;">
+                Trạng Thái
+                <i class="fa-solid fa-bolt" style="color: #cbd5e1; font-size: 1.2rem;"></i>
+              </div>
+              <div id="plan_current_status"
+                style="font-size: 1.6rem; font-weight: 800; color: #10b981; display:flex; align-items:center; gap:0.6rem;">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải...
+              </div>
+            </div>
+            <!-- Card 2: Hạn sử dụng -->
+            <div
+              style="flex: 1; background: linear-gradient(145deg, #ffffff, #f8fafc); padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02); position: relative; overflow: hidden; transition: transform 0.3s;"
+              onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+              <div
+                style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #3b82f6; border-radius: 4px 0 0 4px;"
+                id="plan_expiry_indicator"></div>
+              <div
+                style="font-size: 1.1rem; color: #64748b; font-weight: 700; margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; display:flex; justify-content: space-between; align-items: center;">
+                Hạn Sử Dụng
+                <i class="fa-solid fa-calendar-days" style="color: #cbd5e1; font-size: 1.2rem;"></i>
+              </div>
+              <div id="plan_current_expiry"
+                style="font-size: 1.6rem; font-weight: 800; color: #1e293b; font-family: 'Inter', monospace; letter-spacing: -0.02em;">
+                Đang tải...
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items: center; margin: 3rem 0; gap: 1.5rem;">
+            <hr style="flex:1; border: none; border-top: 1px dashed #cbd5e1;">
+            <span
+              style="background: #f1f5f9; padding: 0.4rem 1.2rem; border-radius: 20px; font-size: 1.1rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;"><i
+                class="fa-solid fa-rocket" style="margin-right:0.5rem; color:#94a3b8;"></i> Gia Hạn</span>
+            <hr style="flex:1; border: none; border-top: 1px dashed #cbd5e1;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: start;">
+            <!-- Chọn Gói UI -->
+            <div>
+              <label
+                style="display:block; font-weight:700; color: #334155; margin-bottom:1.2rem; font-size: 1.2rem;">Chọn
+                Gói Nâng Cấp</label>
+
+              <input type="hidden" id="extend_plan_type" value="1_year">
+
+              <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Card Gói 1 Tháng -->
+                <div class="plan-card" onclick="selectPlanCard('1_month')" id="plan_card_1_month"
+                  style="border: 2px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; background: #fff;">
+                  <div style="display: flex; align-items: center; gap: 1.2rem;">
+                    <div class="plan-radio" id="radio_1_month"
+                      style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center;">
+                      <div style="width: 10px; height: 10px; border-radius: 50%; background: transparent;"
+                        id="radio_inner_1_month"></div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.3rem; font-weight: 700; color: #1e293b;">Gói 1 Tháng</div>
+                      <div style="font-size: 1.1rem; color: #64748b; margin-top: 0.2rem;">Phù hợp để trải nghiệm</div>
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 1.4rem; font-weight: 800; color: #1e293b;">690.000đ</div>
+                    <div style="font-size: 1rem; color: #64748b;">/tháng</div>
+                  </div>
+                </div>
+
+                <!-- Card Gói 1 Năm -->
+                <div class="plan-card active" onclick="selectPlanCard('1_year')" id="plan_card_1_year"
+                  style="border: 2px solid #f59e0b; border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; background: rgba(245,158,11,0.03); position: relative; box-shadow: 0 4px 15px rgba(245,158,11,0.1);">
+                  <div
+                    style="position: absolute; top: -10px; right: 15px; background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; font-size: 0.9rem; font-weight: 800; padding: 0.3rem 0.8rem; border-radius: 20px; box-shadow: 0 2px 5px rgba(239,68,68,0.3);">
+                    TIẾT KIỆM 29%
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 1.2rem;">
+                    <div class="plan-radio" id="radio_1_year"
+                      style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center;">
+                      <div style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;"
+                        id="radio_inner_1_year"></div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.3rem; font-weight: 800; color: #92400e;">Gói 1 Năm</div>
+                      <div style="font-size: 1.1rem; color: #b45309; margin-top: 0.2rem;">Thanh toán 5.880.000đ/năm
+                      </div>
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 1.4rem; font-weight: 800; color: #92400e;">490.000đ</div>
+                    <div style="font-size: 1rem; color: #b45309;">/tháng</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Liên Hệ -->
+            <div style="background: #f8fafc; padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0;">
+              <h4
+                style="font-size: 1.2rem; font-weight: 700; color: #334155; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem;">
+                <i class="fa-solid fa-address-card" style="color: #64748b;"></i> Thông Tin Liên Hệ
+              </h4>
+              <label
+                style="display:block; font-weight:600; color: #475569; margin-bottom:0.6rem; font-size: 1.1rem;">SĐT
+                Zalo <span style="color:#ef4444;">*</span></label>
+              <input type="text" id="extend_phone" placeholder="Nhập SĐT để Admin liên hệ..."
+                style="width:100%; padding: 1.2rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1.2rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 1.5rem;"
+                onfocus="this.style.borderColor='var(--mainClr)'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'"
+                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.02)'">
+
+              <div
+                style="font-size: 1.05rem; color: #64748b; line-height: 1.5; margin-bottom: 2rem; display: flex; gap: 0.8rem; background: rgba(59,130,246,0.05); padding: 1rem; border-radius: 8px; border: 1px dashed rgba(59,130,246,0.2);">
+                <i class="fa-solid fa-circle-info" style="color: #3b82f6; margin-top: 0.2rem;"></i>
+                <span>Sau khi gửi yêu cầu, Admin sẽ liên hệ qua Zalo của bạn để hỗ trợ kích hoạt gói dịch vụ.</span>
+              </div>
+
+              <button id="btn_submit_extend" onclick="submitPlanExtension()"
+                style="width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); color:#fff; padding: 1.2rem; border-radius: 8px; border:none; cursor:pointer; font-weight:800; font-size: 1.25rem; display:flex; align-items:center; justify-content:center; gap:0.8rem; transition: all 0.2s; box-shadow: 0 4px 15px rgba(245,158,11,0.3);"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(245,158,11,0.4)'"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245,158,11,0.3)'"
+                onmousedown="this.style.transform='scale(0.98)'">
+                <i class="fa-solid fa-paper-plane"></i> Gửi Yêu Cầu Nâng Cấp
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <script>
+        function selectPlanCard(plan) {
+          document.getElementById('extend_plan_type').value = plan;
+
+          // Reset all
+          ['1_month', '1_year'].forEach(p => {
+            const card = document.getElementById('plan_card_' + p);
+            const radio = document.getElementById('radio_' + p);
+            const inner = document.getElementById('radio_inner_' + p);
+
+            if (card && radio && inner) {
+              card.style.borderColor = '#e2e8f0';
+              card.style.background = '#fff';
+              card.style.boxShadow = 'none';
+              radio.style.borderColor = '#cbd5e1';
+              inner.style.background = 'transparent';
+            }
+          });
+
+          // Active selected
+          const activeCard = document.getElementById('plan_card_' + plan);
+          const activeRadio = document.getElementById('radio_' + plan);
+          const activeInner = document.getElementById('radio_inner_' + plan);
+
+          if (activeCard && activeRadio && activeInner) {
+            activeCard.style.borderColor = '#f59e0b';
+            activeCard.style.background = 'rgba(245,158,11,0.03)';
+            activeCard.style.boxShadow = '0 4px 15px rgba(245,158,11,0.1)';
+            activeRadio.style.borderColor = '#f59e0b';
+            activeInner.style.background = '#f59e0b';
+          }
+        }
+      </script>
+
     </div>
+  </div>
   </div>
 
   <script>
@@ -2263,49 +2302,49 @@
 
     async function saveWorkspaceInfo() {
       if (!window.SAAS_ROUTER || !window.SAAS_ROUTER.tenant) {
-          showToast("Lỗi: Không tìm thấy thông tin tenant hiện tại", 3000);
-          return;
+        showToast("Lỗi: Không tìm thấy thông tin tenant hiện tại", 3000);
+        return;
       }
       const slug = window.SAAS_ROUTER.tenant.slug;
       const keyInp = document.getElementById('edit_workspace_gemini_key');
       const gemini_api_key = keyInp ? keyInp.value.trim() : '';
 
       try {
-          const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
-              method: 'POST',
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify({
-                  action: 'auth_update_settings',
-                  slug: slug,
-                  admin_email: window.SAAS_ROUTER.userEmail || '',
-                  gemini_api_key: gemini_api_key
-              })
-          });
-          const data = await res.json();
-          if (data.ok) {
-              showToast("Đã lưu thông tin cài đặt thành công!", 3000);
-              window.SAAS_ROUTER.tenant.gemini_api_key = gemini_api_key;
-          } else {
-              alert("Lỗi: " + (data.error || "Không thể cập nhật cấu hình"));
-          }
+        const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'auth_update_settings',
+            slug: slug,
+            admin_email: window.SAAS_ROUTER.userEmail || '',
+            gemini_api_key: gemini_api_key
+          })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast("Đã lưu thông tin cài đặt thành công!", 3000);
+          window.SAAS_ROUTER.tenant.gemini_api_key = gemini_api_key;
+        } else {
+          alert("Lỗi: " + (data.error || "Không thể cập nhật cấu hình"));
+        }
       } catch (e) {
-          console.error(e);
-          alert("Lỗi kết nối");
+        console.error(e);
+        alert("Lỗi kết nối");
       }
     }
 
     async function submitPlanExtension() {
       if (!window.SAAS_ROUTER || !window.SAAS_ROUTER.tenant) {
-          showToast("Lỗi: Không tìm thấy thông tin tenant hiện tại", 3000);
-          return;
+        showToast("Lỗi: Không tìm thấy thông tin tenant hiện tại", 3000);
+        return;
       }
       const slug = window.SAAS_ROUTER.tenant.slug;
       const phone = document.getElementById('extend_phone').value.trim();
       const plan = document.getElementById('extend_plan_type').value;
 
       if (!phone) {
-          alert("Vui lòng nhập Số Điện Thoại Zalo để Admin liên hệ!");
-          return;
+        alert("Vui lòng nhập Số Điện Thoại Zalo để Admin liên hệ!");
+        return;
       }
 
       const btn = document.getElementById('btn_submit_extend');
@@ -2314,31 +2353,31 @@
       btn.disabled = true;
 
       try {
-          const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
-              method: 'POST',
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify({
-                  action: 'submit_renewal',
-                  slug: slug,
-                  plan: plan,
-                  phone: phone,
-                  email: window.SAAS_ROUTER.tenant.google_email || ''
-              })
-          });
-          const data = await res.json();
-          if (data.ok) {
-              showToast("Yêu cầu đã gửi! Admin sẽ liên hệ Zalo bạn sớm.", 4000);
-              btn.innerHTML = '<i class="fa-solid fa-check"></i> Đã Gửi Thành Công';
-          } else {
-              alert("Lỗi: " + (data.error || "Không thể gửi yêu cầu"));
-              btn.innerHTML = originalText;
-              btn.disabled = false;
-          }
-      } catch (e) {
-          console.error(e);
-          alert("Lỗi kết nối");
+        const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'submit_renewal',
+            slug: slug,
+            plan: plan,
+            phone: phone,
+            email: window.SAAS_ROUTER.tenant.google_email || ''
+          })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast("Yêu cầu đã gửi! Admin sẽ liên hệ Zalo bạn sớm.", 4000);
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> Đã Gửi Thành Công';
+        } else {
+          alert("Lỗi: " + (data.error || "Không thể gửi yêu cầu"));
           btn.innerHTML = originalText;
           btn.disabled = false;
+        }
+      } catch (e) {
+        console.error(e);
+        alert("Lỗi kết nối");
+        btn.innerHTML = originalText;
+        btn.disabled = false;
       }
     }
   </script>

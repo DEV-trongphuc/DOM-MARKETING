@@ -30,7 +30,11 @@ window.SAAS_ROUTER = {
 
         // Fetch tenant config
         try {
-            const res = await fetch(`${window.APP_CONFIG.SAAS_API_URL}?action=get_tenant&slug=${encodeURIComponent(hash)}`);
+            const adminToken = localStorage.getItem('dom_admin_token');
+            const headers = {};
+            if (adminToken) headers['Authorization'] = 'Bearer ' + adminToken;
+
+            const res = await fetch(`${window.APP_CONFIG.SAAS_API_URL}?action=get_tenant&slug=${encodeURIComponent(hash)}`, { headers });
             const data = await res.json();
 
             if (!data.ok) {
