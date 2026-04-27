@@ -61,4 +61,4 @@ if (_origLoadDashboardData) {
   };
 }
 
-document.getElementById("share_url_btn")?.addEventListener("click", shareCurrentView);
+// document.getElementById("share_url_btn")?.addEventListener("click", shareCurrentView);
