@@ -98,11 +98,12 @@ function _renderAccountManagerList() {
         } else {
             accounts.forEach(acc => {
                 const isActive = (acc.id === window.ACCOUNT_ID || acc.id.replace('act_', '') === window.ACCOUNT_ID);
+                const avatarUrl = acc.avatar || "./assets/dom_avatar.jpg";
                 html += `
                 <div onclick="_switchAccount('${acc.id}', '${group.token}')" style="border: 2px solid ${isActive ? '#f59e0b' : '#e2e8f0'}; background: ${isActive ? '#fffbeb' : '#fff'}; border-radius: 12px; padding: 1.4rem; cursor: pointer; transition: all 0.2s; position: relative;" onmouseover="if(!${isActive}) this.style.borderColor='#cbd5e1'" onmouseout="if(!${isActive}) this.style.borderColor='#e2e8f0'">
                     ${isActive ? '<div style="position: absolute; top: -14px; right: -14px; background: #f59e0b; color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; border: 2px solid #fff;"><i class="fa-solid fa-check"></i></div>' : ''}
                     <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem;">
-                        <img src="./assets/dom_avatar.jpg" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #e2e8f0;" onerror="this.src='https://ui-avatars.com/api/?name=DOM&background=f5a623&color=fff&bold=true'" />
+                        <img src="${avatarUrl}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #e2e8f0;" onerror="this.src='./assets/dom_avatar.jpg'" />
                         <h5 style="margin: 0; font-size: 1.4rem; color: #1e293b; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${acc.name}">${acc.name}</h5>
                     </div>
                     <p style="margin: 0; font-size: 1.2rem; color: #64748b; font-family: monospace;">ID: ${acc.id}</p>
@@ -196,7 +197,7 @@ window.fetchAccountsFromNewToken = async function() {
     btn.disabled = true;
     
     try {
-        const url = `https://graph.facebook.com/v20.0/me/adaccounts?fields=name,account_id,currency&limit=100&access_token=${token}`;
+        const url = `https://graph.facebook.com/v20.0/me/adaccounts?fields=name,account_id,currency,business{profile_picture_uri}&limit=100&access_token=${token}`;
         const res = await fetch(url);
         const data = await res.json();
         
@@ -232,9 +233,10 @@ function _renderFetchedAccounts() {
     window._am_fetched_accounts.forEach(acc => {
         // Loại bỏ act_ prefix nếu có
         const accId = acc.account_id || acc.id.replace('act_', '');
+        const avatarUri = acc.business && acc.business.profile_picture_uri ? acc.business.profile_picture_uri : '';
         html += `
         <label style="display: flex; align-items: flex-start; gap: 1rem; padding: 1.2rem; border: 1.5px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#cbd5e1'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e2e8f0'">
-            <input type="checkbox" value="${accId}" data-name="${acc.name || `Account ${accId}`}" data-currency="${acc.currency || 'VND'}" onchange="this.parentElement.style.borderColor = this.checked ? '#3b82f6' : '#e2e8f0'; this.parentElement.style.background = this.checked ? '#eff6ff' : 'transparent'; _checkAmSaveBtn()" style="width: 1.2rem; height: 1.2rem; margin-top: 0.2rem; accent-color: #3b82f6; cursor: pointer;">
+            <input type="checkbox" value="${accId}" data-name="${acc.name || `Account ${accId}`}" data-currency="${acc.currency || 'VND'}" data-avatar="${avatarUri}" onchange="this.parentElement.style.borderColor = this.checked ? '#3b82f6' : '#e2e8f0'; this.parentElement.style.background = this.checked ? '#eff6ff' : 'transparent'; _checkAmSaveBtn()" style="width: 1.2rem; height: 1.2rem; margin-top: 0.2rem; accent-color: #3b82f6; cursor: pointer;">
             <div>
                 <p style="margin: 0; font-size: 1.1rem; color: #1e293b; font-weight: 600;">${acc.name || `Tài khoản ${accId}`}</p>
                 <p style="margin: 0.2rem 0 0; font-size: 0.95rem; color: #64748b; font-family: monospace;">ID: ${accId} • ${acc.currency || 'VND'}</p>
@@ -273,7 +275,8 @@ window.saveSelectedAccounts = async function() {
     const selectedAccounts = Array.from(checked).map(cb => ({
         id: cb.value,
         name: cb.dataset.name,
-        currency: cb.dataset.currency
+        currency: cb.dataset.currency,
+        avatar: cb.dataset.avatar
     }));
     
     let groups = _normalizeAccounts();

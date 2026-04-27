@@ -152,7 +152,7 @@ async function fetchDashboardInsightsBatch(campaignIds = []) {
     {
       method: "GET",
       name: "platformStats",
-      relative_url: `${commonEndpoint}?fields=spend,impressions,reach,actions,inline_link_clicks,purchase_roas,video_play_actions,video_thruplay_watched_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p95_watched_actions,video_p100_watched_actions${currentTimeRange}${filtering}`,
+      relative_url: `${commonEndpoint}?fields=spend,account_currency,impressions,reach,actions,inline_link_clicks,purchase_roas,video_play_actions,video_thruplay_watched_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p95_watched_actions,video_p100_watched_actions${currentTimeRange}${filtering}`,
     },
     {
       method: "GET",
@@ -217,6 +217,13 @@ async function fetchDashboardInsightsBatch(campaignIds = []) {
         try {
           const body = JSON.parse(item.body);
           results[requestName] = body.data || [];
+          
+          if (requestName === "platformStats" && body.data && body.data.length > 0) {
+              const ac = body.data[0].account_currency;
+              if (ac && window.GLOBAL_CURRENCY !== ac) {
+                  window.GLOBAL_CURRENCY = ac;
+              }
+          }
         } catch (e) {
           console.warn(
             `⚠️ Failed to parse batch response for ${requestName}`,

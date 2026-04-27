@@ -38,7 +38,7 @@ async function initAccountSelector() {
       window.APP_CONFIG.META_TOKEN = targetToken;
       // Lưu Global Currency, mặc định là VND nếu tài khoản cũ chưa có field này
       window.GLOBAL_CURRENCY = targetAccount.currency || 'VND';
-      updateSelectedAccountUI(targetAccount.name, cleanId, "./assets/dom_avatar.jpg");
+      updateSelectedAccountUI(targetAccount.name, cleanId, targetAccount.avatar || "./assets/dom_avatar.jpg");
   } else {
       window.GLOBAL_CURRENCY = 'VND';
       updateSelectedAccountUI("Chưa có Account", "---", "./assets/dom_avatar.jpg");
