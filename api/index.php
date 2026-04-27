@@ -269,8 +269,9 @@ try {
             curl_close($ch);
             
             $b_data = json_decode($b_res, true);
+            // Some tokens don't have business_management permission, so ignore (#100) error
             if (isset($b_data['error'])) {
-                _json(["ok" => false, "error" => $b_data['error']['message'] ?? "Invalid Token"]);
+                $b_data['data'] = [];
             }
 
             // Also fetch personal ad accounts
@@ -288,6 +289,11 @@ try {
                 'businesses' => $b_data['data'] ?? [],
                 'personal_accounts' => $a_data['data'] ?? []
             ];
+            
+            // If both failed or returned no data, but we had an error on adaccounts fetch, report that error
+            if (empty($result['businesses']) && empty($result['personal_accounts']) && isset($a_data['error'])) {
+                _json(["ok" => false, "error" => $a_data['error']['message'] ?? "Invalid Token or Missing permissions (ads_read)"]);
+            }
             
             _json(["ok" => true, "data" => $result]);
             break;
