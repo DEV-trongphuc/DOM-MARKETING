@@ -246,8 +246,9 @@ function _renderFetchedAccounts() {
         const accId = acc.account_id || acc.id.replace('act_', '');
         const avatarUri = (acc.business && acc.business.profile_picture_uri) ? acc.business.profile_picture_uri : (acc._default_avatar || "");
         html += `
-        <label style="display: flex; align-items: flex-start; gap: 1rem; padding: 1.2rem; border: 1.5px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#cbd5e1'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e2e8f0'">
+        <label style="display: flex; align-items: center; gap: 1rem; padding: 1.2rem; border: 1.5px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#cbd5e1'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e2e8f0'">
             <input type="checkbox" value="${accId}" data-name="${acc.name || `Account ${accId}`}" data-currency="${acc.currency || 'VND'}" data-avatar="${avatarUri}" onchange="this.parentElement.style.borderColor = this.checked ? '#3b82f6' : '#e2e8f0'; this.parentElement.style.background = this.checked ? '#eff6ff' : 'transparent'; _checkAmSaveBtn()" style="width: 1.2rem; height: 1.2rem; margin-top: 0.2rem; accent-color: #3b82f6; cursor: pointer;">
+            <img src="${avatarUri || './assets/dom_avatar.jpg'}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #e2e8f0;" onerror="this.src='./assets/dom_avatar.jpg'" />
             <div>
                 <p style="margin: 0; font-size: 1.1rem; color: #1e293b; font-weight: 600;">${acc.name || `Tài khoản ${accId}`}</p>
                 <p style="margin: 0.2rem 0 0; font-size: 0.95rem; color: #64748b; font-family: monospace;">ID: ${accId} • ${acc.currency || 'VND'}</p>
