@@ -132,6 +132,8 @@ function groupByCampaign(adsets, campaignsData = []) {
         video_p100_watched_actions:     ins.video_p100_watched_actions     || [],
         thumbnail: ad.creative?.thumbnail_url || ad.creative?.full_picture || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
         post_url:  ad.creative?.facebook_post_url || ad.creative?.instagram_permalink_url || "#",
+        creative:  ad.creative || {},
+        effective_object_story_id: ad.creative?.effective_object_story_id || null,
       });
     }
   }

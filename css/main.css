@@ -5537,6 +5537,130 @@ tbody {
   display: flex !important;
 }
 
+/* ------------- AD LIBRARY VIEW ------------- */
+.dom_container.ad_library .dom_row {
+  display: none !important;
+}
+.dom_container.ad_library .dom_row.ad_library {
+  display: flex !important;
+}
+
+.ad_library_brand_group {
+  margin-bottom: 3rem;
+  background: #fff;
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
+  border: 1px solid #f1f5f9;
+}
+
+.ad_library_brand_title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 2rem 0;
+  padding-bottom: 1.2rem;
+  border-bottom: 2px dashed #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ad_library_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 2.5rem;
+}
+
+.ad_library_card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+.ad_library_card:hover {
+  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
+  transform: translateY(-5px);
+  border-color: #cbd5e1;
+}
+
+.ad_library_card_header {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+}
+
+.ad_library_card_status {
+  background: #dcfce7;
+  color: #166534;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ad_library_card_id {
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.ad_library_iframe_wrap {
+  width: 100%;
+  position: relative;
+  background: #f1f5f9;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.ad_library_iframe_wrap iframe {
+  width: 100% !important;
+  height: 100%;
+  min-height: 480px;
+  border: none;
+}
+
+.ad_library_fallback {
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  background: #e2e8f0;
+}
+.ad_library_fallback_btn {
+  position: absolute;
+  bottom: 2rem;
+  background: #1877f2;
+  color: #fff;
+  padding: 1rem 2rem;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 0 10px 20px rgba(24,119,242,0.3);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.ad_library_fallback_btn:hover {
+  background: #166fe5;
+  transform: scale(1.05);
+}
+
 /* Hide show all button in other tabs */
 .dom_container:not(.dashboard) .show_all_container,
 .dom_container:not(.dashboard) #extra_details_container {

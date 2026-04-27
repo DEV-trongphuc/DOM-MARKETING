@@ -335,6 +335,10 @@
           <i class="fa-solid fa-list"></i>
           <span>Campaign details</span>
         </li>
+        <li class="" data-view="ad_library">
+          <i class="fa-solid fa-images"></i>
+          <span>Ad Library</span>
+        </li>
         <li class="" data-view="account">
           <i class="fa-solid fa-money-check"></i>
           <span>Ad Account</span>
@@ -1009,6 +1013,20 @@
 
         </div>
 
+      </div>
+      
+      <!-- AD LIBRARY VIEW -->
+      <div class="dom_row flex ad_library" id="dom_ad_library" style="display:none; flex-direction:column; gap:1.5rem; width:100%; padding: 0.5rem 0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; background: #fff; padding: 1.5rem 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+          <h2 style="margin:0; font-size:1.6rem; font-weight:800; color:#1e293b;"><i class="fa-solid fa-images" style="color:#f59e0b; margin-right:0.5rem;"></i> Ad Library</h2>
+          <div style="color:#64748b; font-size:1rem; display:flex; gap: 1rem; align-items:center;">
+             <span style="background:#dcfce7; color:#166534; padding:0.3rem 0.8rem; border-radius:20px; font-weight:700; font-size:0.9rem;"><i class="fa-solid fa-circle" style="font-size:0.6rem; vertical-align:middle; margin-right:0.3rem; margin-top:-2px;"></i> ACTIVE</span>
+             Hiển thị quảng cáo đang chạy
+          </div>
+        </div>
+        <div id="ad_library_content" style="width:100%;">
+           <div style="text-align:center; padding: 4rem; color: #94a3b8;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem; margin-bottom:1rem; color:#f59e0b;"></i><br>Đang tải thư viện quảng cáo...</div>
+        </div>
       </div>
 
       <div class="dom_detail" id="dom_detail">
@@ -2521,6 +2539,7 @@
 <script src="./js/ui/selection_bar.js?v=9"></script>
 <script src="./js/ui/adset_modal.js?v=9"></script>
 <script src="./js/ui/ad_detail_modal.js?v=9"></script>
+<script src="./js/ui/ad_library.js?v=1"></script>
 <script src="./js/ui/ai_report.js?v=9"></script>
 <script src="./js/ui/ai_modal_setup.js?v=9"></script>
 <script src="./js/ui/year_dropdown.js?v=9"></script>
