@@ -1,4 +1,8 @@
 function openFilterSettings() {
+  if (window._currentUser?.role !== 'admin') {
+      if (typeof showToast === 'function') showToast('⛔ Bạn không có quyền truy cập cài đặt.');
+      return;
+  }
   const modal = document.getElementById("filter_settings_modal");
   if (modal) {
     modal.style.display = "flex";

@@ -594,8 +594,18 @@ try {
                 }
             }
 
-            if (!$tenant || (strtolower($admin_email) !== strtolower($tenant['google_email']) && !$is_super_admin)) {
-                _json(["ok" => false, "error" => "Chỉ Owner hoặc Admin mới có quyền xem danh sách"], 403);
+            $is_owner = ($tenant && strtolower($admin_email) === strtolower($tenant['google_email']));
+            $is_member = false;
+            if (!$is_owner && !$is_super_admin && $tenant) {
+                $vstmt = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ? AND status = 'active'");
+                $vstmt->execute([$slug, $admin_email]);
+                if ($vstmt->fetch()) {
+                    $is_member = true;
+                }
+            }
+
+            if (!$tenant || (!$is_owner && !$is_super_admin && !$is_member && !$tenant['is_public'])) {
+                _json(["ok" => false, "error" => "Bạn không có quyền xem danh sách"], 403);
             }
 
             $ustmt = $pdo->prepare("SELECT email, name, picture, role, status, request_at, added_at FROM saas_tenant_viewers WHERE tenant_slug = ? ORDER BY added_at DESC");
