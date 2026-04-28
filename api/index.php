@@ -4,7 +4,7 @@
  * (Separate from legacy index.php)
  */
 // Connect DB
-require_once 'db_connect.php';
+require_once 'db.php';
 
 // Auto-migrate missing columns for smooth deployment
 try {

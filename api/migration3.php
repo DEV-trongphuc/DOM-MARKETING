@@ -1,5 +1,5 @@
 <?php
-require_once 'db_connect.php';
+require_once 'db.php';
 
 echo "<h1>Migration 3: Missing Columns for SaaS Tenants</h1>";
 
