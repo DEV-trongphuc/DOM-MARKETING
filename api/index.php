@@ -3,9 +3,30 @@
  * DOM META SAAS - MAIN API ROUTER
  * (Separate from legacy index.php)
  */
-require_once 'db.php';
-init_cors();
+// Connect DB
+require_once 'db_connect.php';
 
+// --- Ensure saas_tenant_settings exists ---
+try {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `saas_tenant_settings` (
+      `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+      `tenant_slug` VARCHAR(50) NOT NULL,
+      `account_id` VARCHAR(50) NOT NULL,
+      `setting_key` VARCHAR(60) NOT NULL,
+      `setting_value` JSON NOT NULL,
+      `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY `uk_tenant_acc_key` (`tenant_slug`, `account_id`, `setting_key`),
+      FOREIGN KEY (`tenant_slug`) REFERENCES `saas_tenants`(`slug`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+} catch (Exception $e) {}
+
+// --- Ensure account_id in saas_ai_reports ---
+try {
+    $pdo->exec("ALTER TABLE `saas_ai_reports` ADD COLUMN `account_id` VARCHAR(50) NULL AFTER `tenant_slug`");
+    $pdo->exec("UPDATE `saas_ai_reports` SET `account_id` = 'legacy' WHERE `account_id` IS NULL");
+} catch (Exception $e) {}
+
+// Extract request
 $method = $_SERVER['REQUEST_METHOD'];
 $GLOBALS['raw_post_data'] = file_get_contents("php://input");
 $body = json_decode($GLOBALS['raw_post_data'], true) ?: [];
@@ -896,6 +917,60 @@ try {
             _json(["ok" => true, "message" => "Cập nhật cài đặt thành công"]);
             break;
 
+        case 'auth_load_dashboard_settings':
+            $slug = $_GET['slug'] ?? $body['slug'] ?? '';
+            $account_id = $_GET['account_id'] ?? $body['account_id'] ?? '';
+            $email = $_GET['email'] ?? $body['email'] ?? '';
+            
+            if (!$slug || !$account_id || !$email) _json(["ok" => false, "error" => "Missing data"], 400);
+            if (!_verify_tenant_member($pdo, $slug, $email)) _json(["ok" => false, "error" => "Unauthorized"], 403);
+            
+            $stmt = $pdo->prepare("SELECT setting_key, setting_value FROM saas_tenant_settings WHERE tenant_slug = ? AND account_id = ?");
+            $stmt->execute([$slug, $account_id]);
+            $settings = [];
+            while($row = $stmt->fetch()) {
+                $settings[$row['setting_key']] = json_decode($row['setting_value'], true);
+            }
+            _json(["ok" => true, "settings" => $settings]);
+            break;
+
+        case 'auth_save_dashboard_settings':
+            if ($method !== 'POST') _json(["ok" => false], 405);
+            $slug = $body['slug'] ?? '';
+            $account_id = $body['account_id'] ?? '';
+            $email = $body['email'] ?? '';
+            $setting_key = $body['setting_key'] ?? '';
+            $setting_value = $body['setting_value'] ?? null;
+            
+            if (!$slug || !$account_id || !$email || !$setting_key) _json(["ok" => false], 400);
+            if (!_verify_tenant_member($pdo, $slug, $email)) _json(["ok" => false, "error" => "Unauthorized"], 403);
+            
+            $stmt = $pdo->prepare("SELECT google_email FROM saas_tenants WHERE slug = ?");
+            $stmt->execute([$slug]);
+            $t = $stmt->fetch();
+            $is_owner = ($t && strtolower($email) === strtolower($t['google_email']));
+            $is_super = (strtolower($email) === 'dom.marketing.vn@gmail.com');
+            
+            $vstmt = $pdo->prepare("SELECT role FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ? AND status = 'active'");
+            $vstmt->execute([$slug, $email]);
+            $viewer = $vstmt->fetch();
+            $is_admin = ($viewer && $viewer['role'] === 'admin');
+            
+            if (!$is_owner && !$is_super && !$is_admin) {
+                _json(["ok" => false, "error" => "Only owner or admin can update settings"], 403);
+            }
+            
+            $json_val = json_encode($setting_value, JSON_UNESCAPED_UNICODE);
+            $stmt = $pdo->prepare("
+                INSERT INTO saas_tenant_settings (tenant_slug, account_id, setting_key, setting_value) 
+                VALUES (?, ?, ?, ?) 
+                ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+            ");
+            $stmt->execute([$slug, $account_id, $setting_key, $json_val]);
+            
+            _json(["ok" => true]);
+            break;
+
         // --- 2. ADMIN ENDPOINTS ---
         case 'admin_login':
             if ($method !== 'POST')
@@ -1111,9 +1186,10 @@ try {
             if ($method !== 'POST')
                 _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
+            $account_id = $body['account_id'] ?? '';
             $report = $body['report'] ?? [];
             $user_email = $body['user_email'] ?? '';
-            if (!$slug || empty($report) || !isset($report['id']))
+            if (!$slug || !$account_id || empty($report) || !isset($report['id']))
                 _json(["ok" => false, "error" => "Missing data"], 400);
             // 🔒 Chỉ active member của tenant mới được lưu báo cáo AI
             if (!_verify_tenant_member($pdo, $slug, $user_email)) {
@@ -1121,12 +1197,13 @@ try {
             }
 
             // Delete old if exists (overwrite)
-            $stmt = $pdo->prepare("DELETE FROM saas_ai_reports WHERE tenant_slug = ? AND local_id = ?");
-            $stmt->execute([$slug, $report['id']]);
+            $stmt = $pdo->prepare("DELETE FROM saas_ai_reports WHERE tenant_slug = ? AND account_id = ? AND local_id = ?");
+            $stmt->execute([$slug, $account_id, $report['id']]);
 
-            $stmt = $pdo->prepare("INSERT INTO saas_ai_reports (tenant_slug, local_id, timestamp, label, brand, dateRange, preview, html) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO saas_ai_reports (tenant_slug, account_id, local_id, timestamp, label, brand, dateRange, preview, html) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $slug,
+                $account_id,
                 $report['id'],
                 $report['timestamp'] ?? '',
                 $report['label'] ?? '',
@@ -1136,19 +1213,20 @@ try {
                 $report['html'] ?? ''
             ]);
 
-            // Keep only max 20 per tenant
-            $pdo->prepare("DELETE FROM saas_ai_reports WHERE tenant_slug = ? AND local_id NOT IN (SELECT local_id FROM (SELECT local_id FROM saas_ai_reports WHERE tenant_slug = ? ORDER BY local_id DESC LIMIT 20) foo)")->execute([$slug, $slug]);
+            // Keep only max 20 per tenant + account
+            $pdo->prepare("DELETE FROM saas_ai_reports WHERE tenant_slug = ? AND account_id = ? AND local_id NOT IN (SELECT local_id FROM (SELECT local_id FROM saas_ai_reports WHERE tenant_slug = ? AND account_id = ? ORDER BY local_id DESC LIMIT 20) foo)")->execute([$slug, $account_id, $slug, $account_id]);
 
             _json(["ok" => true]);
             break;
 
         case 'ai_list':
             $slug = $_GET['slug'] ?? $body['slug'] ?? '';
-            if (!$slug)
-                _json(["ok" => false, "error" => "Missing slug"], 400);
+            $account_id = $_GET['account_id'] ?? $body['account_id'] ?? '';
+            if (!$slug || !$account_id)
+                _json(["ok" => false, "error" => "Missing data"], 400);
 
-            $stmt = $pdo->prepare("SELECT local_id as id, timestamp, label, brand, dateRange, preview, html FROM saas_ai_reports WHERE tenant_slug = ? ORDER BY local_id DESC");
-            $stmt->execute([$slug]);
+            $stmt = $pdo->prepare("SELECT local_id as id, timestamp, label, brand, dateRange, preview, html FROM saas_ai_reports WHERE tenant_slug = ? AND account_id = ? ORDER BY local_id DESC");
+            $stmt->execute([$slug, $account_id]);
             $reports = $stmt->fetchAll();
             _json(["ok" => true, "data" => $reports]);
             break;
@@ -1157,17 +1235,18 @@ try {
             if ($method !== 'POST')
                 _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
+            $account_id = $body['account_id'] ?? '';
             $local_id = $body['id'] ?? '';
             $user_email = $body['user_email'] ?? '';
-            if (!$slug || !$local_id)
+            if (!$slug || !$account_id || !$local_id)
                 _json(["ok" => false, "error" => "Missing data"], 400);
             // 🔒 Chỉ active member mới được xóa báo cáo
             if (!_verify_tenant_member($pdo, $slug, $user_email)) {
                 _json(["ok" => false, "error" => "Unauthorized"], 403);
             }
 
-            $stmt = $pdo->prepare("DELETE FROM saas_ai_reports WHERE tenant_slug = ? AND local_id = ?");
-            $stmt->execute([$slug, $local_id]);
+            $stmt = $pdo->prepare("DELETE FROM saas_ai_reports WHERE tenant_slug = ? AND account_id = ? AND local_id = ?");
+            $stmt->execute([$slug, $account_id, $local_id]);
             _json(["ok" => true]);
             break;
 

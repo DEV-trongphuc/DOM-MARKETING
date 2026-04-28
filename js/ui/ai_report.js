@@ -513,9 +513,11 @@ function exportAiToWord() {
 function _aiApiPost(action, payload) {
   const url = window.APP_CONFIG?.SAAS_API_URL;
   const slug = window.SAAS_ROUTER?.tenant?.slug;
+  const account_id = window.ACCOUNT_ID || '';
+  const email = window._currentUser?.email || '';
   if (!url || !slug) return;
   
-  const body = { action: action, slug: slug, ...payload };
+  const body = { action: action, slug: slug, account_id: account_id, user_email: email, ...payload };
   fetch(url, { 
     method: "POST", 
     headers: { "Content-Type": "application/json" },
@@ -526,14 +528,15 @@ function _aiApiPost(action, payload) {
 async function syncAiHistoryFromApi() {
   const url = window.APP_CONFIG?.SAAS_API_URL;
   const slug = window.SAAS_ROUTER?.tenant?.slug;
+  const account_id = window.ACCOUNT_ID || '';
   if (!url || !slug) return;
   
   try {
-    const res = await fetch(`${url}?action=ai_list&slug=${encodeURIComponent(slug)}`);
+    const res = await fetch(`${url}?action=ai_list&slug=${encodeURIComponent(slug)}&account_id=${encodeURIComponent(account_id)}`);
     if (!res.ok) return;
     const json = await res.json();
     if (json.ok && Array.isArray(json.data)) {
-      localStorage.setItem(AI_HISTORY_KEY, JSON.stringify(json.data));
+      window.domSetItem(AI_HISTORY_KEY, JSON.stringify(json.data));
       updateAiHistoryBadge();
       // Nếu đang mở tab lịch sử thì render lại ngay
       const panel = document.getElementById("ai_panel_history");
@@ -548,7 +551,7 @@ const AI_HISTORY_KEY = "dom_ai_summary_history";
 const AI_HISTORY_MAX = 20;  // tăng lên 20 vì có Sheet backup
 
 function loadAiHistory() {
-  try { return JSON.parse(localStorage.getItem(AI_HISTORY_KEY) || "[]"); }
+  try { return JSON.parse(window.domGetItem(AI_HISTORY_KEY) || "[]"); }
   catch { return []; }
 }
 
@@ -570,7 +573,7 @@ function saveAiHistory(html, label) {
 
   history.unshift(entry);
   if (history.length > AI_HISTORY_MAX) history.splice(AI_HISTORY_MAX);
-  try { localStorage.setItem(AI_HISTORY_KEY, JSON.stringify(history)); } catch { }
+  try { window.domSetItem(AI_HISTORY_KEY, JSON.stringify(history)); } catch { }
   updateAiHistoryBadge();
 
   // Sync to API ngầm (non-blocking)
@@ -626,7 +629,7 @@ function confirmDeleteAiHistory(id) {
 function _doDeleteAiHistory(id) {
   // 1. Xóa trong localStorage ngay
   const history = loadAiHistory().filter(e => e.id !== id);
-  try { localStorage.setItem(AI_HISTORY_KEY, JSON.stringify(history)); } catch { }
+  try { window.domSetItem(AI_HISTORY_KEY, JSON.stringify(history)); } catch { }
   updateAiHistoryBadge();
   renderAiHistory();
 
