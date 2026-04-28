@@ -155,12 +155,18 @@ function closeFilterSettings() {
 window.toggleBrandAvatar = function(chk) {
   const wrap = chk.closest('.brand_setting_item').querySelector('.brand_avatar_input_wrap');
   const imgInput = wrap.querySelector('.brand_img');
+  const slider = chk.closest('.brand_toggle_slider');
+  const knob = slider.querySelector('.brand_toggle_knob');
   if (chk.checked) {
     wrap.style.display = 'flex';
+    slider.style.backgroundColor = '#10b981';
+    knob.style.transform = 'translateX(14px)';
   } else {
     wrap.style.display = 'none';
     imgInput.value = '';
     wrap.querySelector('img').src = 'https://domation.net/imgs/ICON.png';
+    slider.style.backgroundColor = '#cbd5e1';
+    knob.style.transform = 'translateX(0)';
   }
 };
 
@@ -203,10 +209,12 @@ function renderBrandSettingsToModal() {
               style="width:100%; padding:0.65rem 0.9rem; border-radius:8px; border:1.5px solid #e2e8f0; font-size:1.25rem; outline:none; transition:border .2s; font-family:monospace; box-sizing:border-box;"
               onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
           </div>
-          </div>
-          <div style="grid-column: 1 / -1; margin-top: 0.2rem; display: flex; align-items: center; gap: 1rem;">
-            <label style="display:flex; align-items:center; gap:0.5rem; font-size:1.1rem; font-weight:600; color:#475569; cursor:pointer;">
-              <input type="checkbox" class="brand_use_avatar_chk" ${b.img ? 'checked' : ''} onchange="window.toggleBrandAvatar(this)">
+          <div style="grid-column: 1 / -1; margin-top: 0.4rem; padding-top: 1rem; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; gap: 1.4rem;">
+            <label style="display:flex; align-items:center; gap:0.6rem; font-size:1.1rem; font-weight:600; color:#475569; cursor:pointer;">
+              <div style="position:relative; width:34px; height:20px; display:inline-block; border-radius:34px; background-color:${b.img ? '#10b981' : '#cbd5e1'}; transition:.3s;" class="brand_toggle_slider">
+                <input type="checkbox" class="brand_use_avatar_chk" ${b.img ? 'checked' : ''} onchange="window.toggleBrandAvatar(this)" style="opacity:0; width:0; height:0; position:absolute;">
+                <span style="position:absolute; height:14px; width:14px; left:3px; bottom:3px; background-color:white; border-radius:50%; transition:.3s; transform:${b.img ? 'translateX(14px)' : 'translateX(0)'}; box-shadow: 0 1px 3px rgba(0,0,0,0.2);" class="brand_toggle_knob"></span>
+              </div>
               Sử dụng Avatar
             </label>
             <div class="brand_avatar_input_wrap" style="flex:1; display: ${b.img ? 'flex' : 'none'}; gap: 0.8rem; align-items: center;">
@@ -267,9 +275,12 @@ function addNewBrandSetting() {
             onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
         </div>
         </div>
-        <div style="grid-column: 1 / -1; margin-top: 0.2rem; display: flex; align-items: center; gap: 1rem;">
-          <label style="display:flex; align-items:center; gap:0.5rem; font-size:1.1rem; font-weight:600; color:#475569; cursor:pointer;">
-            <input type="checkbox" class="brand_use_avatar_chk" onchange="window.toggleBrandAvatar(this)">
+        <div style="grid-column: 1 / -1; margin-top: 0.4rem; padding-top: 1rem; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; gap: 1.4rem;">
+          <label style="display:flex; align-items:center; gap:0.6rem; font-size:1.1rem; font-weight:600; color:#475569; cursor:pointer;">
+            <div style="position:relative; width:34px; height:20px; display:inline-block; border-radius:34px; background-color:#cbd5e1; transition:.3s;" class="brand_toggle_slider">
+              <input type="checkbox" class="brand_use_avatar_chk" onchange="window.toggleBrandAvatar(this)" style="opacity:0; width:0; height:0; position:absolute;">
+              <span style="position:absolute; height:14px; width:14px; left:3px; bottom:3px; background-color:white; border-radius:50%; transition:.3s; transform:translateX(0); box-shadow: 0 1px 3px rgba(0,0,0,0.2);" class="brand_toggle_knob"></span>
+            </div>
             Sử dụng Avatar
           </label>
           <div class="brand_avatar_input_wrap" style="flex:1; display: none; gap: 0.8rem; align-items: center;">
