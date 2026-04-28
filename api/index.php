@@ -6,26 +6,6 @@
 // Connect DB
 require_once 'db_connect.php';
 
-// --- Ensure saas_tenant_settings exists ---
-try {
-    $pdo->exec("CREATE TABLE IF NOT EXISTS `saas_tenant_settings` (
-      `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-      `tenant_slug` VARCHAR(50) NOT NULL,
-      `account_id` VARCHAR(50) NOT NULL,
-      `setting_key` VARCHAR(60) NOT NULL,
-      `setting_value` JSON NOT NULL,
-      `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      UNIQUE KEY `uk_tenant_acc_key` (`tenant_slug`, `account_id`, `setting_key`),
-      FOREIGN KEY (`tenant_slug`) REFERENCES `saas_tenants`(`slug`) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-} catch (Exception $e) {}
-
-// --- Ensure account_id in saas_ai_reports ---
-try {
-    $pdo->exec("ALTER TABLE `saas_ai_reports` ADD COLUMN `account_id` VARCHAR(50) NULL AFTER `tenant_slug`");
-    $pdo->exec("UPDATE `saas_ai_reports` SET `account_id` = 'legacy' WHERE `account_id` IS NULL");
-} catch (Exception $e) {}
-
 // Extract request
 $method = $_SERVER['REQUEST_METHOD'];
 $GLOBALS['raw_post_data'] = file_get_contents("php://input");
@@ -161,46 +141,6 @@ function _verify_tenant_member(PDO $pdo, string $slug, string $email): bool
 
 try {
     switch ($action) {
-        // --- 0. TEMP MIGRATION ---
-        case 'migrate_auth':
-            try {
-                $pdo->exec("ALTER TABLE saas_tenants ADD COLUMN is_public TINYINT(1) DEFAULT 0 COMMENT '1: Public Link enabled'");
-            } catch (Exception $e) {
-            }
-            try {
-                $pdo->exec("ALTER TABLE saas_tenant_viewers ADD COLUMN last_login DATETIME");
-            } catch (Exception $e) {
-            }
-            try {
-                $pdo->exec("CREATE TABLE IF NOT EXISTS `saas_tenant_viewers` (
-                  `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-                  `tenant_slug` VARCHAR(50) NOT NULL,
-                  `email` VARCHAR(150) NOT NULL,
-                  `name` VARCHAR(150),
-                  `picture` TEXT,
-                  `role` VARCHAR(20) DEFAULT 'viewer',
-                  `status` ENUM('active', 'request', 'rejected') DEFAULT 'request',
-                  `request_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-                  `added_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                  `last_login` DATETIME,
-                  FOREIGN KEY (`tenant_slug`) REFERENCES `saas_tenants`(`slug`) ON DELETE CASCADE
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-            } catch (Exception $e) {
-            }
-            try {
-                $pdo->exec("CREATE TABLE IF NOT EXISTS `saas_rate_limits` (
-                  `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-                  `ip` VARCHAR(60) NOT NULL,
-                  `action` VARCHAR(60) NOT NULL DEFAULT 'request',
-                  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-                  INDEX idx_ip_created (ip, created_at)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-            } catch (Exception $e) {
-            }
-            _json(["ok" => true, "message" => "Migration complete"]);
-            break;
-
-
         // --- 1. SAAS CLIENT API (For End Users) ---
         case 'get_user_tenants':
             $email = $_GET['email'] ?? $body['email'] ?? '';
