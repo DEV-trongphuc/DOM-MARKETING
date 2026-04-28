@@ -6,6 +6,15 @@
 // Connect DB
 require_once 'db_connect.php';
 
+// Auto-migrate missing columns for smooth deployment
+try {
+    @$pdo->exec("ALTER TABLE saas_tenants ADD COLUMN brand_filter_enabled TINYINT(1) DEFAULT 1");
+    @$pdo->exec("ALTER TABLE saas_tenants ADD COLUMN gemini_api_key VARCHAR(255) NULL");
+    @$pdo->exec("ALTER TABLE saas_tenants ADD COLUMN ad_accounts JSON NULL");
+    @$pdo->exec("ALTER TABLE saas_tenants ADD COLUMN is_public TINYINT(1) DEFAULT 0");
+} catch (Throwable $e) {}
+
+
 // Extract request
 $method = $_SERVER['REQUEST_METHOD'];
 $GLOBALS['raw_post_data'] = file_get_contents("php://input");
@@ -1272,7 +1281,7 @@ try {
             _json(["ok" => false, "error" => "Unknown action"], 400);
             break;
     }
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     error_log($e->getMessage());
-    _json(["ok" => false, "error" => "Database error: " . $e->getMessage()], 500);
+    _json(["ok" => false, "error" => "Server error: " . $e->getMessage()], 500);
 }
