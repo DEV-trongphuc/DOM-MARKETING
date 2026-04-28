@@ -58,54 +58,79 @@ window.SAAS_ROUTER = {
 
             // --- KIỂM TRA HẾT HẠN ---
             if (this.tenant.is_expired) {
+                window.selectPlan = function(plan) {
+                    document.getElementById('rn_plan').value = plan;
+                    const card1 = document.getElementById('card_1_month');
+                    const card2 = document.getElementById('card_1_year');
+                    if (plan === '1_month') {
+                        card1.style.border = '2px solid #f59e0b';
+                        card1.style.boxShadow = '0 10px 15px -3px rgba(245, 158, 11, 0.1)';
+                        card1.querySelector('.plan-price').style.color = '#f59e0b';
+                        
+                        card2.style.border = '2px solid #e2e8f0';
+                        card2.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)';
+                        card2.querySelector('.plan-price').style.color = '#1e293b';
+                    } else {
+                        card2.style.border = '2px solid #f59e0b';
+                        card2.style.boxShadow = '0 10px 15px -3px rgba(245, 158, 11, 0.1)';
+                        card2.querySelector('.plan-price').style.color = '#f59e0b';
+                        
+                        card1.style.border = '2px solid #e2e8f0';
+                        card1.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)';
+                        card1.querySelector('.plan-price').style.color = '#1e293b';
+                    }
+                };
+
                 document.body.innerHTML = `
                     <div style="display:flex; height:100vh; align-items:center; justify-content:center; background:rgba(15,23,42,0.95); font-family:'Roboto', sans-serif; backdrop-filter: blur(10px);">
-                        <div style="background:#fff; width:100%; max-width:800px; border-radius:24px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); overflow:hidden; display:flex;">
+                        <div style="background:#fff; width:100%; max-width:1050px; border-radius:24px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); overflow:hidden; display:flex;">
                             <!-- Bên trái: Bảng giá -->
-                            <div style="flex:1; padding:3rem; background:#f8fafc; border-right:1px solid #e2e8f0;">
+                            <div style="flex:1.2; padding:3.5rem; background:#f8fafc; border-right:1px solid #e2e8f0;">
                                 <div style="display:flex; align-items:center; gap:0.5rem; color:#b91c1c; font-weight:800; margin-bottom:1rem;">
                                     <i class="fa-solid fa-lock" style="font-size:1.2rem;"></i> WORKSPACE ĐÃ BỊ KHÓA
                                 </div>
-                                <h2 style="margin:0 0 1rem; font-size:2rem; font-weight:800; color:#0f172a; line-height:1.2;">Nâng cấp gói để tiếp tục sử dụng</h2>
-                                <p style="color:#64748b; margin-bottom:2rem; font-size:1.05rem;">Thời gian dùng thử của <b>${this.tenant.name}</b> đã kết thúc. Vui lòng chọn gói để duy trì hệ thống báo cáo tự động.</p>
+                                <h2 style="margin:0 0 1rem; font-size:2.2rem; font-weight:800; color:#0f172a; line-height:1.2;">Nâng cấp gói để tiếp tục sử dụng</h2>
+                                <p style="color:#64748b; margin-bottom:2.5rem; font-size:1.1rem; line-height:1.6;">Thời gian dùng thử của <b>${this.tenant.name}</b> đã kết thúc. Vui lòng chọn gói để duy trì hệ thống báo cáo tự động.</p>
                                 
-                                <div style="display:grid; gap:1rem;">
-                                    <div style="background:#fff; border:2px solid #f59e0b; border-radius:12px; padding:1.5rem; position:relative;">
-                                        <div style="position:absolute; top:-12px; right:20px; background:#f59e0b; color:#fff; font-size:0.75rem; font-weight:800; padding:0.2rem 0.8rem; border-radius:20px; text-transform:uppercase;">Phổ Biến</div>
-                                        <h3 style="margin:0 0 0.5rem; font-size:1.3rem; color:#1e293b;">Gói 1 Tháng</h3>
-                                        <div style="color:#64748b; font-size:0.9rem;">Duy trì hệ thống báo cáo hàng ngày.</div>
+                                <div style="display:grid; gap:1.2rem;">
+                                    <div id="card_1_month" onclick="selectPlan('1_month')" style="background:#fff; border:2px solid #f59e0b; box-shadow:0 10px 15px -3px rgba(245, 158, 11, 0.1); border-radius:16px; padding:1.5rem 2rem; position:relative; cursor:pointer; transition:all 0.2s;">
+                                        <div style="position:absolute; top:-12px; right:20px; background:#f59e0b; color:#fff; font-size:0.8rem; font-weight:800; padding:0.3rem 1rem; border-radius:20px; text-transform:uppercase;">Phổ Biến</div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                                            <h3 style="margin:0; font-size:1.4rem; color:#1e293b;">Gói 1 Tháng</h3>
+                                            <div class="plan-price" style="font-size:1.8rem; font-weight:800; color:#f59e0b;">500,000<span style="font-size:1rem; color:#64748b; font-weight:500;">đ/tháng</span></div>
+                                        </div>
+                                        <div style="color:#64748b; font-size:1.05rem;">Duy trì hệ thống báo cáo hàng ngày.</div>
                                     </div>
-                                    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem;">
-                                        <h3 style="margin:0 0 0.5rem; font-size:1.3rem; color:#1e293b;">Gói 1 Năm (Tiết kiệm 20%)</h3>
-                                        <div style="color:#64748b; font-size:0.9rem;">Thanh toán 1 lần, yên tâm sử dụng cả năm.</div>
+                                    <div id="card_1_year" onclick="selectPlan('1_year')" style="background:#fff; border:2px solid #e2e8f0; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); border-radius:16px; padding:1.5rem 2rem; cursor:pointer; transition:all 0.2s;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                                            <h3 style="margin:0; font-size:1.4rem; color:#1e293b;">Gói 1 Năm <span style="font-size:0.9rem; background:#10b981; color:#fff; padding:0.25rem 0.6rem; border-radius:10px; margin-left:0.5rem; font-weight:700;">Tiết kiệm 20%</span></h3>
+                                            <div class="plan-price" style="font-size:1.8rem; font-weight:800; color:#1e293b;">4,800,000<span style="font-size:1rem; color:#64748b; font-weight:500;">đ/năm</span></div>
+                                        </div>
+                                        <div style="color:#64748b; font-size:1.05rem;">Thanh toán 1 lần, yên tâm sử dụng cả năm.</div>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Bên phải: Form Gia Hạn -->
-                            <div style="flex:1; padding:3rem; display:flex; flex-direction:column; justify-content:center;">
-                                <h3 style="margin:0 0 1.5rem; font-size:1.3rem; color:#1e293b;">Yêu cầu gia hạn</h3>
+                            <div style="flex:0.8; padding:3.5rem; display:flex; flex-direction:column; justify-content:center;">
+                                <h3 style="margin:0 0 1.5rem; font-size:1.5rem; color:#1e293b;">Thông tin liên hệ</h3>
                                 
-                                <label style="display:block; font-size:0.85rem; font-weight:700; color:#475569; margin-bottom:0.4rem; text-transform:uppercase;">Chọn Gói</label>
-                                <select id="rn_plan" style="width:100%; padding:1rem; border:2px solid #e2e8f0; border-radius:8px; margin-bottom:1rem; outline:none; font-family:'Roboto'; font-size:1rem;">
-                                    <option value="1_month">Gói 1 Tháng</option>
-                                    <option value="1_year">Gói 1 Năm</option>
-                                </select>
+                                <input type="hidden" id="rn_plan" value="1_month">
                                 
-                                <label style="display:block; font-size:0.85rem; font-weight:700; color:#475569; margin-bottom:0.4rem; text-transform:uppercase;">Số Điện Thoại Zalo</label>
-                                <input type="text" id="rn_phone" placeholder="0987.654.321" style="width:100%; padding:1rem; border:2px solid #e2e8f0; border-radius:8px; margin-bottom:1rem; outline:none; font-family:'Roboto'; font-size:1rem; box-sizing:border-box;">
+                                <label style="display:block; font-size:0.9rem; font-weight:700; color:#475569; margin-bottom:0.5rem; text-transform:uppercase;">Số Điện Thoại Zalo</label>
+                                <input type="text" id="rn_phone" placeholder="0987.654.321" style="width:100%; padding:1.2rem; border:2px solid #e2e8f0; border-radius:10px; margin-bottom:1.5rem; outline:none; font-family:'Roboto'; font-size:1.1rem; box-sizing:border-box; transition:all 0.2s;" onfocus="this.style.borderColor='#f59e0b'; this.style.boxShadow='0 0 0 3px rgba(245, 158, 11, 0.2)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
                                 
-                                <label style="display:block; font-size:0.85rem; font-weight:700; color:#475569; margin-bottom:0.4rem; text-transform:uppercase;">Email</label>
-                                <input type="email" id="rn_email" placeholder="Ví dụ: ceo@company.com" value="${this.tenant.google_email || ''}" style="width:100%; padding:1rem; border:2px solid #e2e8f0; border-radius:8px; margin-bottom:1.5rem; outline:none; font-family:'Roboto'; font-size:1rem; box-sizing:border-box;">
+                                <label style="display:block; font-size:0.9rem; font-weight:700; color:#475569; margin-bottom:0.5rem; text-transform:uppercase;">Email</label>
+                                <input type="email" id="rn_email" placeholder="Ví dụ: ceo@company.com" value="${this.tenant.google_email || ''}" style="width:100%; padding:1.2rem; border:2px solid #e2e8f0; border-radius:10px; margin-bottom:2rem; outline:none; font-family:'Roboto'; font-size:1.1rem; box-sizing:border-box; transition:all 0.2s;" onfocus="this.style.borderColor='#f59e0b'; this.style.boxShadow='0 0 0 3px rgba(245, 158, 11, 0.2)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
                                 
-                                <button onclick="SAAS_ROUTER.submitRenewal('${hash}')" id="btn_submit_renewal" style="width:100%; padding:1.2rem; background:#f59e0b; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:1.1rem; cursor:pointer; margin-bottom:1rem; transition:all 0.2s;"><i class="fa-solid fa-paper-plane"></i> Gửi Yêu Cầu</button>
+                                <button onclick="SAAS_ROUTER.submitRenewal('${hash}')" id="btn_submit_renewal" style="width:100%; padding:1.4rem; background:#f59e0b; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:1.2rem; cursor:pointer; margin-bottom:1rem; transition:all 0.2s; box-shadow:0 4px 6px rgba(245,158,11,0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(245,158,11,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(245,158,11,0.3)'"><i class="fa-solid fa-paper-plane"></i> Yêu Cầu Gia Hạn</button>
                                 
-                                <div style="text-align:center; position:relative; margin:1rem 0;">
+                                <div style="text-align:center; position:relative; margin:1.5rem 0;">
                                     <hr style="border:none; border-top:1px solid #e2e8f0;">
-                                    <span style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:#fff; padding:0 10px; color:#94a3b8; font-size:0.85rem;">Hoặc</span>
+                                    <span style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:#fff; padding:0 10px; color:#94a3b8; font-size:0.9rem;">Hoặc</span>
                                 </div>
                                 
-                                <a href="https://zalo.me/0378859736" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; padding:1.2rem; background:#0068ff; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:1rem; cursor:pointer; text-decoration:none; transition:all 0.2s;"><i class="fa-solid fa-comment-dots"></i> Chat Zalo Hỗ Trợ</a>
+                                <a href="https://zalo.me/0378859736" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; padding:1.4rem; background:#0068ff; color:#fff; border:none; border-radius:10px; font-weight:700; font-size:1.1rem; cursor:pointer; text-decoration:none; transition:all 0.2s; box-shadow:0 4px 6px rgba(0,104,255,0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,104,255,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,104,255,0.3)'"><i class="fa-solid fa-comment-dots"></i> Chat Zalo Hỗ Trợ</a>
                             </div>
                         </div>
                     </div>
