@@ -24,9 +24,11 @@ CREATE TABLE IF NOT EXISTS `saas_tenant_viewers` (
   `picture` TEXT,
   `role` VARCHAR(20) DEFAULT 'viewer',
   `status` ENUM('active', 'request', 'rejected') DEFAULT 'request',
+  `last_login` DATETIME,
   `request_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `added_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (`tenant_slug`) REFERENCES `saas_tenants`(`slug`) ON DELETE CASCADE
+  FOREIGN KEY (`tenant_slug`) REFERENCES `saas_tenants`(`slug`) ON DELETE CASCADE,
+  UNIQUE KEY `idx_tenant_email` (`tenant_slug`, `email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `saas_users` (

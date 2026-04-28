@@ -54,6 +54,26 @@ try {
         echo "<p style='color:red'>Error updating existing tenants: " . $e->getMessage() . "</p>";
     }
 
+    // 4. Optimize saas_tenant_viewers for 1000 users concurrency
+    $optimizeQueries = [
+        "ALTER TABLE `saas_tenant_viewers` ADD COLUMN `last_login` DATETIME NULL",
+        "DELETE t1 FROM `saas_tenant_viewers` t1 INNER JOIN `saas_tenant_viewers` t2 WHERE t1.id < t2.id AND t1.tenant_slug = t2.tenant_slug AND t1.email = t2.email",
+        "ALTER TABLE `saas_tenant_viewers` ADD UNIQUE KEY `idx_tenant_email` (`tenant_slug`, `email`)"
+    ];
+
+    foreach ($optimizeQueries as $query) {
+        try {
+            $pdo->exec($query);
+            echo "<p style='color:green'>Success: $query</p>";
+        } catch (PDOException $e) {
+            if (strpos($e->getMessage(), 'Duplicate column name') !== false || strpos($e->getMessage(), 'Duplicate key name') !== false) {
+                echo "<p style='color:orange'>Skipped (already exists): $query</p>";
+            } else {
+                echo "<p style='color:red'>Error: " . $e->getMessage() . " <br>Query: $query</p>";
+            }
+        }
+    }
+
     echo "<h3>Migration completed! Please delete this file for security.</h3>";
 
 } catch (Exception $e) {

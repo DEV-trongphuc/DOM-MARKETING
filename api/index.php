@@ -546,21 +546,19 @@ try {
             $name = $body['name'] ?? '';
             $picture = $body['picture'] ?? '';
 
-            $vstmt = $pdo->prepare("SELECT role, status FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ?");
+            $vstmt = $pdo->prepare("SELECT role, status, last_login FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ?");
             $vstmt->execute([$slug, $email]);
             $viewer = $vstmt->fetch();
 
             if ($viewer) {
-                // Ensure last_login column exists
-                try {
-                    $pdo->exec("ALTER TABLE saas_tenant_viewers ADD COLUMN last_login DATETIME");
-                } catch (PDOException $e) {}
+                // Throttle last_login update to every 15 minutes to reduce DB write load
+                $last_login_time = !empty($viewer['last_login']) ? strtotime($viewer['last_login']) : 0;
+                $should_update_login = (time() - $last_login_time > 900); // 900s = 15m
 
-                // Update viewer info when they log in
                 if ($name && $picture) {
                     $upd = $pdo->prepare("UPDATE saas_tenant_viewers SET name = ?, picture = ?, last_login = NOW() WHERE tenant_slug = ? AND email = ?");
                     $upd->execute([$name, $picture, $slug, $email]);
-                } else {
+                } else if ($should_update_login) {
                     $upd = $pdo->prepare("UPDATE saas_tenant_viewers SET last_login = NOW() WHERE tenant_slug = ? AND email = ?");
                     $upd->execute([$slug, $email]);
                 }
@@ -634,9 +632,6 @@ try {
                 _json(["ok" => false, "error" => "Bạn không có quyền xem danh sách"], 403);
             }
 
-            try {
-                $pdo->exec("ALTER TABLE saas_tenant_viewers ADD COLUMN last_login DATETIME");
-            } catch (PDOException $e) {}
 
             $ustmt = $pdo->prepare("SELECT email, name, picture, role, status, request_at, added_at, last_login FROM saas_tenant_viewers WHERE tenant_slug = ? ORDER BY added_at DESC");
             $ustmt->execute([$slug]);
