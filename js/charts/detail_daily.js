@@ -587,7 +587,7 @@ function renderChartByDevice(dataByDevice) {
     item.style.cssText = `
       display:flex;flex-direction:column;gap:0.2rem;
       padding:0.7rem 1rem;border-radius:10px;
-      border:1px solid #f3f4f6;background:#fff;
+      border:1px solid #f3f4f6;background:#f8fafc;
       box-shadow:0 1px 3px rgba(0,0,0,0.02);
     `;
     item.innerHTML = `

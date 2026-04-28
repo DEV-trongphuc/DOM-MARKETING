@@ -709,43 +709,28 @@ const filterInput = document.getElementById("filter");
 const filterButton = document.getElementById("filter_button");
 
 if (filterInput) {
-  // 🧠 Khi nhấn Enter mới filter
-  filterInput.addEventListener(
-    "keydown",
-    debounce((e) => {
-      if (e.key === "Enter") {
-        const keyword = e.target.value.trim().toLowerCase();
-        const filtered = keyword
-          ? window._ALL_CAMPAIGNS.filter((c) => {
-            if ((c.name || "").toLowerCase().includes(keyword)) return true;
-            if (c.id && c.id.includes(keyword)) return true;
-            const hasAdset = (c.adsets || []).some(
-              (as) => (as.name || "").toLowerCase().includes(keyword) || (as.id && as.id.includes(keyword))
-            );
-            if (hasAdset) return true;
-            return (c.adsets || []).some((as) =>
-              (as.ads || []).some((ad) => (ad.name || "").toLowerCase().includes(keyword) || (ad.id && ad.id.includes(keyword)))
-            );
-          })
-          : window._ALL_CAMPAIGNS;
-
-        // 🔹 Render lại danh sách và tổng quan
-        renderCampaignView(filtered);
-      } else if (e.target.value.trim() === "") {
-        // 🧹 Nếu clear input → reset về mặc định
-        renderCampaignView(window._ALL_CAMPAIGNS);
-      }
-    }, 300)
-  );
-
-  // 👀 Khi clear input bằng tay (xóa hết text)
+  // 🧠 Tự động filter khi gõ (có debounce 500ms)
   filterInput.addEventListener(
     "input",
     debounce((e) => {
-      if (e.target.value.trim() === "") {
-        renderCampaignView(window._ALL_CAMPAIGNS);
-      }
-    }, 300)
+      const keyword = e.target.value.trim().toLowerCase();
+      const filtered = keyword
+        ? window._ALL_CAMPAIGNS.filter((c) => {
+          if ((c.name || "").toLowerCase().includes(keyword)) return true;
+          if (c.id && c.id.includes(keyword)) return true;
+          const hasAdset = (c.adsets || []).some(
+            (as) => (as.name || "").toLowerCase().includes(keyword) || (as.id && as.id.includes(keyword))
+          );
+          if (hasAdset) return true;
+          return (c.adsets || []).some((as) =>
+            (as.ads || []).some((ad) => (ad.name || "").toLowerCase().includes(keyword) || (ad.id && ad.id.includes(keyword)))
+          );
+        })
+        : window._ALL_CAMPAIGNS;
+
+      // 🔹 Render lại danh sách và tổng quan
+      renderCampaignView(filtered);
+    }, 500)
   );
 }
 

@@ -4082,6 +4082,13 @@ tbody {
   height: max-content;
 }
 
+.dom_interaction_note {
+  background: #f8fafc;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+}
+
 .dom_interaction_note>span:last-child {
   font-size: 1.7rem;
   font-weight: bold;
@@ -10232,4 +10239,11 @@ tbody {
 /* Rotate arrow when open */
 #show_all_btn.open i {
   transform: rotate(180deg);
+}
+
+/* Update light mode active state for better contrast */
+body:not([data-theme="dark"]) .adset_item.active,
+body:not([data-theme="dark"]) .ad_item.active,
+body:not([data-theme="dark"]) .campaign_main.active {
+    background-color: #f1f5f9 !important;
 }

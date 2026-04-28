@@ -506,3 +506,76 @@ body[data-theme="dark"] .brand_setting_item label {
   color: var(--textClr) !important;
 }
 
+/* ==========================================================================
+   ITERATIVE FIXES 2 (Profile Dropdown, List Actives, Filter Inputs, Sub-cards)
+   ========================================================================== */
+
+/* Buttons, Pills, and Dropdowns with hardcoded white background */
+body[data-theme="dark"] [style*="background: #fff"],
+body[data-theme="dark"] [style*="background:#fff"],
+body[data-theme="dark"] [style*="background-color: #fff"],
+body[data-theme="dark"] [style*="background-color:#fff"],
+body[data-theme="dark"] [style*="background: white"],
+body[data-theme="dark"] [style*="background-color: white"] {
+  background-color: var(--bgWhite) !important;
+  color: var(--textClr) !important;
+  border-color: var(--borderMid) !important;
+}
+body[data-theme="dark"] [style*="background: #fff"] *,
+body[data-theme="dark"] [style*="background-color: #fff"] * {
+  color: inherit;
+}
+/* Ensure the text is visible if it was black */
+body[data-theme="dark"] [style*="color: #000"],
+body[data-theme="dark"] [style*="color: #333"] {
+  color: var(--textClr) !important;
+}
+
+/* Search Input in Detail Table that has white pill behind it */
+body[data-theme="dark"] .dom_table_header {
+  background-color: transparent !important;
+}
+body[data-theme="dark"] .dom_campaign_filter {
+  background-color: var(--bgSlate100) !important;
+  border-color: var(--borderMid) !important;
+}
+body[data-theme="dark"] .dom_campaign_filter input {
+  color: var(--textClr) !important;
+}
+
+/* Sidebar Workspace block (Bún Bò Huế Duyên Mai) */
+body[data-theme="dark"] .dom_account_view_block {
+  background-color: var(--bgSlate100) !important;
+  border-color: var(--borderMid) !important;
+}
+body[data-theme="dark"] .dom_account_view_block:hover {
+  background-color: var(--bgSlate200) !important;
+}
+body[data-theme="dark"] .dom_account_view_block .account_item_name {
+  color: var(--textClr) !important;
+}
+body[data-theme="dark"] .dom_account_view_block .account_item_id {
+  color: var(--textLight) !important;
+}
+
+/* Interaction Cards, Device Breakdown, Top Campaigns (Sub-items) */
+body[data-theme="dark"] .dom_interaction_note,
+body[data-theme="dark"] .dom_toplist li {
+  background-color: var(--bgSlate100) !important;
+  border-color: var(--borderMid) !important;
+}
+body[data-theme="dark"] .dom_interaction_note span {
+  color: var(--textClr) !important;
+}
+
+/* List Items (Campaign, Adset, Ad) Active State */
+body[data-theme="dark"] .campaign_main.active,
+body[data-theme="dark"] .adset_item.active,
+body[data-theme="dark"] .ad_item.active {
+  background-color: var(--bgSlate100) !important;
+  border-color: var(--mainClr) !important;
+}
+body[data-theme="dark"] .ad_item.active .ad_item_box {
+  background-color: var(--bgSlate100) !important;
+}
+
