@@ -215,18 +215,26 @@ YÊU CẦU PHÂN TÍCH SO SÁNH:
 ⚠️ QUY TẮC: Dùng bảng markdown cho phần so sánh số liệu, viết bằng tiếng Việt, có số liệu cụ thể.`;
 
     try {
-      const PROXY_URL = (window.APP_CONFIG?.SAAS_API_URL || "api/index.php") + "?action=ai_generate";
-      const resp = await fetch(PROXY_URL, {
+      const apiKey = window.SAAS_ROUTER?.tenant?.gemini_api_key;
+      if (!apiKey) {
+          throw new Error("Chưa cấu hình GEMINI API KEY. Vui lòng cập nhật cài đặt Workspace.");
+      }
+
+      const GEMINI_MODEL = "gemini-2.5-flash";
+      const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+
+      const resp = await fetch(GEMINI_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          prompt: prompt,
-          slug: window.SAAS_ROUTER?.tenant?.slug || ''
-        }),
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 1.5, maxOutputTokens: 50000 }
+        })
       });
+
     const data = await resp.json();
-    if (!resp.ok) throw new Error(data?.error || `Proxy error: ${resp.status}`);
-    const text = data?.text || "Không nhận được phản hồi.";
+    if (!resp.ok) throw new Error(data?.error?.message || `Gemini API error: ${resp.status}`);
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Không nhận được phản hồi.";
 
     if (loading) loading.style.display = "none";
     if (content) content.innerHTML = simpleMarkdown(text);
@@ -863,22 +871,28 @@ YÊU CẦU PHÂN TÍCH (đầy đủ, chi tiết, có số liệu cụ thể)
     _aiController = new AbortController();
     const signal = _aiController.signal;
 
-    // ── Gọi qua PHP proxy (API key ẩn phía server) ──
-    const PROXY_URL = (window.APP_CONFIG?.SAAS_API_URL || "api/index.php") + "?action=ai_generate";
+    // ── Gọi trực tiếp lên Google Gemini (Client-side) ──
+    const apiKey = window.SAAS_ROUTER?.tenant?.gemini_api_key;
+    if (!apiKey) {
+        throw new Error("Chưa cấu hình GEMINI API KEY. Vui lòng cập nhật cài đặt Workspace.");
+    }
 
-    const resp = await fetch(PROXY_URL, {
+    const GEMINI_MODEL = "gemini-2.5-flash";
+    const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+
+    const resp = await fetch(GEMINI_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        prompt: prompt,
-        slug: window.SAAS_ROUTER?.tenant?.slug || ''
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 1.5, maxOutputTokens: 50000 }
       }),
       signal,
     });
 
     const data = await resp.json();
-    if (!resp.ok) throw new Error(data?.error || `Proxy error: ${resp.status} `);
-    const text = data?.text || "Không nhận được phản hồi từ AI.";
+    if (!resp.ok) throw new Error(data?.error?.message || `Gemini API error: ${resp.status}`);
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Không nhận được phản hồi từ AI.";
 
     // Render markdown
     if (content) {

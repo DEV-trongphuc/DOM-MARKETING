@@ -135,6 +135,7 @@
       cursor: pointer;
     }
   </style>
+  <link rel="stylesheet" href="css/dark_mode.css">
 </head>
 
 <body>
@@ -445,6 +446,10 @@
             </button>
             <button id="kb_shortcut_btn" class="toolbar_btn icon_only" title="Shortcuts">
               <i class="fa-solid fa-keyboard"></i>
+            </button>
+            <button id="theme_toggle_btn" class="toolbar_btn icon_only theme-toggle-btn" title="Giao diện Tối / Sáng">
+              <i class="fa-solid fa-moon"></i>
+              <i class="fa-solid fa-sun" style="display:none;"></i>
             </button>
             <button id="share_url_btn" class="toolbar_btn" title="Share (Ctrl+Shift+S)"
               onclick="window.openShareModal && window.openShareModal()">
@@ -2850,6 +2855,8 @@
       if (logoEl) logoEl.src = _LOGO_DEFAULT;
     };
   </script>
+  <!-- Theme logic (Light/Dark Mode) -->
+  <script src="js/ui/theme.js"></script>
 </body>
 <!-- Foundation: lib/ (token, auth, settings, setup) -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>

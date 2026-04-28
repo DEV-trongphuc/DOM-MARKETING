@@ -1,0 +1,239 @@
+/* ==========================================================================
+   DARK MODE OVERRIDES
+   Tuyệt đối KHÔNG sửa file main.css để bảo toàn Light mode.
+   Toàn bộ biến ở đây sẽ ghi đè lên :root khi body có data-theme="dark".
+   ========================================================================== */
+
+body[data-theme="dark"] {
+  /* ── Brand / Theme ── */
+  /* Giữ nguyên màu chủ đạo (Cam) nhưng có thể làm dịu xíu nếu cần, hiện tại giữ nguyên để đồng bộ brand */
+  --mainClr: #ffa900;
+  --mainClr-mid: rgba(255, 169, 0, 0.3);
+  --mainClr-soft: rgba(255, 169, 0, 0.1);
+  --mainClr-bg: rgba(255, 169, 0, 0.05);
+  --mainClr-hover: rgba(255, 169, 0, 0.15);
+  --subClr: #828bf9; /* Sáng hơn trên nền tối */
+  --subClr-mid: rgba(130, 139, 249, 0.3);
+  --subClr-soft: rgba(130, 139, 249, 0.1);
+
+  /* ── Text ── */
+  --textClr: #e2e8f0;       /* Chữ xám sáng */
+  --textDark: #f8fafc;      /* Chữ trắng (tiêu đề) */
+  --textMid: #cbd5e1;       /* Xám vừa */
+  --textLight: #94a3b8;     /* Xám nhạt */
+  --textFaint: #64748b;
+  --textFaint999: #475569;
+  --textMid666: #94a3b8;
+  --textClr444: #cbd5e1;
+  --textGray: #64748b;
+  --textSlate: #94a3b8;
+  --textSlate2: #cbd5e1;
+  --textNavy: #f8fafc;
+
+  /* ── State Colors ── */
+  --colorSuccess-bg: rgba(16, 185, 129, 0.1);
+  --colorDanger-bg: rgba(239, 68, 68, 0.1);
+  --colorWarn-bg: rgba(245, 158, 11, 0.1);
+  --colorWarn-border: rgba(245, 158, 11, 0.2);
+  --colorUpBg: rgba(0, 177, 72, 0.1);
+  --colorDownBg: rgba(225, 112, 85, 0.1);
+
+  /* ── Background / Surface ── */
+  --fadeClr: #1e293b;       /* Nền xám đậm cho thẻ/nút */
+  --fadeClr500: #334155;    /* Sáng hơn tí khi hover */
+  --fadeClrG: #1e293b;
+  --bgPage: #0f172a;        /* Nền trang cực tối */
+  --bgWhite: #1e293b;       /* Nền card (thay cho trắng) */
+  --bgWhite80: rgba(30, 41, 59, 0.85); /* Box nửa trong suốt */
+  --bgWhite95: rgba(30, 41, 59, 0.95);
+  --bgSlate50: #1e293b;
+  --bgSlate100: #334155;
+  --bgSlate200: #475569;
+  --bgAmberHover: rgba(255, 169, 0, 0.1);
+  --bgAmberLight: rgba(255, 169, 0, 0.05);
+  --bgGoldActive: rgba(255, 169, 0, 0.1);
+
+  /* ── Border ── */
+  --borderLight: rgba(255, 255, 255, 0.05);
+  --borderMid: rgba(255, 255, 255, 0.1);
+  --borderSlate: #334155;
+  --borderSlate2: #475569;
+  --borderFaint: rgba(255, 255, 255, 0.03);
+  --borderDdd: #334155;
+
+  /* ── Shadow ── */
+  --shadowSm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadowMd: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadowLg: 0 10px 15px rgba(0, 0, 0, 0.3);
+  --shadowCard: 0 20px 25px rgba(0, 0, 0, 0.5);
+
+  /* ── Scrollbar ── */
+  --scrollTrack: #0f172a;
+  --scrollThumb: #475569;
+  --scrollThumbHover: #64748b;
+}
+
+/* ==========================================================================
+   GLOBAL OVERRIDES FOR DARK MODE
+   ========================================================================== */
+
+/* 1. Xóa gradient chói lóa ở Body */
+body[data-theme="dark"] {
+  background-image: none !important;
+  background-color: var(--bgPage) !important;
+}
+
+/* 2. Ép màu những phần tử Hardcode màu trắng/đen (nếu có) */
+body[data-theme="dark"] .bgw, 
+body[data-theme="dark"] .dom_header,
+body[data-theme="dark"] .dom_sidebar,
+body[data-theme="dark"] .dom_toolbar_right,
+body[data-theme="dark"] .dom_select.quick_filter,
+body[data-theme="dark"] .dom_select.status_filter .dom_select_show,
+body[data-theme="dark"] .dom_summary,
+body[data-theme="dark"] .dom_card {
+  background: var(--bgWhite) !important;
+}
+
+/* Biểu đồ (Charts) nền */
+body[data-theme="dark"] .dom_card,
+body[data-theme="dark"] .chart-container {
+  border: 1px solid var(--borderLight);
+  box-shadow: var(--shadowMd);
+}
+
+/* Dropdown / Select box Fix */
+body[data-theme="dark"] .dom_select {
+  background-color: var(--fadeClr) !important;
+  color: var(--textClr) !important;
+  border-color: var(--borderMid) !important;
+}
+body[data-theme="dark"] .dom_select_show {
+  background-color: var(--bgWhite) !important;
+  border: 1px solid var(--borderMid) !important;
+}
+body[data-theme="dark"] .dom_select_show li:hover {
+  background-color: var(--bgSlate100) !important;
+}
+
+/* Nút bấm toolbar Hover fix */
+body[data-theme="dark"] .toolbar_btn:hover {
+  background: var(--bgSlate100) !important;
+}
+
+/* Modals */
+body[data-theme="dark"] .dom_modal_box,
+body[data-theme="dark"] .perf_modal_box,
+body[data-theme="dark"] .ai_modal_box {
+  background-color: var(--bgWhite) !important;
+  border: 1px solid var(--borderMid);
+}
+body[data-theme="dark"] .perf_header,
+body[data-theme="dark"] .ai_modal_header {
+  border-bottom: 1px solid var(--borderMid) !important;
+}
+body[data-theme="dark"] .perf_sidebar,
+body[data-theme="dark"] .ai_modal_sidebar {
+  background-color: var(--bgSlate50) !important;
+  border-right: 1px solid var(--borderMid) !important;
+}
+body[data-theme="dark"] .perf_tab_btn:hover,
+body[data-theme="dark"] .ai_tab_btn:hover {
+  background-color: var(--bgSlate100) !important;
+}
+body[data-theme="dark"] .perf_tab_btn.active,
+body[data-theme="dark"] .ai_tab_btn.active {
+  background-color: var(--bgAmberLight) !important;
+}
+
+/* Inputs */
+body[data-theme="dark"] input,
+body[data-theme="dark"] textarea {
+  color: var(--textClr) !important;
+}
+
+/* Tables (nếu có table data) */
+body[data-theme="dark"] table th {
+  background-color: var(--bgSlate50) !important;
+  color: var(--textDark) !important;
+  border-bottom-color: var(--borderMid) !important;
+}
+body[data-theme="dark"] table td {
+  border-bottom-color: var(--borderLight) !important;
+}
+body[data-theme="dark"] tr:hover td {
+  background-color: var(--bgSlate50) !important;
+}
+
+/* Date Range Picker background override */
+body[data-theme="dark"] .daterangepicker {
+  background-color: var(--bgWhite) !important;
+  border-color: var(--borderMid) !important;
+  color: var(--textClr) !important;
+}
+body[data-theme="dark"] .daterangepicker .calendar-table {
+  background-color: var(--bgWhite) !important;
+  border-color: var(--borderWhite) !important;
+}
+body[data-theme="dark"] .daterangepicker td.off {
+  background-color: var(--bgWhite) !important;
+  color: var(--textFaint) !important;
+}
+body[data-theme="dark"] .daterangepicker td.available:hover {
+  background-color: var(--bgSlate100) !important;
+}
+body[data-theme="dark"] .daterangepicker .drp-buttons {
+  border-top-color: var(--borderMid) !important;
+}
+
+/* Sửa lỗi skeleton trên nền đen */
+body[data-theme="dark"] .skeleton {
+  background: var(--bgSlate100);
+  background: linear-gradient(110deg, var(--bgSlate100) 8%, var(--bgSlate200) 18%, var(--bgSlate100) 33%);
+  background-size: 200% 100%;
+}
+body[data-theme="dark"] .skeleton-container {
+  background: var(--bgWhite) !important;
+}
+
+/* Fix màu markdown (nếu có hardcode) */
+body[data-theme="dark"] .ai_summary_content {
+  color: var(--textClr) !important;
+}
+body[data-theme="dark"] .ai_summary_content table th {
+  background: var(--bgSlate100) !important;
+}
+body[data-theme="dark"] .ai_summary_content blockquote {
+  background: var(--bgSlate50) !important;
+  border-left-color: var(--textSlate) !important;
+}
+
+/* Toggle Theme Button */
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--textMid);
+  font-size: 1.6rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+.theme-toggle-btn:hover {
+  background: var(--bgSlate100);
+  color: var(--mainClr);
+}
+body[data-theme="dark"] .theme-toggle-btn .fa-moon {
+  display: none;
+}
+body[data-theme="dark"] .theme-toggle-btn .fa-sun {
+  display: block !important;
+}
+.theme-toggle-btn .fa-sun {
+  display: none;
+  color: var(--mainClr);
+}
