@@ -280,9 +280,8 @@ document.addEventListener("click", (e) => {
         ? window._ALL_CAMPAIGNS
         : [];
       const filtered = all.filter((c) =>
-        String(c?.name || "")
-          .toLowerCase()
-          .includes(keyword)
+        String(c?.name || "").toLowerCase().includes(keyword) ||
+        String(c?.id || "").includes(keyword)
       );
 
       renderFilteredCampaigns(filtered);

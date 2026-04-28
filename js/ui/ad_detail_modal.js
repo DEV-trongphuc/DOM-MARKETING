@@ -716,9 +716,17 @@ if (filterInput) {
       if (e.key === "Enter") {
         const keyword = e.target.value.trim().toLowerCase();
         const filtered = keyword
-          ? window._ALL_CAMPAIGNS.filter((c) =>
-            (c.name || "").toLowerCase().includes(keyword)
-          )
+          ? window._ALL_CAMPAIGNS.filter((c) => {
+            if ((c.name || "").toLowerCase().includes(keyword)) return true;
+            if (c.id && c.id.includes(keyword)) return true;
+            const hasAdset = (c.adsets || []).some(
+              (as) => (as.name || "").toLowerCase().includes(keyword) || (as.id && as.id.includes(keyword))
+            );
+            if (hasAdset) return true;
+            return (c.adsets || []).some((as) =>
+              (as.ads || []).some((ad) => (ad.name || "").toLowerCase().includes(keyword) || (ad.id && ad.id.includes(keyword)))
+            );
+          })
           : window._ALL_CAMPAIGNS;
 
         // 🔹 Render lại danh sách và tổng quan
@@ -748,9 +756,17 @@ if (filterButton) {
     debounce(() => {
       const keyword = filterInput?.value?.trim().toLowerCase() || "";
       const filtered = keyword
-        ? window._ALL_CAMPAIGNS.filter((c) =>
-          (c.name || "").toLowerCase().includes(keyword)
-        )
+        ? window._ALL_CAMPAIGNS.filter((c) => {
+          if ((c.name || "").toLowerCase().includes(keyword)) return true;
+          if (c.id && c.id.includes(keyword)) return true;
+          const hasAdset = (c.adsets || []).some(
+            (as) => (as.name || "").toLowerCase().includes(keyword) || (as.id && as.id.includes(keyword))
+          );
+          if (hasAdset) return true;
+          return (c.adsets || []).some((as) =>
+            (as.ads || []).some((ad) => (ad.name || "").toLowerCase().includes(keyword) || (ad.id && ad.id.includes(keyword)))
+          );
+        })
         : window._ALL_CAMPAIGNS;
 
       // 🔹 Render lại danh sách và tổng quan
