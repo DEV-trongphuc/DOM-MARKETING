@@ -74,8 +74,9 @@
                 body: JSON.stringify({ action, slug, ...payload })
             });
             if (res.status === 403) {
-                console.error("[saas auth] 403 Unauthorized detected. Returning error without forcing sign out.");
-                return { ok: false, error: "Phiên đăng nhập đã hết hạn hoặc bạn không có quyền thực hiện hành động này." };
+                console.error("[saas auth] 403 Unauthorized detected. Forcing sign out.");
+                if (typeof window._signOut === 'function') window._signOut();
+                return { ok: false, error: "Phiên đăng nhập đã hết hạn hoặc bạn đã bị thu hồi quyn truy cập." };
             }
             return await res.json();
         } catch (e) {
@@ -145,12 +146,12 @@
     const _brand = () => `<div class="_brand"><img src="https://domation.net/imgs/ICON.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2991/2991148.png'"><div><h2>DOMATION</h2><p><span>/</span> META REPORT</p></div></div>`;
     const _icon  = (ico, bg) => `<div class="_ico" style="background:${bg}"><i class="${ico}" style="color:#fff;font-size:1.7rem;"></i></div>`;
     const _title = (t, s) => `<h2 class="_h2">${t}</h2><p class="_sub">${s}</p>`;
-    const _outBtn = () => `<button class="_btn _btn-ghost" onclick="window._signOut()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</button>`;
+    const _outBtn = () => `<button class="_btn _btn-ghost" onclick="window._signOut()"><i class="fa-solid fa-arrow-right-from-bracket"></i> ăng xuất</button>`;
 
     function _showLoading() {
         _html(_card(`<div style="text-align:center;">
             <div class="_sp2"></div>
-            <p style="font-family:'Inter',sans-serif;font-size:.85rem;color:#94a3b8;margin:0;">Đang kiểm tra quyền truy cập...</p>
+            <p style="font-family:'Inter',sans-serif;font-size:.85rem;color:#94a3b8;margin:0;">ang kiểm tra quyn truy cập...</p>
         </div>`));
     }
 
@@ -158,7 +159,7 @@
         if (!CLIENT_ID) {
             _html(_card(`${_icon("fa-solid fa-triangle-exclamation", "linear-gradient(135deg,#f59e0b,#d88200)")}
                 ${_title("Chưa cấu hình Google Client ID", `Thêm <code style="background:#fef9c3;padding:.2rem .5rem;border-radius:.4rem;color:#92400e;font-family:monospace;">GOOGLE_CLIENT_ID</code> vào <b>config_env.js</b>`)}
-                <button onclick="window._skipAuth()" class="_btn _btn-amber">Bỏ qua (Dev mode)</button>`));
+                <button onclick="window._skipAuth()" class="_btn _btn-amber">B qua (Dev mode)</button>`));
             return;
         }
         _html(_card(`
@@ -194,7 +195,7 @@
     function _showPending(email) {
         const adminLabel = _maskedAdmin();
 
-        // Hiển thị thời gian đã chờ dựa vào requestAt (nếu có)
+        // Hiển thị thi gian đã ch dựa vào requestAt (nếu có)
         const pendingData = _loadPending();
         let waitHtml = '';
         if (pendingData?.requestAt) {
@@ -206,7 +207,7 @@
                     const diffMin = Math.round(diffMs / 60000);
                     const diffText = diffMin < 1 ? 'vừa xong' :
                         diffMin < 60 ? `${diffMin} phút trước` :
-                            `${Math.round(diffMin / 60)} giờ trước`;
+                            `${Math.round(diffMin / 60)} gi trước`;
                     waitHtml = `<p style="font-size:1.1rem;color:#94a3b8;margin-top:.8rem;">Yêu cầu gửi lúc ${pendingData.requestAt} (${diffText})</p>`;
                 }
             } catch (_) { }
@@ -215,7 +216,7 @@
         _html(_card(`
             ${_brand()}
             ${_icon("fa-solid fa-clock", "linear-gradient(135deg,#f59e0b,#d97706)")}
-            ${_title("Đang chờ phê duyệt", `Yêu cầu của <b style="color:#f59e0b;">${email}</b> đang chờ Admin xét duyệt.`)}
+            ${_title("ang ch phê duyệt", `Yêu cầu của <b style="color:#f59e0b;">${email}</b> đang ch Admin xét duyệt.`)}
             ${waitHtml}
             <button class="_btn _btn-ghost" onclick="window._checkPendingNow()" style="margin-bottom:.5rem;">
               <i class="fa-solid fa-rotate-right"></i> Kiểm tra lại ngay
@@ -246,7 +247,7 @@
         const pending = _loadPending();
         if (!pending?.email) return;
         const btn = document.querySelector('[onclick="window._checkPendingNow()"]');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang kiểm tra...'; }
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> ang kiểm tra...'; }
         const users = await _api();
         const found = (users || []).find(u => (u.email || '').toLowerCase() === pending.email.toLowerCase());
         if (found?.status === 'active') {
@@ -255,7 +256,7 @@
             _grantAccess({ email: found.email, name: found.name || pending.email, picture: pending.picture || '', role: found.role, status: 'active' });
         } else if (found?.status === 'request') {
             if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Kiểm tra lại ngay'; }
-            if (typeof showToast === 'function') showToast('⏳ Vẫn đang chờ admin duyệt...');
+            if (typeof showToast === 'function') showToast(' Vẫn đang ch admin duyệt...');
         } else {
             clearInterval(_pendingRefreshTimer);
             _clearPending();
@@ -273,9 +274,9 @@
                 <div class="_ci"><strong>${name || email}</strong><small>${email}</small></div>
             </div>
             ${_icon("fa-solid fa-ban", "linear-gradient(135deg,#ef4444,#b91c1c)")}
-            ${_title("Không có quyền truy cập", "Tài khoản của bạn chưa được cấp quyền xem báo cáo này.")}
+            ${_title("Không có quyn truy cập", "Tài khoản của bạn chưa được cấp quyn xem báo cáo này.")}
             <button id="_reqBtn" class="_btn _btn-amber" onclick="window._requestAccess('${esc(email)}','${esc(name)}','${esc(pic)}')">
-                <i class="fa-solid fa-paper-plane"></i> Yêu cầu quyền truy cập
+                <i class="fa-solid fa-paper-plane"></i> Yêu cầu quyn truy cập
             </button>
             ${_outBtn()}`));
     }
@@ -285,7 +286,7 @@
         _html(_card(`
             ${_brand()}
             ${_icon("fa-solid fa-paper-plane", "linear-gradient(135deg,#f59e0b,#d97706)")}
-            ${_title("Đã gửi yêu cầu!", `Yêu cầu đã được ghi nhận.<br><span style="font-size:.8rem;color:#94a3b8;display:block;margin-top:.4rem;">Admin <b style="color:#64748b;">${adminLabel}</b> sẽ phê duyệt sớm.</span>`)}
+            ${_title("ã gửi yêu cầu!", `Yêu cầu đã được ghi nhận.<br><span style="font-size:.8rem;color:#94a3b8;display:block;margin-top:.4rem;">Admin <b style="color:#64748b;">${adminLabel}</b> sẽ phê duyệt sớm.</span>`)}
             ${_outBtn()}`));
     }
 
@@ -298,9 +299,9 @@
         _dbg(`Email nhận được: ${email}`);
         _showLoading();
 
-        // Đã xóa bypass DEFAULT_ADMINS để bắt buộc gọi auth_check lấy token.
+        // ã xóa bypass DEFAULT_ADMINS để bắt buộc gi auth_check lấy token.
 
-        _dbg("Đang gọi API auth_check...");
+        _dbg("ang gi API auth_check...");
         const check = await _saasApi('auth_check', { email });
         _dbg("Phản hồi từ auth_check:", check);
 
@@ -308,7 +309,7 @@
             window._everyoneViewEnabled = check.is_public;
             
             if (check.status === 'active' || check.role === 'admin') {
-                _dbg(`Đăng nhập thành công: Quyền ${check.role}. Nạp token vào cấu hình.`);
+                _dbg(`ăng nhập thành công: Quyn ${check.role}. Nạp token vào cấu hình.`);
                 if (check.meta_token) window.APP_CONFIG.META_TOKEN = check.meta_token;
                 if (check.ad_accounts) {
                     try { window.APP_CONFIG.ALLOWED_ACCOUNTS = JSON.parse(check.ad_accounts); } 
@@ -358,7 +359,7 @@
     }
 
     function _updateLastLogin(email) {
-        if (email === "dev@local") return;  // 🔧 Bỏ qua dev skip session
+        if (email === "dev@local") return;  // 🔧 B qua dev skip session
         const now = new Date().toLocaleString("vi-VN");
         console.log("[auth] _updateLastLogin →", email, now);
         // Note: Không update lastLogin trên saas cho viewer nữa để đơn giản
@@ -397,7 +398,7 @@
                     const reqs = users.filter(u => u.status === "request");
                     if (reqs.length > 0) {
                         _autoModalShown = true;
-                        // Đợi UI sẵn sàng rồi mới mở modal
+                        // ợi UI sẵn sàng rồi mới mở modal
                         setTimeout(async () => {
                             await window.openShareModal();
                             // Chuyển sang tab Yêu cầu
@@ -418,7 +419,7 @@
         // Wrapper bên ngoài Share button (cần overflow:visible)
         const shareBtn = document.getElementById("share_url_btn");
         if (!shareBtn) return;
-        // Đảm bảo thẻ wrapper có overflow visible
+        // ảm bảo thẻ wrapper có overflow visible
         const parent = shareBtn.parentElement;
         if (parent) parent.style.overflow = "visible";
         shareBtn.style.position = "relative";
@@ -442,11 +443,11 @@
     }
 
     // Tự động refresh mỗi 60 giây để cập nhật badge request
-    setInterval(() => { if (document.visibilityState === 'visible') _bgFetchUsers(); }, 60000);
+    // Removed setInterval _bgFetchUsers per user request
 
     window._requestAccess = async function (email, name, pic) {
         const btn = document.getElementById("_reqBtn");
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang gửi...'; }
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> ang gửi...'; }
         await _saasApi('auth_request', { email, name, picture: pic });
         // Lưu pending session — nhớ trạng thái giữa các lần load
         _savePending({ email, name, picture: pic });
@@ -485,7 +486,7 @@
                     <p style="font-size:1.1rem;color:#64748b;margin:0;">${u.email}</p>
                 </div>
                 <div onclick="window._signOut()" style="padding:1.1rem 1.6rem;cursor:pointer;display:flex;align-items:center;gap:.8rem;font-size:1.3rem;color:#ef4444;transition:background .15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background=''">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> ăng xuất
                 </div>`;
             chip.appendChild(dd);
             setTimeout(() => document.addEventListener("click", function _c(e2) { if (!chip.contains(e2.target)) { dd.remove(); document.removeEventListener("click", _c); } }), 10);
@@ -502,7 +503,7 @@
             if (overlay) {
                 overlay.style.display = "flex";
                 overlay.classList.add("active");
-                console.log("[ShareModal] Đã hiển thị overlay.");
+                console.log("[ShareModal] ã hiển thị overlay.");
             } else {
                 console.error("[ShareModal] LỖI: Không tìm thấy _share_modal_overlay sau khi build!");
                 alert("Lỗi: Không thể khởi tạo giao diện Share Modal.");
@@ -555,7 +556,7 @@
                 </div>
                 <div>
                     <h2 style="margin:0;font-size:1.6rem;font-weight:800;color:#1e293b;">Chia sẻ Báo Cáo</h2>
-                    <p style="margin:0.2rem 0 0 0;font-size:1.15rem;color:#64748b;">Quản lý quyền truy cập và link chia sẻ</p>
+                    <p style="margin:0.2rem 0 0 0;font-size:1.15rem;color:#64748b;">Quản lý quyn truy cập và link chia sẻ</p>
                 </div>
             </div>
             <button onclick="document.getElementById('_share_modal_overlay').style.display='none'" style="width:3.2rem;height:3.2rem;border-radius:50%;border:none;background:#f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;color:#64748b;font-size:1.4rem;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
@@ -600,8 +601,8 @@
           <div id="_ev_row" style="padding:1.2rem 2.4rem;background:#fffbeb;border-bottom:1.5px solid #fde68a;display:flex;align-items:center;gap:1.2rem;flex-shrink:0;position:relative;transition:opacity .2s,background .25s;">
             <i class="fa-solid fa-globe" style="color:#ffa900;font-size:1.4rem;"></i>
             <div style="flex:1;">
-              <p style="font-size:1.25rem;font-weight:700;color:#1e293b;margin:0;">Chia sẻ link cho tất cả mọi người</p>
-              <p style="font-size:1.1rem;color:#92400e;margin:0;" id="_ev_desc">${evOn ? '🔓 Bất kỳ ai có link đều có thể xem (không cần đăng nhập)' : '🔒 Chỉ tài khoản được cấp quyền mới xem được'}</p>
+              <p style="font-size:1.25rem;font-weight:700;color:#1e293b;margin:0;">Chia sẻ link cho tất cả mi ngưi</p>
+              <p style="font-size:1.1rem;color:#92400e;margin:0;" id="_ev_desc">${evOn ? '🔓 Bất kỳ ai có link đu có thể xem (không cần đăng nhập)' : '🔒 Chỉ tài khoản được cấp quyn mới xem được'}</p>
             </div>
             <label class="_ev_toggle" title="Bật/tắt chia sẻ công khai">
               <input type="checkbox" id="_ev_chk" ${evOn ? 'checked' : ''} onchange="window._toggleEveryoneView(this.checked)">
@@ -650,7 +651,7 @@
                         <span style="width:2.8rem;height:2.8rem;border-radius:.6rem;background:linear-gradient(135deg,#ffa900,#d88200);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">&#128081;</span>
                         <div>
                           <p style="font-size:1.25rem;font-weight:700;color:#ffa900;margin:0;">Admin</p>
-                          <p style="font-size:1.05rem;color:#94a3b8;margin:0;">Quản lý toàn quyền</p>
+                          <p style="font-size:1.05rem;color:#94a3b8;margin:0;">Quản lý toàn quyn</p>
                         </div>
                       </div>
                     </div>
@@ -694,17 +695,17 @@
             window._everyoneViewEnabled = enabled;
 
             if (desc) desc.innerHTML = enabled
-                ? '🔓 Bất kỳ ai có link đều có thể xem (không cần đăng nhập)'
-                : '🔒 Chỉ tài khoản được cấp quyền mới xem được';
+                ? '🔓 Bất kỳ ai có link đu có thể xem (không cần đăng nhập)'
+                : '🔒 Chỉ tài khoản được cấp quyn mới xem được';
 
             if (row) row.style.background = enabled ? "#fff7e0" : "#fffbeb";
 
             if (typeof showToast === "function")
-                showToast(enabled ? '🔓 Đã bật chia sẻ link công khai' : '🔒 Đã tắt chia sẻ link công khai');
+                showToast(enabled ? '🔓 ã bật chia sẻ link công khai' : '🔒 ã tắt chia sẻ link công khai');
 
         } catch (e) {
             if (chk) chk.checked = !enabled;
-            if (typeof showToast === "function") showToast('❌ Lỗi lưu cài đặt: ' + e.message);
+            if (typeof showToast === "function") showToast(' Lỗi lưu cài đặt: ' + e.message);
         } finally {
             if (chk) chk.disabled = false;
             if (row) {
@@ -729,14 +730,14 @@
 
     window._copyLink = function () {
         navigator.clipboard.writeText(document.getElementById("_slink")?.value || location.href);
-        if (typeof showToast === "function") showToast("✅ Đã copy link!");
+        if (typeof showToast === "function") showToast("✅ ã copy link!");
     };
 
     async function _reloadUsers() {
         const u = window._currentUser;
         if (!u || u.role !== 'admin') return;
         
-        // Hiệu ứng mờ khi đang tải lại
+        // Hiệu ứng m khi đang tải lại
         const ul = document.getElementById("_ulist");
         const rl = document.getElementById("_rlist");
         if (ul) ul.style.opacity = "0.5";
@@ -797,7 +798,7 @@
             : `<div style="width:3.4rem;height:3.4rem;border-radius:50%;background:linear-gradient(135deg,#ffa900,#d88200);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:#fff;font-weight:800;font-size:1.3rem;">${initials}</span></div>`;
         
         const loginInfo = isSelf
-            ? `<span style="font-size:1rem;color:#10b981;white-space:nowrap;"><i class="fa-solid fa-circle" style="font-size:.7rem;"></i> Đang trực tuyến</span>`
+            ? `<span style="font-size:1rem;color:#10b981;white-space:nowrap;"><i class="fa-solid fa-circle" style="font-size:.7rem;"></i> ang trực tuyến</span>`
             : (u.lastLogin
                 ? `<span style="font-size:1rem;color:#94a3b8;white-space:nowrap;"><i class="fa-solid fa-clock" style="font-size:.9rem;"></i> ${u.lastLogin}</span>`
                 : `<span style="font-size:1rem;color:#cbd5e1;">Chưa đăng nhập</span>`);
@@ -813,7 +814,7 @@
           <span style="background:${rb};color:${rc};padding:.25rem .8rem;border-radius:3rem;font-size:1.05rem;font-weight:700;flex-shrink:0;">${u.role}</span>
           <span style="background:${sb};color:${sc};padding:.25rem .8rem;border-radius:3rem;font-size:1.05rem;font-weight:600;flex-shrink:0;">${u.status === "active" ? "Active" : "Rejected"}</span>
           ${isAdmin ? `<div style="display:flex;gap:.3rem;">
-            ${!isSelf ? `<button onclick="window._toggleRole('${u.email}','${u.role}')" title="Đổi role"
+            ${!isSelf ? `<button onclick="window._toggleRole('${u.email}','${u.role}')" title="ổi role"
               style="width:3rem;height:3rem;border-radius:.6rem;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;color:#64748b;font-size:1.1rem;"
               onmouseover="this.style.borderColor='#ffa900';this.style.color='#ffa900'"
               onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">
@@ -904,7 +905,7 @@
             const cancelBtn = document.getElementById("_cm_cancel");
             if (okBtn) {
                 okBtn.disabled = true;
-                okBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Đang xử lý...`;
+                okBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ang xử lý...`;
                 okBtn.style.opacity = ".8";
             }
             if (cancelBtn) { cancelBtn.disabled = true; cancelBtn.style.opacity = ".5"; }
@@ -919,13 +920,13 @@
         if (!email) return;
         // Loading state trên nút Thêm
         const addBtn = document.querySelector("button[onclick='window._addUser()']");
-        if (addBtn) _btnLoading(addBtn, true, "Đang thêm...");
+        if (addBtn) _btnLoading(addBtn, true, "ang thêm...");
         try {
             await _saasApi('auth_update_user', { admin_email: window._currentUser?.email, target_email: email, action_type: 'add', role });
             document.getElementById("_nadd").value = "";
             window._selectRole("viewer");
             await _reloadUsers();
-            if (typeof showToast === "function") showToast(`✅ Đã thêm ${email}`);
+            if (typeof showToast === "function") showToast(`✅ ã thêm ${email}`);
         } finally {
             if (addBtn) _btnLoading(addBtn, false);
         }
@@ -936,12 +937,12 @@
         const newRole = cur === "admin" ? "viewer" : "admin";
         const icon = newRole === "admin" ? "👑" : "👤";
         _confirmModal(
-            `${icon} Đổi role thành <b>${newRole}</b>?`,
+            `${icon} ổi role thành <b>${newRole}</b>?`,
             `<span style="color:#64748b;font-size:1.25rem;">Tài khoản <b style="color:#1e293b;">${email}</b> sẽ được chuyển sang role <b style="color:${newRole === "admin" ? "#ffa900" : "#64748b"}">${newRole}</b>.</span>`,
             async () => {
                 await _saasApi('auth_update_user', { admin_email: window._currentUser?.email, target_email: email, action_type: 'role', role: newRole });
                 await _reloadUsers();
-                if (typeof showToast === "function") showToast(`✅ Đã đổi ${email} → ${newRole}`);
+                if (typeof showToast === "function") showToast(`✅ ã đổi ${email} → ${newRole}`);
             }
         );
     };
@@ -951,13 +952,13 @@
             `<span style="color:#ef4444;"><i class="fa-solid fa-trash"></i> Xóa thành viên?</span>`,
             `<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:1rem;padding:1.2rem 1.4rem;margin-bottom:.4rem;">
               <p style="font-size:1.25rem;color:#1e293b;margin:0;font-weight:600;">${email}</p>
-              <p style="font-size:1.15rem;color:#94a3b8;margin:.3rem 0 0;">Tài khoản này sẽ bị xóa khỏi danh sách truy cập.</p>
+              <p style="font-size:1.15rem;color:#94a3b8;margin:.3rem 0 0;">Tài khoản này sẽ bị xóa khi danh sách truy cập.</p>
             </div>`,
             async () => {
-                _btnLoading(btnEl, true, "Đang xóa...");
+                _btnLoading(btnEl, true, "ang xóa...");
                 await _saasApi('auth_update_user', { admin_email: window._currentUser?.email, target_email: email, action_type: 'remove' });
                 await _reloadUsers();
-                if (typeof showToast === "function") showToast(`🗑️ Đã xóa ${email}`);
+                if (typeof showToast === "function") showToast(`🗑 ã xóa ${email}`);
             },
             { danger: true }
         );
@@ -969,17 +970,17 @@
         btns?.forEach(b => { b.disabled = true; b.style.opacity = ".5"; b.style.cursor = "not-allowed"; });
         const origHTML = btnEl?.innerHTML;
         if (btnEl) {
-            btnEl.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Đang duyệt...`;
+            btnEl.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ang duyệt...`;
             btnEl.style.minWidth = btnEl.offsetWidth + 'px';
         }
         try {
             await _saasApi('auth_update_user', { admin_email: window._currentUser?.email, target_email: email, action_type: 'approve' });
             await _reloadUsers();
-            if (typeof showToast === "function") showToast(`✅ Đã duyệt ${email}`);
+            if (typeof showToast === "function") showToast(`✅ ã duyệt ${email}`);
         } catch (e) {
             btns?.forEach(b => { b.disabled = false; b.style.opacity = "1"; b.style.cursor = "pointer"; });
             if (btnEl && origHTML) btnEl.innerHTML = origHTML;
-            if (typeof showToast === "function") showToast(`❌ Lỗi: ${e.message}`);
+            if (typeof showToast === "function") showToast(` Lỗi: ${e.message}`);
         }
     };
 
@@ -989,17 +990,17 @@
         btns?.forEach(b => { b.disabled = true; b.style.opacity = ".5"; b.style.cursor = "not-allowed"; });
         const origHTML = btnEl?.innerHTML;
         if (btnEl) {
-            btnEl.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Đang từ chối...`;
+            btnEl.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ang từ chối...`;
             btnEl.style.minWidth = btnEl.offsetWidth + 'px';
         }
         try {
             await _saasApi('auth_update_user', { admin_email: window._currentUser?.email, target_email: email, action_type: 'reject' });
             await _reloadUsers();
-            if (typeof showToast === "function") showToast(`🗑️ Đã từ chối ${email}`);
+            if (typeof showToast === "function") showToast(`🗑 ã từ chối ${email}`);
         } catch (e) {
             btns?.forEach(b => { b.disabled = false; b.style.opacity = "1"; b.style.cursor = "pointer"; });
             if (btnEl && origHTML) btnEl.innerHTML = origHTML;
-            if (typeof showToast === "function") showToast(`❌ Lỗi: ${e.message}`);
+            if (typeof showToast === "function") showToast(` Lỗi: ${e.message}`);
         }
     };
 
@@ -1013,7 +1014,7 @@
             const target = action === "approve"
                 ? row.querySelector("button:first-of-type")
                 : row.querySelector("button:last-of-type");
-            if (target) target.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${action === "approve" ? "Đang duyệt..." : "Đang xóa..."}`;
+            if (target) target.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${action === "approve" ? "ang duyệt..." : "ang xóa..."}`;
         });
     }
 
@@ -1042,7 +1043,7 @@
 
         if (!CLIENT_ID && !window.APP_CONFIG?.SAAS_API_URL) { _authResolve(); return; }
 
-        // Pre-check: Xác minh tenant có tồn tại không trước khi làm bất kỳ điều gì
+        // Pre-check: Xác minh tenant có tồn tại không trước khi làm bất kỳ điu gì
         const slug = _getTenantSlug();
         if (slug) {
             try {
@@ -1068,7 +1069,7 @@
                     }
 
                     if (window._everyoneViewEnabled && !window._currentUser) {
-                        console.log("[auth] 🌐 everyone_view = ON → bypass auth");
+                        console.log("[auth]  everyone_view = ON → bypass auth");
                         _applyEveryoneView();
                     }
                 }
@@ -1081,19 +1082,22 @@
         if (cached?.status === "active") {
             window._currentUser = cached;
             
-            // Phải gọi auth_check để lấy lại token vì ban đầu get_tenant đã giấu nó đi
+            // Phải gi auth_check để lấy lại token vì ban đầu get_tenant đã giấu nó đi
             try {
                 const check = await _saasApi('auth_check', { email: cached.email });
                 if (check.ok && (check.status === 'active' || check.role === 'admin')) {
                     window._currentUser.role = check.role;
                     window._currentUser.status = check.status;
                     if (check.meta_token) window.APP_CONFIG.META_TOKEN = check.meta_token;
+                    if (check.gemini_api_key && window.SAAS_ROUTER && window.SAAS_ROUTER.tenant) {
+                        window.SAAS_ROUTER.tenant.gemini_api_key = check.gemini_api_key;
+                    }
                     if (check.ad_accounts) {
                         try { window.APP_CONFIG.ALLOWED_ACCOUNTS = JSON.parse(check.ad_accounts); } 
                         catch(e) { window.APP_CONFIG.ALLOWED_ACCOUNTS = check.ad_accounts; }
                     }
                 } else {
-                    // Mất quyền truy cập -> xóa session và yêu cầu đăng nhập lại
+                    // Mất quyn truy cập -> xóa session và yêu cầu đăng nhập lại
                     localStorage.removeItem("_dom_auth_session");
                     window._currentUser = null;
                     _overlay(); _showLoading();
@@ -1162,3 +1166,4 @@
     document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", setupShareBtn) : setupShareBtn();
 
 })();
+
