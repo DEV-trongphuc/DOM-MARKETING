@@ -691,8 +691,20 @@ try {
             } else if ($action_type === 'role') {
                 $pdo->prepare("UPDATE saas_tenant_viewers SET role = ? WHERE tenant_slug = ? AND email = ?")->execute([$role, $slug, $target_email]);
             } else if ($action_type === 'add') {
-                // Direct add from admin
-                $pdo->prepare("INSERT INTO saas_tenant_viewers (tenant_slug, email, role, status, request_at) VALUES (?, ?, ?, 'active', NOW()) ON DUPLICATE KEY UPDATE status='active', role=?")->execute([$slug, $target_email, $role, $role]);
+                // Check if user already exists
+                $chk = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ?");
+                $chk->execute([$slug, $target_email]);
+                $existing = $chk->fetch();
+
+                if ($existing) {
+                    if ($existing['status'] === 'active' || $existing['status'] === 'request') {
+                        _json(["ok" => false, "error" => "Thành viên này đã có trong danh sách."], 400);
+                    } else {
+                        $pdo->prepare("UPDATE saas_tenant_viewers SET status='active', role=? WHERE tenant_slug=? AND email=?")->execute([$role, $slug, $target_email]);
+                    }
+                } else {
+                    $pdo->prepare("INSERT INTO saas_tenant_viewers (tenant_slug, email, role, status, request_at) VALUES (?, ?, ?, 'active', NOW())")->execute([$slug, $target_email, $role]);
+                }
             }
             _json(["ok" => true]);
             break;
