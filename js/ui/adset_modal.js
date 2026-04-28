@@ -130,7 +130,6 @@ async function handleAdsetInsightClick(btn) {
   try {
     await showAdsetDetail(adsetId);
   } catch (err) {
-    console.error("❌ Lỗi khi load chi tiết adset:", err);
   } finally {
     if (loadingEl) loadingEl.classList.remove("active");
   }
@@ -198,10 +197,8 @@ async function showAdsetDetail(adset_id) {
             results[name] = parsed.data || [];
           }
         } catch (e) {
-          console.warn(`⚠️ Failed to parse batch response for ${name}`, e);
         }
       } else {
-        console.warn(`⚠️ Batch request for ${name} failed.`, item);
       }
     });
 
@@ -332,7 +329,6 @@ async function showAdsetDetail(adset_id) {
     window.processedByRegion = processedByRegion;
     window.processedByPlatform = processedByPlatform;
   } catch (err) {
-    console.error("Lỗi khi fetch adset detail:", err);
   } finally {
     // 🦴 Skeleton end
     toggleSkeletons("#dom_detail", false);

@@ -24,7 +24,6 @@ try {
   const savedMode = localStorage.getItem("goal_chart_mode");
   if (savedMode) GOAL_CHART_MODE = savedMode;
 } catch (e) {
-  console.warn("Lỗi load settings:", e);
 }
 
 document.addEventListener("DOMContentLoaded", () => {

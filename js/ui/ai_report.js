@@ -259,7 +259,6 @@ YÊU CẦU PHÂN TÍCH SO SÁNH:
       }
       content.innerHTML = errorHtml;
     }
-    console.error("❌ AI Compare error:", err);
   }
 }
 
@@ -532,7 +531,6 @@ async function syncAiHistoryFromApi() {
       if (panel && panel.style.display !== "none") renderAiHistory();
     }
   } catch (err) {
-    console.warn("AI History Sync failed:", err);
   }
 }
 
@@ -901,7 +899,6 @@ YÊU CẦU PHÂN TÍCH (đầy đủ, chi tiết, có số liệu cụ thể)
       // Request bị huỷ chủ động (user đóng modal) — im lặng
       return;
     }
-    console.error("❌ AI Summary error:", err);
     if (content) {
       let errorHtml = `<p style="color:#e05c1a">❌ Lỗi: ${err.message}</p>`;
       
@@ -1066,7 +1063,6 @@ window.saveQuickApiKey = async function(inputId) {
             alert("Lỗi: " + (data.error || "Không thể cập nhật cấu hình. Có thể bạn không phải Admin."));
         }
     } catch (e) {
-        console.error(e);
         alert("Lỗi kết nối khi lưu API Key");
     } finally {
         btn.innerHTML = originalText;

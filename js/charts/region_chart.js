@@ -39,7 +39,6 @@ function renderRegionChart(data = []) {
     try {
       window.chart_region_total.destroy();
     } catch (err) {
-      console.warn("⚠️ Chart destroy error:", err);
     }
   }
   window.chart_region_total = null;
@@ -781,7 +780,6 @@ async function fetchAdAccountInfo() {
 
     return data;
   } catch (error) {
-    console.error("❌ Error fetching Ad Account info:", error);
     return null;
   }
 }

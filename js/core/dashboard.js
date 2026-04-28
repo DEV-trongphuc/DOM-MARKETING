@@ -1,18 +1,13 @@
 async function loadCampaignList() {
-  console.time("[PERF] loadCampaignList overall");
   try {
-    console.time("[PERF] fetchCampaignInsights & fetchAdsets");
     const [campaignsInsights, adsets] = await Promise.all([
       fetchCampaignInsights(),
       fetchAdsets(),
     ]);
-    console.timeEnd("[PERF] fetchCampaignInsights & fetchAdsets");
     if (!adsets || !adsets.length) throw new Error("No adsets found.");
 
     const adsetIds = adsets.map((as) => as.adset_id).filter(Boolean);
-    console.time("[PERF] fetchAdsAndInsights");
     const ads = await fetchAdsAndInsights(adsetIds);
-    console.timeEnd("[PERF] fetchAdsAndInsights");
 
     const adsetMap = new Map(
       adsets.map((as) => {
@@ -28,9 +23,7 @@ async function loadCampaignList() {
     const campaigns = groupByCampaign(adsets, campaignsInsights);
 
     window._ALL_CAMPAIGNS = campaigns;
-    console.time("[PERF] renderCampaignView");
     renderCampaignView(campaigns);
-    console.timeEnd("[PERF] renderCampaignView");
 
     const allAds = campaigns.flatMap((c) =>
       c.adsets.flatMap((as) =>
@@ -65,9 +58,7 @@ async function loadCampaignList() {
     }, 2000);
 
   } catch (err) {
-    console.error("Error in loadCampaignList:", err);
   } finally {
-    console.timeEnd("[PERF] loadCampaignList overall");
   }
 }
 
@@ -103,24 +94,17 @@ async function loadDashboardData() {
   resetYearDropdownToCurrentYear();
   resetFilterDropdownTo("spend");
 
-  console.time("[PERF] ⭐ Total Dashboard Data Load");
-
   await Promise.all([
     (async () => {
-      console.time("[PERF] loadAllDashboardCharts");
       await loadAllDashboardCharts();
-      console.timeEnd("[PERF] loadAllDashboardCharts");
     })(),
     (async () => {
-      console.time("[PERF] initializeYearData");
       await initializeYearData();
-      console.timeEnd("[PERF] initializeYearData");
     })(),
     loadCampaignList(),
   ]).finally(() => {
     if (loading) loading.classList.remove("active");
     toggleSkeletons(".dom_dashboard", false);
-    console.timeEnd("[PERF] ⭐ Total Dashboard Data Load");
   });
 }
 

@@ -393,7 +393,6 @@ async function loadExtraPlatformPositions() {
         }
         renderExtraPlatformPositions(data.data || []);
     } catch (err) {
-        console.error("Error fetching platform positions:", err);
     }
 }
 
@@ -628,7 +627,6 @@ async function fetchSpendByDevice() {
         const data = await fetchJSON(url);
         return data.data || [];
     } catch (err) {
-        console.error("Error fetching device data:", err);
         return [];
     }
 }

@@ -230,7 +230,6 @@ async function loadAdLibraryPreviews() {
         renderAdLibraryFallback(contentWrap, thumb, postUrl);
       }
     } catch (err) {
-      console.warn("Ad Library preview load failed for ad:", adId, err);
       const contentWrap = wrap.querySelector('.ad_lib_iframe_content');
       if (contentWrap) renderAdLibraryFallback(contentWrap, thumb, postUrl);
     }

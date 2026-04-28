@@ -34,14 +34,12 @@ async function fetchAdAccountData(year) {
     DATA_YEAR = insightsData;
     return insightsData;
   } catch (error) {
-    console.error(`Error fetching Ad Account data for ${year}:`, error);
     return [];
   }
 }
 
 function processMonthlyData(data) {
   if (!Array.isArray(data)) {
-    console.error("Dữ liệu không hợp lệ:", data);
     return [];
   }
 

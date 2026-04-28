@@ -79,6 +79,5 @@ async function fetchActiveAccountAvatar(accountId, token) {
         
         updateSelectedAccountUI(null, null, finalAvatarUrl);
     } catch (err) {
-        console.warn("Could not fetch active account avatar:", err);
     }
 }

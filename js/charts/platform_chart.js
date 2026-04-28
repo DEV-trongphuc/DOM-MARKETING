@@ -35,7 +35,6 @@ async function fetchSpendByPlatform(campaignIds = []) {
     const data = await fetchJSON(url);
     return data.data || [];
   } catch (err) {
-    console.error("❌ Error fetching spend by platform:", err);
     return [];
   }
 }
@@ -59,7 +58,6 @@ async function fetchSpendByAgeGender(campaignIds = []) {
 
     return results;
   } catch (err) {
-    console.error("❌ Error fetching spend by age_gender:", err);
     return [];
   }
 }
@@ -82,7 +80,6 @@ async function fetchSpendByRegion(campaignIds = []) {
 
     return results;
   } catch (err) {
-    console.error("❌ Error fetching spend by region:", err);
     return [];
   }
 }
@@ -106,7 +103,6 @@ async function fetchDailySpendByCampaignIDs(campaignIds = []) {
     if (loading) loading.classList.remove("active");
     return results;
   } catch (err) {
-    console.error("❌ Error fetching daily spend by campaign IDs", err);
     return [];
   }
 }

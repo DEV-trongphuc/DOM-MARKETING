@@ -358,7 +358,6 @@ async function saveBrandSettings() {
   // 2. Lưu lên sheet ngầm (non-blocking)
   if (typeof saveBrandSettingsSync === "function") {
     saveBrandSettingsSync(brands).catch(err => {
-      console.warn("Settings sync failed:", err);
       showToast("⚠️ Không thể đồng bộ cấu hình, vui lòng thử lại");
     });
   }
@@ -749,7 +748,6 @@ async function loadAccountActivities(reset = false) {
     if (wrap) wrap.style.display = _activityHasMore ? "block" : "none";
 
   } catch (err) {
-    console.error("❌ Failed to load activities:", err);
     const container = document.getElementById("activity_log_list");
     if (!container) return;
 

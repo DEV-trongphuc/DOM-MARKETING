@@ -226,7 +226,6 @@ window.refreshPerformanceComparison = async function () {
       perfCustomCompareDates
     );
   } catch (err) {
-    console.error("❌ Lỗi load so sánh:", err);
   } finally {
     if (loading) loading.style.display = "none";
   }

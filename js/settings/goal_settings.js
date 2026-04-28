@@ -119,7 +119,6 @@ window.saveGoalSettings = async function () {
   // 2. Lưu lên sheet ngầm (non-blocking)
   if (typeof saveGoalSettingsSync === "function") {
     saveGoalSettingsSync(GOAL_KEYWORDS, GOAL_CHART_MODE).catch(err => {
-      console.warn("Settings sync failed:", err);
       showToast("⚠️ Không thể đồng bộ cấu hình, vui lòng thử lại");
     });
   }

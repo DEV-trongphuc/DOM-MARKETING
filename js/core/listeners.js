@@ -5,7 +5,6 @@
 function addListeners() {
   const wrap = document.querySelector(".view_campaign_box");
   if (!wrap) {
-    console.warn("Không tìm thấy container .view_campaign_box để gán listener.");
     return;
   }
 
