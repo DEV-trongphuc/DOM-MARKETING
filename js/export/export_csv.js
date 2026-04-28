@@ -94,17 +94,27 @@ function updateBrandDropdownUI() {
     </li>`;
   }).join("");
 
-  const selectedBrand = brands.find((b) => (b.filter || "").toLowerCase() === current) || brands[brands.length - 1];
-  if (selectedBrand) {
-    const parent = dropdownUl.closest(".quick_filter_detail");
-    if (parent) {
+  const selectedBrand = brands.find((b) => (b.filter || "").toLowerCase() === current);
+  const parent = dropdownUl.closest(".quick_filter_detail");
+  if (parent) {
+    const parentImg = parent.querySelector("img");
+    const parentText = parent.querySelector(".dom_selected");
+    
+    if (selectedBrand) {
       const imgSrc = (selectedBrand.img && selectedBrand.img.trim() !== '') ? selectedBrand.img.trim() : "https://domation.net/imgs/ICON.png";
       if (parentImg) {
         parentImg.style.display = "block";
         parentImg.src = imgSrc;
         parentImg.onerror = function() { this.src = 'https://domation.net/imgs/ICON.png'; };
       }
-      if (parentText) parentText.textContent   = selectedBrand.name;
+      if (parentText) parentText.textContent = selectedBrand.name;
+    } else {
+      // Default / Reset state ("Tất cả")
+      if (parentImg) {
+        parentImg.style.display = "block";
+        parentImg.src = "https://domation.net/imgs/ICON.png";
+      }
+      if (parentText) parentText.textContent = "Tất cả";
     }
   }
 }

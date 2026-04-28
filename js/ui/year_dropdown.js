@@ -148,9 +148,12 @@ function resetUIFilter() {
     const imgEl = quickFilter.querySelector("img");
     const ul = quickFilter.querySelector(".dom_select_show");
 
-    // Đổi ảnh & text về Ampersand
-    if (imgEl) imgEl.src = "./assets/brand_logo/ampersand_img.jpg";
-    if (selectedEl) selectedEl.textContent = "Ampersand";
+    // Đổi ảnh & text về Tất cả
+    if (imgEl) {
+      imgEl.style.display = "block";
+      imgEl.src = "https://domation.net/imgs/ICON.png";
+    }
+    if (selectedEl) selectedEl.textContent = "Tất cả";
 
     // Xóa trạng thái active trên list item
     if (ul) {

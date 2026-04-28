@@ -32,16 +32,24 @@ function updatePerfBrandDropdownUI() {
     </li>`;
   }).join("");
 
-  const selectedBrand = brands.find((b) => (b.filter || "").toLowerCase() === current) || brands[brands.length - 1];
+  const selectedBrand = brands.find((b) => (b.filter || "").toLowerCase() === current);
+  const parentText = document.getElementById("perf_selected_brand");
+  const parentImg  = document.getElementById("perf_selected_brand_img");
+  
   if (selectedBrand) {
-    const parentText = document.getElementById("perf_selected_brand");
-    const parentImg  = document.getElementById("perf_selected_brand_img");
     if (parentText) parentText.textContent = selectedBrand.name;
     if (parentImg) {
       const imgSrc = (selectedBrand.img && selectedBrand.img.trim() !== '') ? selectedBrand.img.trim() : "https://domation.net/imgs/ICON.png";
       parentImg.style.display = "block";
       parentImg.src = imgSrc;
       parentImg.onerror = function() { this.src = 'https://domation.net/imgs/ICON.png'; };
+    }
+  } else {
+    // Default / Reset state ("Tất cả")
+    if (parentText) parentText.textContent = "Tất cả";
+    if (parentImg) {
+      parentImg.style.display = "block";
+      parentImg.src = "https://domation.net/imgs/ICON.png";
     }
   }
 }
