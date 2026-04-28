@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>404 — Workspace Not Found · Domation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            margin: 0; 
+            background: #f8fafc; 
+            font-family: 'Roboto', sans-serif; 
+            display: flex; 
+            height: 100vh; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .box { 
+            text-align: center; 
+            background: #fff; 
+            padding: 4rem 3rem; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); 
+            max-width: 450px; 
+            border: 1px solid #f1f5f9; 
+        }
+        .icon-wrap { 
+            width: 80px; 
+            height: 80px; 
+            background: #fef2f2; 
+            border-radius: 24px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin: 0 auto 1.5rem; 
+        }
+        h2 { 
+            color: #0f172a; 
+            margin: 0 0 1rem; 
+            font-weight: 800; 
+            font-size: 2rem; 
+            letter-spacing: -0.02em; 
+        }
+        p { 
+            color: #64748b; 
+            margin: 0 0 2.5rem; 
+            font-size: 1.1rem; 
+            line-height: 1.6; 
+        }
+        .btns { 
+            display: flex; 
+            gap: 1rem; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+        }
+        .btn { 
+            display: inline-block; 
+            padding: 1rem 1.8rem; 
+            text-decoration: none; 
+            border-radius: 12px; 
+            font-weight: 700; 
+            font-size: 1.05rem;
+            transition: all 0.2s; 
+        }
+        .btn-home { 
+            background: #f1f5f9; 
+            color: #334155; 
+            border: 2px solid #e2e8f0; 
+        }
+        .btn-home:hover { 
+            background: #e2e8f0; 
+        }
+        .btn-new { 
+            background: #f59e0b; 
+            color: #fff; 
+            box-shadow: 0 4px 10px rgba(245,158,11,0.2); 
+            border: 2px solid transparent;
+        }
+        .btn-new:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 12px rgba(245,158,11,0.3); 
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="icon-wrap"><i class="fa-solid fa-folder-open" style="font-size:2.5rem; color:#ef4444;"></i></div>
+        <h2>Workspace Not Found</h2>
+        <p>Workspace này không tồn tại hoặc đã bị xóa.<br>Vui lòng kiểm tra lại đường link.</p>
+        <div class="btns">
+            <a href="https://meta.domation.net" class="btn btn-home">Quay Về Trang Chủ</a>
+            <a href="/register" class="btn btn-new">Tạo Workspace Mới</a>
+        </div>
+    </div>
+</body>
+</html>

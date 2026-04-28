@@ -38,19 +38,7 @@ window.SAAS_ROUTER = {
             const data = await res.json();
 
             if (!data.ok) {
-                document.title = `404 — Workspace Not Found · Domation`;
-                document.body.innerHTML = `
-                    <div style="display:flex; height:100vh; align-items:center; justify-content:center; background:#f8fafc; font-family:'Roboto', sans-serif;">
-                        <div style="text-align:center; background:#fff; padding:4rem 3rem; border-radius:24px; box-shadow:0 10px 40px -10px rgba(0,0,0,0.1); max-width:450px; border:1px solid #f1f5f9;">
-                            <div style="width:80px; height:80px; background:#fef2f2; border-radius:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem;">
-                                <i class="fa-solid fa-folder-open" style="font-size:2.5rem; color:#ef4444;"></i>
-                            </div>
-                            <h2 style="color:#0f172a; margin:0 0 1rem; font-weight:800; font-size:2rem; letter-spacing:-0.02em;">Workspace Not Found</h2>
-                            <p style="color:#64748b; margin:0 0 2rem; font-size:1.1rem; line-height:1.5;">Workspace <b style="color:#334155;">${hash}</b> không tồn tại hoặc đã bị xóa. Vui lòng kiểm tra lại đường link.</p>
-                            <a href="/register" style="display:inline-block; padding:1rem 2rem; background:#f59e0b; color:#fff; text-decoration:none; border-radius:12px; font-weight:700; box-shadow:0 4px 10px rgba(245,158,11,0.2);">Tạo Workspace Mới</a>
-                        </div>
-                    </div>
-                `;
+                window.location.href = '/404.html';
                 return false;
             }
 
@@ -367,6 +355,7 @@ window.SAAS_ROUTER = {
                                 <button onclick="SAAS_ROUTER.updateTenantStatus('${t.slug}', 'active', 30)" title="Cộng 1 tháng" style="padding:0.5rem 0.8rem; background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); border-radius:6px; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='#fff'"><i class="fa-solid fa-plus"></i> 1M</button>
                                 <button onclick="SAAS_ROUTER.updateTenantStatus('${t.slug}', 'active', 365)" title="Cộng 1 năm" style="padding:0.5rem 0.8rem; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.3); border-radius:6px; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#10b981'; this.style.color='#fff'"><i class="fa-solid fa-plus"></i> 1Y</button>
                                 <button onclick="SAAS_ROUTER.updateTenantStatus('${t.slug}', '${t.status==='locked'?'active':'locked'}', 0)" title="Khóa/Mở Khóa" style="padding:0.5rem 0.8rem; background:${t.status==='locked'?'rgba(255,255,255,0.1)':'rgba(239,68,68,0.2)'}; color:${t.status==='locked'?'#cbd5e1':'#f87171'}; border:1px solid ${t.status==='locked'?'rgba(255,255,255,0.2)':'rgba(239,68,68,0.3)'}; border-radius:6px; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='${t.status==='locked'?'rgba(255,255,255,0.2)':'#ef4444'}'; this.style.color='#fff'"><i class="fa-solid fa-${t.status==='locked'?'unlock':'lock'}"></i></button>
+                                <button onclick="SAAS_ROUTER.deleteTenant('${t.slug}')" title="Xóa Workspace" style="padding:0.5rem 0.8rem; background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.3); border-radius:6px; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='#fff'"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -456,6 +445,30 @@ window.SAAS_ROUTER = {
                 this.renderAdminDashboard();
             } else {
                 alert("Error: " + data.error);
+            }
+        } catch(e) { console.error(e); }
+    },
+
+    deleteTenant: async function(slug) {
+        if (!confirm(`⚠ CẢNH BÁO NGUY HIỂM ⚠\n\nBạn có chắc chắn muốn XÓA VĨNH VIỄN workspace [${slug}] và TẤT CẢ dữ liệu liên quan không?\nHành động này KHÔNG THỂ hoàn tác!`)) return;
+        try {
+            const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + this.adminToken
+                },
+                body: JSON.stringify({
+                    action: 'admin_delete_tenant',
+                    slug: slug
+                })
+            });
+            const data = await res.json();
+            if (data.ok) {
+                alert("Đã xóa workspace thành công!");
+                this.renderAdminDashboard();
+            } else {
+                alert("Lỗi xóa: " + data.error);
             }
         } catch(e) { console.error(e); }
     },

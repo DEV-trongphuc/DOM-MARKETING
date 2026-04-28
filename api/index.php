@@ -895,6 +895,43 @@ try {
             }
             break;
 
+        case 'admin_delete_tenant':
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
+            $slug = $body['slug'] ?? '';
+            $admin_email = $body['admin_email'] ?? '';
+            
+            $is_super_admin = false;
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if ($authHeader) {
+                $token = str_replace('Bearer ', '', $authHeader);
+                if (verify_admin_token($token)) {
+                    $is_super_admin = true;
+                }
+            }
+
+            if (!$is_super_admin && !_verify_admin_for_slug($pdo, $slug, $admin_email)) {
+                _json(["ok" => false, "error" => "Unauthorized"], 403);
+            }
+
+            if (!$slug) {
+                _json(["ok" => false, "error" => "Missing slug"], 400);
+            }
+
+            try {
+                $pdo->beginTransaction();
+                $pdo->prepare("DELETE FROM saas_tenant_viewers WHERE tenant_slug = ?")->execute([$slug]);
+                $pdo->prepare("DELETE FROM saas_renewal_requests WHERE tenant_slug = ?")->execute([$slug]);
+                $pdo->prepare("DELETE FROM saas_ai_reports WHERE tenant_slug = ?")->execute([$slug]);
+                $pdo->prepare("DELETE FROM saas_tenants WHERE slug = ?")->execute([$slug]);
+                $pdo->commit();
+                _json(["ok" => true, "message" => "Tenant deleted successfully"]);
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                _json(["ok" => false, "error" => "Delete failed"], 500);
+            }
+            break;
+
         case 'admin_update_tenant_status':
             $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
             $token = str_replace('Bearer ', '', $authHeader);

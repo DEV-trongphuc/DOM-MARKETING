@@ -31,6 +31,10 @@ async function bootstrapSaaS() {
   const routerReady = await SAAS_ROUTER.init();
   if (!routerReady) return;
 
+  if (typeof window.initAuth === 'function') {
+      window.initAuth();
+  }
+
   _dbg('Chờ xác thực Google...');
   if (window._authReady instanceof Promise) await window._authReady;
   _dbg('Xác thực hoàn tất. Chuẩn bị trích xuất Token...');

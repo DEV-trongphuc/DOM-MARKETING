@@ -2074,7 +2074,12 @@
             </div>
           </div>
 
-          <div style="display: flex; justify-content: flex-end; margin-top: auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
+            <button onclick="deleteWorkspace()"
+              style="background: transparent; color:#ef4444; border: 2px solid #ef4444; padding: 1.2rem 2rem; border-radius: 8px; cursor:pointer; font-weight:700; font-size: 1.15rem; display:flex; align-items:center; gap:0.8rem; transition: all 0.2s;"
+              onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
+              <i class="fa-solid fa-trash-can"></i> Xóa Workspace
+            </button>
             <button onclick="saveWorkspaceInfo()"
               style="background: var(--mainClr); color:#fff; padding: 1.2rem 3rem; border-radius: 8px; border:none; cursor:pointer; font-weight:700; font-size: 1.35rem; display:flex; align-items:center; gap:0.8rem; transition: all 0.15s; box-shadow: 0 4px 6px rgba(59,130,246,0.2);"
               onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(59,130,246,0.3)'"
@@ -2328,6 +2333,36 @@
           window.SAAS_ROUTER.tenant.gemini_api_key = gemini_api_key;
         } else {
           alert("Lỗi: " + (data.error || "Không thể cập nhật cấu hình"));
+        }
+      } catch (e) {
+        console.error(e);
+        alert("Lỗi kết nối");
+      }
+    }
+
+    async function deleteWorkspace() {
+      if (!window.SAAS_ROUTER || !window.SAAS_ROUTER.tenant) return;
+      const slug = window.SAAS_ROUTER.tenant.slug;
+      
+      const confirmMsg = `⚠ CẢNH BÁO NGUY HIỂM ⚠\n\nBạn có chắc chắn muốn XÓA VĨNH VIỄN workspace [${slug}] và TẤT CẢ dữ liệu liên quan không?\nHành động này KHÔNG THỂ hoàn tác!`;
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'admin_delete_tenant',
+            slug: slug,
+            admin_email: window._currentUser?.email || ''
+          })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert("Đã xóa workspace thành công!");
+          window.location.href = "https://meta.domation.net";
+        } else {
+          alert("Lỗi xóa: " + (data.error || "Không thể xóa workspace"));
         }
       } catch (e) {
         console.error(e);
@@ -2724,7 +2759,6 @@
       console.log('%c⚠️  Đây là công cụ nội bộ.', warn);
       console.log('%c   Không chia sẻ token hoặc dữ liệu từ console này.', sub);
       console.log('%c───────────────────────────────────────', sub);
-      console.log('%c💡 Tip: resetLogo() → reset logo về mặc định', sub);
     })();
 
     // ── Logo URL handler ──────────────────────────────────
