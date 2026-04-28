@@ -254,9 +254,9 @@ try {
             $first_account = !empty($accounts) ? $accounts[0]['id'] : '';
             $accounts_json = json_encode($accounts);
 
-            // Mặc định luôn tạo dự án mới ở trạng thái dùng thử 3 ngày
+            // Mặc định luôn tạo dự án mới ở trạng thái dùng thử 7 ngày
             $status = 'trial';
-            $interval = '3 DAY';
+            $interval = '7 DAY';
 
             try {
                 $stmt = $pdo->prepare("INSERT INTO saas_tenants (slug, name, google_email, meta_token, ad_account_id, ad_accounts, status, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL $interval))");

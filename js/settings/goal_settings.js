@@ -14,7 +14,7 @@ function openGoalSettings() {
       <div style="padding:2.4rem; overflow-y:auto; max-height:60vh;">
         <!-- Toggle Mode -->
         <div style="margin-bottom:2.4rem; padding-bottom:1.6rem; border-bottom:1px dashed #e2e8f0;">
-           <label style="display:block; font-size:1.2rem; font-weight:700; color:#475569; margin-bottom:1rem;">Chế độ hiển thị Custom Bar</label>
+           <label style="display:block; font-size:1.2rem; font-weight:700; color:#475569; margin-bottom:1rem;">Chế độ hiển thị Custom Bar lọc theo Campaign Name</label>
            <div style="display:flex; gap:1rem;">
              <button onclick="window.setGoalChartMode('keyword')" id="mode_kw_btn" style="flex:1; padding:0.8rem; border-radius:8px; border:1.5px solid ${GOAL_CHART_MODE === 'keyword' ? '#f59e0b' : '#e2e8f0'}; background:${GOAL_CHART_MODE === 'keyword' ? '#fffaf0' : '#fff'}; color:${GOAL_CHART_MODE === 'keyword' ? '#f59e0b' : '#64748b'}; font-weight:600; cursor:pointer;">
                <i class="fa-solid fa-tags"></i> Keyword Goal
