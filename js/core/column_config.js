@@ -3,7 +3,7 @@ let ACTIVE_COLUMNS = [];
 let CUSTOM_METRICS = [];
 
 function loadColumnConfig() {
-  const saved = localStorage.getItem("dom_column_config");
+  const saved = window.domGetItem("dom_column_config");
   if (saved) {
     const config = JSON.parse(saved);
     ACTIVE_COLUMNS = (config.activeColumns || []).slice(0, 15);
@@ -17,7 +17,7 @@ function loadColumnConfig() {
 
 function saveColumnConfig() {
   const config = { activeColumns: ACTIVE_COLUMNS, customMetrics: CUSTOM_METRICS };
-  localStorage.setItem("dom_column_config", JSON.stringify(config));
+  window.domSetItem("dom_column_config", JSON.stringify(config));
   // Sync to Google Sheets (runs in background, non-blocking)
   if (typeof saveColumnConfigSync === "function") {
     saveColumnConfigSync(config).catch(() => { });

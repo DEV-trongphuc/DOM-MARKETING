@@ -1,4 +1,4 @@
-﻿// ── Goal Settings Modal Logic ────────────────────────────────
+// ── Goal Settings Modal Logic ────────────────────────────────
 function openGoalSettings() {
   const modal = document.getElementById("goal_settings_modal");
   if (!modal) return;
@@ -98,8 +98,8 @@ window.saveGoalSettings = async function () {
   GOAL_KEYWORDS = newKeywords;
 
   // 1. Lưu local + đóng modal + re-render ngay
-  localStorage.setItem("goal_keywords", JSON.stringify(GOAL_KEYWORDS));
-  localStorage.setItem("goal_chart_mode", GOAL_CHART_MODE);
+  window.domSetItem("goal_keywords", JSON.stringify(GOAL_KEYWORDS));
+  window.domSetItem("goal_chart_mode", GOAL_CHART_MODE);
   closeGoalSettings();
   showToast("Đã đồng bộ cấu hình thiết lập");
 

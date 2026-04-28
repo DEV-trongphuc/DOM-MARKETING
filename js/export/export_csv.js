@@ -58,7 +58,7 @@ const BRAND_SETTINGS_KEY = "dom_brand_filters";
 const DEFAULT_BRANDS = [];
 
 function loadBrandSettings() {
-  const saved = localStorage.getItem(BRAND_SETTINGS_KEY);
+  const saved = window.domGetItem(BRAND_SETTINGS_KEY);
   if (saved) {
     try { return JSON.parse(saved); } catch (e) { return DEFAULT_BRANDS; }
   }

@@ -18,10 +18,10 @@ let GOAL_CHART_MODE = "keyword";
 let GOAL_KEYWORDS = ["Reach", "Engagement", "View", "Message", "Traffic", "Lead"];
 
 try {
-  const saved = localStorage.getItem("goal_keywords");
+  const saved = window.domGetItem("goal_keywords");
   if (saved) GOAL_KEYWORDS = JSON.parse(saved);
 
-  const savedMode = localStorage.getItem("goal_chart_mode");
+  const savedMode = window.domGetItem("goal_chart_mode");
   if (savedMode) GOAL_CHART_MODE = savedMode;
 } catch (e) {
   console.warn("Lỗi load settings:", e);

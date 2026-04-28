@@ -120,7 +120,7 @@ window.setGoalChartMode = function (mode) {
 window.quickToggleGoalChartMode = function () {
   const newMode = GOAL_CHART_MODE === 'brand' ? 'keyword' : 'brand';
   window.setGoalChartMode(newMode);
-  localStorage.setItem("goal_chart_mode", newMode);
+  window.domSetItem("goal_chart_mode", newMode);
 
   // Re-render chart immediately
   if (window._ALL_CAMPAIGNS) {
@@ -398,7 +398,7 @@ async function saveBrandSettings() {
   }));
 
   // 1. Cập nhật UI + đóng modal ngay lập tức
-  localStorage.setItem(BRAND_SETTINGS_KEY, JSON.stringify(brands));
+  window.domSetItem(BRAND_SETTINGS_KEY, JSON.stringify(brands));
   updateBrandDropdownUI();
   closeFilterSettings();
   showToast("Đã đồng bộ cấu hình thiết lập");

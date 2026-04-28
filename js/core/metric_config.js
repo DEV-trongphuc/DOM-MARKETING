@@ -1,5 +1,5 @@
-﻿// --- Summary Metrics Logic ---
-var SUMMARY_METRICS = JSON.parse(localStorage.getItem("dom_summary_metrics")) || ["impressions", "reach", "message_started"];
+// --- Summary Metrics Logic ---
+var SUMMARY_METRICS = JSON.parse(window.domGetItem("dom_summary_metrics")) || ["impressions", "reach", "message_started"];
 // --- Summary Metrics UI Logic ---
 window.openSummarySettings = function () {
   const modal = document.getElementById("summary_settings_modal");
@@ -77,7 +77,7 @@ window.saveSummarySettings = function () {
     domAlert("Vui lòng chọn đúng 3 chỉ số phụ.");
     return;
   }
-  localStorage.setItem("dom_summary_metrics", JSON.stringify(SUMMARY_METRICS));
+  window.domSetItem("dom_summary_metrics", JSON.stringify(SUMMARY_METRICS));
 
   // Đồng bộ với Google Sheets nếu có function
   if (typeof window.saveSummaryMetricsSync === "function") {
@@ -101,7 +101,7 @@ window.closeSummarySettings = function () {
       modal.style.display = "none";
     }, 300);
   }
-  SUMMARY_METRICS = JSON.parse(localStorage.getItem("dom_summary_metrics")) || ["impressions", "reach", "message_started"];
+  SUMMARY_METRICS = JSON.parse(window.domGetItem("dom_summary_metrics")) || ["impressions", "reach", "message_started"];
 };
 
 function updateSummaryCardHTML() {

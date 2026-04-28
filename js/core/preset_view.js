@@ -17,7 +17,7 @@ const DEFAULT_PRESET = {
 /** Đọc presets — luôn đảm bảo có preset mặc định ở đầu */
 function loadViewPresets() {
   let list = [];
-  try { list = JSON.parse(localStorage.getItem(VIEW_PRESETS_KEY) || "[]"); } catch { }
+  try { list = JSON.parse(window.domGetItem(VIEW_PRESETS_KEY) || "[]"); } catch { }
   // Đảm bảo preset mặc định luôn có và ở đầu
   if (!list.find(p => p.id === DEFAULT_PRESET_ID)) list.unshift(DEFAULT_PRESET);
   return list;
@@ -25,7 +25,7 @@ function loadViewPresets() {
 
 /** Ghi presets — sync lên Sheet ngầm (chỉ dom_view_presets, không cần dom_column_config) */
 function _saveViewPresets(presets) {
-  try { localStorage.setItem(VIEW_PRESETS_KEY, JSON.stringify(presets)); } catch { }
+  try { window.domSetItem(VIEW_PRESETS_KEY, JSON.stringify(presets)); } catch { }
   // Sync to Google Sheets (runs in background, non-blocking)
   if (typeof saveViewPresetsSync === "function") {
     saveViewPresetsSync(presets).catch(() => { });
