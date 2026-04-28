@@ -667,7 +667,7 @@
             <div class="input-group">
                 <label>Đường dẫn Workspace (Slug)</label>
                 <div style="position:relative;">
-                    <input type="text" id="reg_slug" placeholder="domation"
+                    <input type="text" id="reg_slug" placeholder="domation" maxlength="20"
                         style="font-family:monospace; color:var(--primary); font-weight:700; background:#fffbeb; border-color:var(--primary-light); padding-right:2.5rem;">
                     <i id="slug_icon" class="fa-solid"
                         style="position:absolute; right:1rem; top:50%; transform:translateY(-50%); font-size:1.1rem; display:none;"></i>
@@ -950,7 +950,10 @@
 
         function generateSlug() {
             const name = document.getElementById('reg_name').value;
-            const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            let slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            if (slug.length > 20) {
+                slug = slug.substring(0, 20).replace(/-$/, ''); // Prevent trailing hyphen if cut at one
+            }
             document.getElementById('reg_slug').value = slug;
             document.getElementById('slug_preview').textContent = slug || '...';
             clearTimeout(slugCheckTimer);
@@ -962,6 +965,7 @@
 
         document.getElementById('reg_slug').addEventListener('input', function () {
             let val = this.value.toLowerCase().replace(/[^a-z0-9\-]/g, '');
+            if (val.length > 20) val = val.substring(0, 20);
             this.value = val;
             document.getElementById('slug_preview').textContent = val || '...';
 
@@ -975,6 +979,15 @@
 
             if (!slug || slug.length < 3) {
                 statusEl.textContent = "Slug quá ngắn (tối thiểu 3 ký tự)";
+                statusEl.style.color = '#ef4444';
+                statusEl.style.display = 'block';
+                iconEl.className = 'fa-solid fa-circle-xmark';
+                iconEl.style.color = '#ef4444';
+                iconEl.style.display = 'block';
+                isSlugValid = false;
+                return;
+            } else if (slug.length > 20) {
+                statusEl.textContent = "Slug quá dài (tối đa 20 ký tự)";
                 statusEl.style.color = '#ef4444';
                 statusEl.style.display = 'block';
                 iconEl.className = 'fa-solid fa-circle-xmark';

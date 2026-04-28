@@ -221,6 +221,10 @@ try {
             if (!$slug || !$name || !$token)
                 _json(["ok" => false, "error" => "Missing required fields"], 400);
 
+            if (strlen($slug) > 20) {
+                _json(["ok" => false, "error" => "Slug cannot exceed 20 characters"], 400);
+            }
+
             // Chặn các slug dành riêng cho hệ thống
             $reserved_slugs = ['admin', 'register', 'workspaces', 'api', 'assets', 'css', 'js', 'lib', 'server'];
             if (in_array(strtolower($slug), $reserved_slugs)) {
@@ -326,8 +330,8 @@ try {
             if ($method !== 'POST')
                 _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = trim($body['slug'] ?? '');
-            if (!$slug)
-                _json(["ok" => false, "error" => "Missing slug"], 400);
+            if (!$slug || strlen($slug) > 20)
+                _json(["ok" => false, "error" => "Invalid slug"], 400);
 
             $reserved_slugs = ['admin', 'register', 'workspaces', 'api', 'assets', 'css', 'js', 'lib', 'server'];
             if (in_array(strtolower($slug), $reserved_slugs)) {
