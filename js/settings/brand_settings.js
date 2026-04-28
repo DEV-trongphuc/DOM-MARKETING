@@ -152,6 +152,18 @@ function closeFilterSettings() {
   }
 }
 
+window.toggleBrandAvatar = function(chk) {
+  const wrap = chk.closest('.brand_setting_item').querySelector('.brand_avatar_input_wrap');
+  const imgInput = wrap.querySelector('.brand_img');
+  if (chk.checked) {
+    wrap.style.display = 'flex';
+  } else {
+    wrap.style.display = 'none';
+    imgInput.value = '';
+    wrap.querySelector('img').src = 'https://domation.net/imgs/ICON.png';
+  }
+};
+
 function renderBrandSettingsToModal() {
   const brands = loadBrandSettings();
   const listContainer = document.getElementById("brand_settings_list");
@@ -191,7 +203,20 @@ function renderBrandSettingsToModal() {
               style="width:100%; padding:0.65rem 0.9rem; border-radius:8px; border:1.5px solid #e2e8f0; font-size:1.25rem; outline:none; transition:border .2s; font-family:monospace; box-sizing:border-box;"
               onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
           </div>
-          <input type="hidden" class="brand_img" value="">
+          </div>
+          <div style="grid-column: 1 / -1; margin-top: 0.2rem; display: flex; align-items: center; gap: 1rem;">
+            <label style="display:flex; align-items:center; gap:0.5rem; font-size:1.1rem; font-weight:600; color:#475569; cursor:pointer;">
+              <input type="checkbox" class="brand_use_avatar_chk" ${b.img ? 'checked' : ''} onchange="window.toggleBrandAvatar(this)">
+              Sử dụng Avatar
+            </label>
+            <div class="brand_avatar_input_wrap" style="flex:1; display: ${b.img ? 'flex' : 'none'}; gap: 0.8rem; align-items: center;">
+              <input type="text" placeholder="URL hình ảnh (https://...)" class="brand_img bsi_input" value="${b.img || ''}"
+                oninput="this.nextElementSibling.src = this.value || 'https://domation.net/imgs/ICON.png'"
+                style="flex:1; padding:0.65rem 0.9rem; border-radius:8px; border:1.5px solid #e2e8f0; font-size:1.1rem; outline:none; transition:border .2s; box-sizing:border-box;"
+                onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
+              <img src="${b.img || 'https://domation.net/imgs/ICON.png'}" onerror="this.src='https://domation.net/imgs/ICON.png'" style="width: 3.2rem; height: 3.2rem; border-radius: 50%; object-fit: cover; border: 1.5px solid #e2e8f0;">
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -241,7 +266,20 @@ function addNewBrandSetting() {
             style="width:100%; padding:0.65rem 0.9rem; border-radius:8px; border:1.5px solid #e2e8f0; font-size:1.25rem; outline:none; transition:border .2s; font-family:monospace; box-sizing:border-box;"
             onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
         </div>
-        <input type="hidden" class="brand_img" value="">
+        </div>
+        <div style="grid-column: 1 / -1; margin-top: 0.2rem; display: flex; align-items: center; gap: 1rem;">
+          <label style="display:flex; align-items:center; gap:0.5rem; font-size:1.1rem; font-weight:600; color:#475569; cursor:pointer;">
+            <input type="checkbox" class="brand_use_avatar_chk" onchange="window.toggleBrandAvatar(this)">
+            Sử dụng Avatar
+          </label>
+          <div class="brand_avatar_input_wrap" style="flex:1; display: none; gap: 0.8rem; align-items: center;">
+            <input type="text" placeholder="URL hình ảnh (https://...)" class="brand_img bsi_input" value=""
+              oninput="this.nextElementSibling.src = this.value || 'https://domation.net/imgs/ICON.png'"
+              style="flex:1; padding:0.65rem 0.9rem; border-radius:8px; border:1.5px solid #e2e8f0; font-size:1.1rem; outline:none; transition:border .2s; box-sizing:border-box;"
+              onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
+            <img src="https://domation.net/imgs/ICON.png" onerror="this.src='https://domation.net/imgs/ICON.png'" style="width: 3.2rem; height: 3.2rem; border-radius: 50%; object-fit: cover; border: 1.5px solid #e2e8f0;">
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -345,7 +383,7 @@ async function saveBrandSettings() {
   const items = document.querySelectorAll("#brand_settings_list .brand_setting_item");
   const brands = Array.from(items).map(item => ({
     name: item.querySelector(".brand_name").value,
-    img: item.querySelector(".brand_img").value,
+    img: item.querySelector(".brand_use_avatar_chk")?.checked ? item.querySelector(".brand_img").value : "",
     filter: item.querySelector(".brand_filter").value
   }));
 

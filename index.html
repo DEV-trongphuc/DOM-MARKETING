@@ -270,7 +270,7 @@
   <section id="dom" class="flex">
     <div class="dom_sidebar box_shadow flex">
       <div class="dom_logo">
-        <div style="display:inline-flex; align-items:center; gap:1.2rem; position:relative; cursor:pointer;">
+        <div onclick="window.open('https://domation.net', '_blank')" style="display:inline-flex; align-items:center; gap:1.2rem; position:relative; cursor:pointer;">
           <img id="sidebar_logo" src="https://domation.net/imgs/ICON.png" alt="DOM Report Logo"
             style="width: 4.8rem; height: 4.8rem; object-fit: contain; flex-shrink: 0;" />
 
@@ -2317,9 +2317,13 @@
       const gemini_api_key = keyInp ? keyInp.value.trim() : '';
 
       try {
+        const adminToken = localStorage.getItem('dom_admin_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (adminToken) headers['Authorization'] = 'Bearer ' + adminToken;
+
         const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: headers,
           body: JSON.stringify({
             action: 'auth_update_settings',
             slug: slug,
@@ -2348,9 +2352,13 @@
       if (!confirm(confirmMsg)) return;
 
       try {
+        const adminToken = localStorage.getItem('dom_admin_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (adminToken) headers['Authorization'] = 'Bearer ' + adminToken;
+
         const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: headers,
           body: JSON.stringify({
             action: 'admin_delete_tenant',
             slug: slug,
@@ -2390,9 +2398,13 @@
       btn.disabled = true;
 
       try {
+        const adminToken = localStorage.getItem('dom_admin_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (adminToken) headers['Authorization'] = 'Bearer ' + adminToken;
+
         const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: headers,
           body: JSON.stringify({
             action: 'submit_renewal',
             slug: slug,
