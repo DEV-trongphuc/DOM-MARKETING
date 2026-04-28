@@ -143,13 +143,13 @@ function renderCampaignView(data) {
 
     const campaignStatusClass = hasActiveAdset ? "active" : "inactive";
     const campaignStatusText = hasActiveAdset
-      ? `<div style="width: 100%; display: flex; align-items: center; padding: 0 3rem; box-sizing: border-box;">
+      ? `<div style="width: 100%; display: flex; align-items: center; padding: 0 3rem 0 2rem; box-sizing: border-box;">
            <div style="display: flex; align-items: center; gap: 0.8rem;">
              <span style="width:1rem;height:1rem;border-radius:50%;background:green;flex-shrink:0;"></span>
              <span>${activeAdsetCountForDisplay} ACTIVE</span>
            </div>
          </div>`
-      : `<div style="width: 100%; display: flex; align-items: center; padding: 0 3rem; box-sizing: border-box;">
+      : `<div style="width: 100%; display: flex; align-items: center; padding: 0 3rem 0 2rem; box-sizing: border-box;">
            <div style="display: flex; align-items: center; gap: 0.8rem;">
              <span style="width:1rem;height:1rem;border-radius:50%;background:#a1a1a1;flex-shrink:0;"></span>
              <span>INACTIVE</span>
@@ -225,11 +225,11 @@ function renderCampaignView(data) {
 
       const endTime = as.end_time ? new Date(as.end_time).getTime() : null;
       const isEnded = endTime && endTime < now;
-      const dailyBudget    = +as.daily_budget    || 0;
+      const dailyBudget = +as.daily_budget || 0;
       const lifetimeBudget = +as.lifetime_budget || 0;
 
       const startDateFmt = _formatAdsetDate(as.start_time);
-      const endDateFmt   = _formatAdsetDate(as.end_time);
+      const endDateFmt = _formatAdsetDate(as.end_time);
       let label = "";
       let value = "";
       let timeText = "";
@@ -249,7 +249,7 @@ function renderCampaignView(data) {
         value = `<span class="status-value">COMPLETE</span>`;
 
         adsetStatusText = `
-          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 3rem; box-sizing: border-box;">
+          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 3rem 0 2rem; box-sizing: border-box;">
   <div style="display: flex; align-items: center; gap: 0.8rem;">
     <span style="width:1rem;height:1rem;border-radius:50%;background:#a1a1a1;flex-shrink:0;"></span>
     <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
@@ -276,7 +276,7 @@ function renderCampaignView(data) {
         }
 
         adsetStatusText = `
-          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 3rem; box-sizing: border-box;">
+          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 3rem 0 2rem; box-sizing: border-box;">
   <div style="display: flex; align-items: center; gap: 0.8rem;">
     <span style="width:1rem;height:1rem;border-radius:50%;background:green;flex-shrink:0;"></span>
     <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
@@ -290,7 +290,7 @@ function renderCampaignView(data) {
       } else if (hasActiveAd) {
         adsetStatusClass = "active";
         adsetStatusText = `
-          <div style="width: 100%; display: flex; align-items: center; padding: 0 3rem; box-sizing: border-box;">
+          <div style="width: 100%; display: flex; align-items: center; padding: 0 3rem 0 2rem; box-sizing: border-box;">
   <div style="display: flex; align-items: center; gap: 0.8rem;">
     <span style="width:1rem;height:1rem;border-radius:50%;background:green;flex-shrink:0;"></span>
     <span>ACTIVE</span>
@@ -313,7 +313,7 @@ function renderCampaignView(data) {
         value = `<span class="status-value">INACTIVE</span>`;
 
         adsetStatusText = `
-          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 3rem; box-sizing: border-box;">
+          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 3rem 0 2rem; box-sizing: border-box;">
   <div style="display: flex; align-items: center; gap: 0.8rem;">
     <span style="width:1rem;height:1rem;border-radius:50%;background:#a1a1a1;flex-shrink:0;"></span>
     <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
@@ -395,7 +395,7 @@ function renderCampaignView(data) {
               </a>
             </div>
             <div class="ad_status ${isActive ? "active" : "inactive"}">
-              <div style="width: 100%; display: flex; align-items: center; padding: 0 3rem; box-sizing: border-box;">
+              <div style="width: 100%; display: flex; align-items: center; padding: 0 3rem 0 2rem; box-sizing: border-box;">
                 <div style="display: flex; align-items: center; gap: 0.8rem;">
                   <span style="width:1rem;height:1rem;border-radius:50%;background:${isActive ? 'green' : '#a1a1a1'};flex-shrink:0;"></span>
                   <span>${ad.status}</span>
