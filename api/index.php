@@ -706,9 +706,20 @@ try {
                         _json(["ok" => false, "error" => "Thành viên này đã có trong danh sách."], 400);
                     } else {
                         $pdo->prepare("UPDATE saas_tenant_viewers SET status='active', role=? WHERE tenant_slug=? AND email=?")->execute([$role, $slug, $target_email]);
+                        $send_email = true;
                     }
                 } else {
                     $pdo->prepare("INSERT INTO saas_tenant_viewers (tenant_slug, email, role, status, request_at) VALUES (?, ?, ?, 'active', NOW())")->execute([$slug, $target_email, $role]);
+                    $send_email = true;
+                }
+
+                if (isset($send_email)) {
+                    _send_webhook_email([
+                        "type" => "invite",
+                        "email" => $target_email,
+                        "inviter_email" => $admin_email ? $admin_email : 'Admin',
+                        "slug" => $slug
+                    ]);
                 }
             }
             _json(["ok" => true]);

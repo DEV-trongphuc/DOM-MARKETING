@@ -23,6 +23,8 @@ function doPost(e) {
         sendRenewalRequestEmail(email, name, slug, data.plan);
       } else if (type === "upgrade") {
         sendUpgradeSuccessEmail(email, name, slug, data.expires_at, data.add_days);
+      } else if (type === "invite") {
+        sendInvitationEmail(email, data.inviter_email, slug);
       }
     }
     
@@ -46,7 +48,7 @@ function _getBaseHtml(title, subtitle, contentHtml) {
       <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 40px 20px; text-align: center;">
           <img src="https://domation.vercel.app/imgs/ICON.png" alt="DOMATION" style="width: 60px; height: 60px; object-fit: contain; margin: 0 auto 12px; display: block;" />
           <h1 style="color: #ffffff; font-size: 28px; margin: 0; font-weight: 900; letter-spacing: 2px; text-align: center;">DOMATION</h1>
-          <p style="color: rgba(255,255,255,0.9); font-size: 13px; margin: 8px 0 0; letter-spacing: 1px; text-transform: uppercase; font-weight: 600;">Hệ Thống Báo Cáo Meta Đa Kênh</p>
+          <p style="color: rgba(255,255,255,0.9); font-size: 13px; margin: 8px 0 0; letter-spacing: 1px; text-transform: uppercase; font-weight: 600;">Hệ Thống Dashboard Meta Ads Report</p>
       </div>
       <!-- Content -->
       <div style="padding: 40px 30px;">
@@ -160,6 +162,44 @@ function sendUpgradeSuccessEmail(recipient, name, slug, expiresAt, addDays) {
     <div style="text-align: center; margin-top: 40px;">
         <a href="https://meta.domation.net/${slug}" target="_blank" style="background-color: #10b981; background-image: linear-gradient(to right, #34d399, #059669); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">
             Vào Trang Quản Trị Của Bạn
+        </a>
+    </div>
+  `;
+  
+  MailApp.sendEmail({
+    to: recipient,
+    subject: subject,
+    htmlBody: _getBaseHtml("Kính chào Quý khách,", "", content),
+    name: "DOMATION TEAM"
+  });
+}
+
+function sendInvitationEmail(recipient, inviterEmail, slug) {
+  var subject = "DOMATION - Bạn được mời tham gia Workspace";
+  var content = `
+    <p style="color: #475569; font-size: 16px; line-height: 1.7; margin-bottom: 24px;">
+        Chào bạn,<br><br>
+        Admin <strong>${inviterEmail}</strong> vừa gửi lời mời bạn tham gia vào Workspace <strong>${slug}</strong> trên hệ thống báo cáo tự động DOMATION.
+    </p>
+    
+    <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 24px; margin: 30px 0; border-radius: 0 12px 12px 0;">
+        <p style="color: #166534; font-size: 16px; margin: 0 0 10px 0; font-weight: bold; line-height: 1.6;">
+            Bạn đã được cấp quyền truy cập để xem dữ liệu báo cáo:
+        </p>
+        <ul style="color: #15803d; font-size: 15px; margin: 0; padding-left: 20px; line-height: 1.8;">
+            <li>ID Workspace: <strong style="color: #14532d;">${slug}</strong></li>
+            <li>Đường dẫn truy cập: <a href="https://meta.domation.net/${slug}" style="color: #2563eb; text-decoration: none;">https://meta.domation.net/${slug}</a></li>
+            <li>Vai trò: <strong style="color: #14532d;">Thành viên / Viewer</strong></li>
+        </ul>
+    </div>
+    
+    <p style="color: #64748b; font-size: 15px; line-height: 1.7;">
+        Truy cập ngay vào đường dẫn bên dưới để xem báo cáo Realtime từ nền tảng Meta Ads. Đừng quên đăng nhập bằng tài khoản Google (email này) để hệ thống nhận diện bạn nhé.
+    </p>
+    
+    <div style="text-align: center; margin-top: 40px;">
+        <a href="https://meta.domation.net/${slug}" target="_blank" style="background-color: #3b82f6; background-image: linear-gradient(to right, #3b82f6, #2563eb); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px; box-shadow: 0 4px 6px rgba(59,130,246,0.3);">
+            Truy Cập Workspace
         </a>
     </div>
   `;
