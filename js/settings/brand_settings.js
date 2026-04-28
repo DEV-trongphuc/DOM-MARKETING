@@ -29,7 +29,7 @@ function openFilterSettings() {
       if (keyInp) {
           keyInp.value = t.gemini_api_key || '';
           // Hide API Key container entirely if the user is not owner and not admin
-          if (t.google_email && window.SAAS_ROUTER?.userEmail && t.google_email.toLowerCase() !== window.SAAS_ROUTER.userEmail.toLowerCase() && window._currentUser?.role !== 'admin') {
+          if (t.google_email && window._currentUser?.email && t.google_email.toLowerCase() !== window._currentUser.email.toLowerCase() && window._currentUser?.role !== 'admin') {
              keyInp.parentElement.style.display = 'none';
           }
       }

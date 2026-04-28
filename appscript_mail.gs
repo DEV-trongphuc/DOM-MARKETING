@@ -176,20 +176,21 @@ function sendUpgradeSuccessEmail(recipient, name, slug, expiresAt, addDays) {
 
 function sendInvitationEmail(recipient, inviterEmail, slug) {
   var subject = "DOMATION - Bạn được mời tham gia Workspace";
+  var username = recipient.split('@')[0];
   var content = `
     <p style="color: #475569; font-size: 16px; line-height: 1.7; margin-bottom: 24px;">
-        Chào bạn,<br><br>
+        Chào <strong>${username}</strong>,<br><br>
         Admin <strong>${inviterEmail}</strong> vừa gửi lời mời bạn tham gia vào Workspace <strong>${slug}</strong> trên hệ thống báo cáo tự động DOMATION.
     </p>
     
-    <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 24px; margin: 30px 0; border-radius: 0 12px 12px 0;">
-        <p style="color: #166534; font-size: 16px; margin: 0 0 10px 0; font-weight: bold; line-height: 1.6;">
+    <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 24px; margin: 30px 0; border-radius: 0 12px 12px 0;">
+        <p style="color: #92400e; font-size: 16px; margin: 0 0 10px 0; font-weight: bold; line-height: 1.6;">
             Bạn đã được cấp quyền truy cập để xem dữ liệu báo cáo:
         </p>
-        <ul style="color: #15803d; font-size: 15px; margin: 0; padding-left: 20px; line-height: 1.8;">
-            <li>ID Workspace: <strong style="color: #14532d;">${slug}</strong></li>
-            <li>Đường dẫn truy cập: <a href="https://meta.domation.net/${slug}" style="color: #2563eb; text-decoration: none;">https://meta.domation.net/${slug}</a></li>
-            <li>Vai trò: <strong style="color: #14532d;">Thành viên / Viewer</strong></li>
+        <ul style="color: #b45309; font-size: 15px; margin: 0; padding-left: 20px; line-height: 1.8;">
+            <li>ID Workspace: <strong style="color: #78350f;">${slug}</strong></li>
+            <li>Đường dẫn truy cập: <a href="https://meta.domation.net/${slug}" style="color: #ea580c; text-decoration: none;">https://meta.domation.net/${slug}</a></li>
+            <li>Vai trò: <strong style="color: #78350f;">Thành viên / Viewer</strong></li>
         </ul>
     </div>
     
@@ -198,7 +199,7 @@ function sendInvitationEmail(recipient, inviterEmail, slug) {
     </p>
     
     <div style="text-align: center; margin-top: 40px;">
-        <a href="https://meta.domation.net/${slug}" target="_blank" style="background-color: #3b82f6; background-image: linear-gradient(to right, #3b82f6, #2563eb); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px; box-shadow: 0 4px 6px rgba(59,130,246,0.3);">
+        <a href="https://meta.domation.net/${slug}" target="_blank" style="background-color: #f59e0b; background-image: linear-gradient(to right, #f59e0b, #ea580c); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px; box-shadow: 0 4px 6px rgba(245,158,11,0.3);">
             Truy Cập Workspace
         </a>
     </div>
@@ -207,7 +208,7 @@ function sendInvitationEmail(recipient, inviterEmail, slug) {
   MailApp.sendEmail({
     to: recipient,
     subject: subject,
-    htmlBody: _getBaseHtml("Kính chào Quý khách,", "", content),
+    htmlBody: _getBaseHtml(`Kính chào ${username},`, "", content),
     name: "DOMATION TEAM"
   });
 }

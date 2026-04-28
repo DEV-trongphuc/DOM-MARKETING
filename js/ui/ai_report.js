@@ -1050,7 +1050,7 @@ window.saveQuickApiKey = async function(inputId) {
             body: JSON.stringify({
                 action: 'auth_update_settings',
                 slug: slug,
-                admin_email: window.SAAS_ROUTER.userEmail || '',
+                admin_email: window._currentUser?.email || '',
                 gemini_api_key: gemini_api_key
             })
         });
