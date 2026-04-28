@@ -42,8 +42,8 @@ body[data-theme="dark"] {
   --fadeClr500: #334155;
   --fadeClrG: #1e293b;
   --bgPage: #0f172a;        /* Nền trang cực tối */
-  --bgWhite: #1e293b;       /* Nền card (thay cho trắng) */
-  --bgWhite80: rgba(30, 41, 59, 0.95);
+  --bgWhite: #1f2937;       /* Nền card sáng nhẹ hơn nền trang một chút */
+  --bgWhite80: rgba(31, 41, 55, 0.95);
   --bgWhite95: rgba(30, 41, 59, 0.98);
   --bgSlate50: #1e293b;
   --bgSlate100: #334155;
@@ -97,7 +97,17 @@ body[data-theme="dark"] .dom_active_cp span,
 body[data-theme="dark"] label,
 body[data-theme="dark"] th,
 body[data-theme="dark"] td,
-body[data-theme="dark"] .dom_table_filter h2 {
+body[data-theme="dark"] .dom_table_filter h2,
+body[data-theme="dark"] [style*="color: #333"],
+body[data-theme="dark"] [style*="color:#333"],
+body[data-theme="dark"] [style*="color: #444"],
+body[data-theme="dark"] [style*="color: #555"],
+body[data-theme="dark"] [style*="color: #666"],
+body[data-theme="dark"] [style*="color: #1e293b"],
+body[data-theme="dark"] [style*="color: #374151"],
+body[data-theme="dark"] [style*="color: #475569"],
+body[data-theme="dark"] [style*="color: #64748b"],
+body[data-theme="dark"] [style*="color: #78350f"] {
   color: var(--textClr) !important;
 }
 
@@ -115,7 +125,17 @@ body[data-theme="dark"] .dom_sidebar,
 body[data-theme="dark"] .dom_toolbar_right,
 body[data-theme="dark"] .dom_inner,
 body[data-theme="dark"] .dom_card,
-body[data-theme="dark"] .box_shadow {
+body[data-theme="dark"] .box_shadow,
+body[data-theme="dark"] [style*="background: #fff"],
+body[data-theme="dark"] [style*="background:#fff"],
+body[data-theme="dark"] [style*="background: #f8fafc"],
+body[data-theme="dark"] [style*="background:#f8fafc"],
+body[data-theme="dark"] [style*="background: #f1f5f9"],
+body[data-theme="dark"] [style*="background: #e2e8f0"],
+body[data-theme="dark"] [style*="background: #f8f9fa"],
+body[data-theme="dark"] [style*="background: #fcfcfc"],
+body[data-theme="dark"] [style*="background-color: #fff"],
+body[data-theme="dark"] [style*="background-color: white"] {
   background: var(--bgWhite) !important;
   border-color: var(--borderMid) !important;
 }
@@ -213,12 +233,7 @@ body[data-theme="dark"] .share_container {
   border-color: var(--borderMid) !important;
 }
 /* Share Modal & Settings Modal inner panels */
-body[data-theme="dark"] .share_list_item,
-body[data-theme="dark"] [style*="background: #fff"],
-body[data-theme="dark"] [style*="background:#fff"],
-body[data-theme="dark"] [style*="background: #f8fafc"],
-body[data-theme="dark"] [style*="background: #fcfcfc"],
-body[data-theme="dark"] [style*="background: #f8f9fa"] {
+body[data-theme="dark"] .share_list_item {
   background-color: var(--bgWhite) !important;
   border-color: var(--borderMid) !important;
   color: var(--textClr) !important;
@@ -320,3 +335,174 @@ body[data-theme="dark"] .theme-toggle-btn .fa-sun {
   display: none;
   color: var(--mainClr);
 }
+
+/* ==========================================================================
+   ITERATIVE FIXES (Cards, Tables, Activities, Modals)
+   ========================================================================== */
+
+/* Thẻ (Cards) sáng nhẹ hơn nền */
+body[data-theme="dark"] .dom_card,
+body[data-theme="dark"] .dom_inner {
+  background-color: var(--bgWhite) !important; 
+}
+
+/* Các số liệu Interaction, Reach, Impressions trong các card bị tối chữ */
+body[data-theme="dark"] .dom_interaction_item p span,
+body[data-theme="dark"] .dom_interaction_item p,
+body[data-theme="dark"] .dom_interaction_item {
+  color: var(--textClr) !important;
+}
+
+/* Sidebar Account View Block */
+body[data-theme="dark"] .dom_info {
+  background-color: var(--bgSlate100) !important;
+}
+body[data-theme="dark"] .dom_info:hover {
+  background-color: var(--bgSlate200) !important;
+}
+body[data-theme="dark"] .dom_info p {
+  color: var(--textDark) !important;
+}
+
+/* Modal: Báo Cáo Hiệu Suất Chi Tiết (Pill & Badges) */
+body[data-theme="dark"] .perf_filter_btn,
+body[data-theme="dark"] .perf_filter_wrap,
+body[data-theme="dark"] [style*="background: #f1f5f9"],
+body[data-theme="dark"] [style*="background:#f1f5f9"] {
+  background-color: var(--bgSlate100) !important;
+  color: var(--textClr) !important;
+  border-color: var(--borderMid) !important;
+}
+
+/* Các badge % tăng giảm màu xanh đỏ có nền trắng */
+body[data-theme="dark"] .badge-up,
+body[data-theme="dark"] .badge-down,
+body[data-theme="dark"] [style*="background: #ecfdf5"],
+body[data-theme="dark"] [style*="background:#ecfdf5"],
+body[data-theme="dark"] [style*="background: #fef2f2"],
+body[data-theme="dark"] [style*="background:#fef2f2"],
+body[data-theme="dark"] [style*="background: #f0fdf4"],
+body[data-theme="dark"] [style*="background:#f0fdf4"] {
+  background-color: var(--bgSlate100) !important;
+}
+/* Ép màu tất cả các icon và chữ trong table của Modal */
+body[data-theme="dark"] .perf_modal_box table *,
+body[data-theme="dark"] .perf_modal_box tr *,
+body[data-theme="dark"] .perf_modal_box td * {
+  color: inherit;
+}
+body[data-theme="dark"] .perf_modal_box td span[style*="color"] {
+  color: var(--textClr) !important;
+}
+/* Các icon xanh đỏ giữ nguyên màu chữ nhưng nền phải đen */
+body[data-theme="dark"] .perf_modal_box td span[style*="color: #10b981"],
+body[data-theme="dark"] .perf_modal_box td span[style*="color:#10b981"] {
+  color: #10b981 !important;
+}
+body[data-theme="dark"] .perf_modal_box td span[style*="color: #ef4444"],
+body[data-theme="dark"] .perf_modal_box td span[style*="color:#ef4444"] {
+  color: #ef4444 !important;
+}
+
+/* Campaign, Adset, Ad Items trong danh sách */
+body[data-theme="dark"] .campaign_main,
+body[data-theme="dark"] .adset_item,
+body[data-theme="dark"] .ad_item,
+body[data-theme="dark"] .dom_campaign_list > li,
+body[data-theme="dark"] .view_campaign_box > div,
+body[data-theme="dark"] [style*="background-color: rgb(253, 253, 253)"] {
+  background-color: var(--bgWhite) !important;
+  border-color: var(--borderMid) !important;
+  color: var(--textClr) !important;
+}
+body[data-theme="dark"] .campaign_main:hover,
+body[data-theme="dark"] .adset_item:hover,
+body[data-theme="dark"] .ad_item:hover {
+  background-color: var(--bgSlate100) !important;
+}
+body[data-theme="dark"] .campaign_main *,
+body[data-theme="dark"] .adset_item *,
+body[data-theme="dark"] .ad_item * {
+  color: inherit;
+}
+
+/* Device Breakdown, Top Campaigns, Engagement Mix list items */
+body[data-theme="dark"] .dom_card li,
+body[data-theme="dark"] .dom_inner li {
+  background-color: transparent !important;
+  color: var(--textClr) !important;
+}
+
+/* --- ACTIVITY LOGS --- */
+body[data-theme="dark"] .act_chip {
+  background-color: var(--bgSlate100) !important;
+  border-color: var(--borderMid) !important;
+  color: var(--textClr) !important;
+}
+body[data-theme="dark"] .act_chip:hover {
+  background-color: var(--bgSlate200) !important;
+  color: var(--mainClr) !important;
+  border-color: var(--mainClr) !important;
+}
+body[data-theme="dark"] .act_chip.active {
+  background-color: var(--mainClr) !important;
+  color: #fff !important;
+}
+body[data-theme="dark"] .activity_search_container {
+  background-color: var(--bgSlate100) !important;
+  border-color: var(--borderMid) !important;
+}
+body[data-theme="dark"] .activity_search_container input {
+  color: var(--textClr) !important;
+}
+body[data-theme="dark"] .activity_row {
+  background-color: var(--bgWhite) !important;
+  border-color: var(--borderMid) !important;
+}
+body[data-theme="dark"] .activity_row:hover {
+  border-color: var(--mainClr) !important;
+  background-color: var(--bgSlate100) !important;
+}
+body[data-theme="dark"] .activity_icon {
+  background-color: var(--bgSlate100) !important;
+  color: var(--textClr) !important;
+}
+body[data-theme="dark"] .activity_sentence,
+body[data-theme="dark"] .activity_sentence .act_actor {
+  color: var(--textClr) !important;
+}
+body[data-theme="dark"] .activity_sentence .act_obj,
+body[data-theme="dark"] .activity_sentence .act_type_badge {
+  background-color: var(--bgSlate200) !important;
+  color: var(--textDark) !important;
+}
+body[data-theme="dark"] .activity_skeleton {
+  background: linear-gradient(90deg, var(--bgSlate100) 25%, var(--bgSlate200) 50%, var(--bgSlate100) 75%) !important;
+  background-size: 200% 100% !important;
+}
+
+/* Các viền mờ đi (Grid border) */
+body[data-theme="dark"] .ad_item_box::before,
+body[data-theme="dark"] .ad_item_box::after,
+body[data-theme="dark"] .adset_item::before,
+body[data-theme="dark"] .adset_item::after {
+  background-color: var(--borderMid) !important;
+  border-color: var(--borderMid) !important;
+}
+
+/* --- Brand Settings Modal Items --- */
+body[data-theme="dark"] .brand_setting_item,
+body[data-theme="dark"] .brand_setting_item [style*="background: #f8fafc"],
+body[data-theme="dark"] .brand_setting_item [style*="background:#f8fafc"],
+body[data-theme="dark"] .brand_setting_item [style*="background: #f1f5f9"],
+body[data-theme="dark"] .brand_setting_item [style*="background: #fff"],
+body[data-theme="dark"] .brand_setting_item [style*="background-color: #fff"] {
+  background-color: var(--bgWhite) !important;
+  border-color: var(--borderMid) !important;
+}
+body[data-theme="dark"] .brand_setting_item p,
+body[data-theme="dark"] .brand_setting_item span,
+body[data-theme="dark"] .brand_setting_item label {
+  color: var(--textClr) !important;
+}
+

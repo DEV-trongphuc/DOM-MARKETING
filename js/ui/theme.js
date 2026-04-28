@@ -35,7 +35,13 @@ function toggleTheme() {
 window.addEventListener("themeChanged", () => {
     const isDark = document.body.getAttribute("data-theme") === "dark";
     const textColor = isDark ? "#cbd5e1" : "#666666";
-    const gridColor = isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
+    // Mờ nhạt hơn cho lưới biểu đồ như user yêu cầu (0.05 thay vì 0.1)
+    const gridColor = isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)";
+
+    // Cập nhật biến global cho số giữa chart Doughnut
+    if (typeof CHART_TICK_TEXT !== 'undefined') {
+        window.CHART_TICK_TEXT = textColor;
+    }
 
     // Cập nhật mặc định cho Chart.js nếu thư viện Chart tồn tại
     if (window.Chart && window.Chart.defaults) {

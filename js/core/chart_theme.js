@@ -36,7 +36,7 @@ const CHART_GRID_DARK = "rgba(0,0,0,0.045)";
 const CHART_TICK_DARK = "#444";
 const CHART_TICK_MID = "#555";
 const CHART_TICK_LIGHT = "#666";
-const CHART_TICK_TEXT = "#333";
+let CHART_TICK_TEXT = "#333";
 
 // ── Platform Colors (pie/doughnut) ──────────────────────
 const CHART_FACEBOOK = "rgba(255,169,0,0.9)";     // vàng cho Meta/FB
