@@ -354,6 +354,7 @@ window.SAAS_ROUTER = {
                             <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
                                 <button onclick="SAAS_ROUTER.updateTenantStatus('${t.slug}', 'active', 30)" title="Cộng 1 tháng" style="padding:0.5rem 0.8rem; background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); border-radius:6px; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='#fff'"><i class="fa-solid fa-plus"></i> 1M</button>
                                 <button onclick="SAAS_ROUTER.updateTenantStatus('${t.slug}', 'active', 365)" title="Cộng 1 năm" style="padding:0.5rem 0.8rem; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.3); border-radius:6px; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#10b981'; this.style.color='#fff'"><i class="fa-solid fa-plus"></i> 1Y</button>
+                                <button onclick="let d = prompt('Nhập số ngày muốn cộng thêm (VD: 7, 15, 90...):\\nLưu ý: Cộng bằng nút này sẽ KHÔNG gửi Email thông báo tới người dùng.', '7'); if(d && !isNaN(d)) SAAS_ROUTER.updateTenantStatus('${t.slug}', 'active', parseInt(d), true);" title="Cộng Tùy Ý (Không gửi Email)" style="padding:0.5rem 0.8rem; background:rgba(245,158,11,0.2); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); border-radius:6px; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#f59e0b'; this.style.color='#fff'"><i class="fa-solid fa-calendar-plus"></i></button>
                                 <button onclick="SAAS_ROUTER.updateTenantStatus('${t.slug}', '${t.status==='locked'?'active':'locked'}', 0)" title="Khóa/Mở Khóa" style="padding:0.5rem 0.8rem; background:${t.status==='locked'?'rgba(255,255,255,0.1)':'rgba(239,68,68,0.2)'}; color:${t.status==='locked'?'#cbd5e1':'#f87171'}; border:1px solid ${t.status==='locked'?'rgba(255,255,255,0.2)':'rgba(239,68,68,0.3)'}; border-radius:6px; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='${t.status==='locked'?'rgba(255,255,255,0.2)':'#ef4444'}'; this.style.color='#fff'"><i class="fa-solid fa-${t.status==='locked'?'unlock':'lock'}"></i></button>
                                 <button onclick="SAAS_ROUTER.deleteTenant('${t.slug}')" title="Xóa Workspace" style="padding:0.5rem 0.8rem; background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.3); border-radius:6px; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='#fff'"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
@@ -424,8 +425,8 @@ window.SAAS_ROUTER = {
         }
     },
 
-    updateTenantStatus: async function(slug, status, addDays) {
-        if (!confirm(`Xác nhận cập nhật cho [${slug}]:\nTrạng thái mới: ${status}\nSố ngày cộng thêm: ${addDays}`)) return;
+    updateTenantStatus: async function(slug, status, addDays, skipEmail = false) {
+        if (!confirm(`Xác nhận cập nhật cho [${slug}]:\nTrạng thái mới: ${status}\nSố ngày cộng thêm: ${addDays}\nGửi Email: ${skipEmail ? 'KHÔNG' : 'CÓ'}`)) return;
         try {
             const res = await fetch(window.APP_CONFIG.SAAS_API_URL, {
                 method: 'POST',
@@ -437,7 +438,8 @@ window.SAAS_ROUTER = {
                     action: 'admin_update_tenant_status',
                     slug: slug,
                     status: status,
-                    add_days: addDays
+                    add_days: addDays,
+                    skip_email: skipEmail
                 })
             });
             const data = await res.json();

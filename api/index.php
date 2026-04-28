@@ -975,8 +975,10 @@ try {
             $stmt = $pdo->prepare("UPDATE saas_tenants SET " . implode(", ", $updates) . " WHERE slug = ?");
             $stmt->execute($params);
 
-            // Bắn mail nếu cộng ngày thành công
-            if ($add_days > 0) {
+            $skip_email = !empty($body['skip_email']);
+
+            // Bắn mail nếu cộng ngày thành công và không chọn skip
+            if ($add_days > 0 && !$skip_email) {
                 $tstmt = $pdo->prepare("SELECT name, google_email, expires_at FROM saas_tenants WHERE slug = ?");
                 $tstmt->execute([$slug]);
                 $t = $tstmt->fetch();
