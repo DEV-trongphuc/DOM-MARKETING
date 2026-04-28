@@ -97,6 +97,7 @@ async function runBatchesWithLimit(tasks, limit = CONCURRENCY_LIMIT) {
       try {
         results[idx] = await tasks[idx]();
       } catch (err) {
+        console.warn(`Batch ${idx} failed:`, err.message);
         results[idx] = null;
       }
     }

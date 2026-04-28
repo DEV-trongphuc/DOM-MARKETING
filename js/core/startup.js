@@ -48,12 +48,13 @@ async function bootstrapSaaS() {
   }
 
   if (!tokenOk) {
-.");
+    console.warn("[STARTUP] Token khong hop le hoac bi thieu, ngung load dashboard (Hien Modal).");
     return;
   }
 
   // 2.5 Kiểm tra xem có Ad Account nào được chọn không
   if (!window.ACCOUNT_ID || window.ACCOUNT_ID === "" || window.ACCOUNT_ID === "---") {
+    console.warn("[STARTUP] Khong co Ad Account nao duoc chon, hien thi Modal quan ly tai khoan.");
     if (typeof openAccountManagerModal === 'function') {
         openAccountManagerModal();
     }

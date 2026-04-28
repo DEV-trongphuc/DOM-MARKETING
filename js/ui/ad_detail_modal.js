@@ -2,6 +2,7 @@ async function handleViewClick(e, type = "ad") {
   e.stopPropagation();
   const el = e.target.closest(".ad_item"); // Sử dụng closest để tìm phần tử cha .ad_item
   if (!el) {
+    console.error("Không tìm thấy phần tử .ad_item");
     return;
   }
 
@@ -9,6 +10,7 @@ async function handleViewClick(e, type = "ad") {
   const adViewEl = el.querySelector(".ad_view"); // Tìm .ad_view bên trong .ad_item
 
   if (!adViewEl) {
+    console.error("Không tìm thấy phần tử .ad_view bên trong .ad_item");
     return;
   }
 
@@ -148,6 +150,7 @@ async function handleViewClick(e, type = "ad") {
     } else {
     }
   } catch (err) {
+    console.error("❌ Lỗi khi load chi tiết:", err);
   } finally {
     if (loadingEl) loadingEl.classList.remove("active");
   }
@@ -161,6 +164,7 @@ async function fetchAdsetTargeting(ad_id) {
     const data = await fetchJSON(url);
     return data.targeting || {};
   } catch (err) {
+    console.error(`Error fetching targeting for ad ${ad_id}:`, err);
     return {};
   }
 }
@@ -195,6 +199,7 @@ async function fetchAdsetActionsByHour(ad_id) {
     });
     return byHour;
   } catch (err) {
+    console.error("❌ Error fetching hourly breakdown for ad_id", ad_id, err);
     return null;
   }
 }
@@ -226,6 +231,7 @@ async function fetchAdsetActionsByAgeGender(ad_id) {
     });
     return byAgeGender;
   } catch (err) {
+    console.error("❌ Error fetching breakdown age+gender:", err);
     return null;
   }
 }
@@ -256,6 +262,7 @@ async function fetchAdsetActionsByRegion(ad_id) {
     });
     return byRegion;
   } catch (err) {
+    console.error("❌ Error fetching breakdown region:", err);
     return null;
   }
 }
@@ -286,6 +293,7 @@ async function fetchAdsetActionsByPlatformPosition(ad_id) {
     });
     return byPlatform;
   } catch (err) {
+    console.error("❌ Error fetching breakdown platform_position:", err);
     return null;
   }
 }
@@ -315,6 +323,7 @@ async function fetchAdsetActionsByDevice(ad_id) {
     });
     return byDevice;
   } catch (err) {
+    console.error("❌ Error fetching breakdown device:", err);
     return null;
   }
 }
@@ -348,6 +357,7 @@ async function fetchAdDailyInsights(ad_id) {
     });
     return byDate;
   } catch (err) {
+    console.error("❌ Error fetching daily breakdown for ad", ad_id, err);
     return null;
   }
 }
@@ -504,8 +514,9 @@ async function showAdDetail(ad_id) {
     renderVideoFunnel(lastFullActionsData);
 
     // ================== Render Chart ==================
-);
-);
+    console.log('[showAdDetail] processedByDevice keys:', Object.keys(processedByDevice || {}));
+    console.log('[showAdDetail] processedByPlatform keys:', Object.keys(processedByPlatform || {}));
+    console.log('[showAdDetail] byDevice raw length:', byDevice?.length, '| byPlatform raw length:', byPlatform?.length);
     // Truyền dữ liệu đã xử lý vào hàm render
     renderCharts({
       byHour: processedByHour,
@@ -549,7 +560,7 @@ async function showAdDetail(ad_id) {
     window.processedByRegion = processedByRegion;
     window.processedByPlatform = processedByPlatform;
   } catch (err) {
-:", err);
+    console.error("Lỗi khi load/render chi tiết ad (batch):", err);
   } finally {
     toggleSkeletons("#dom_detail", false);
   }
@@ -648,13 +659,16 @@ async function fetchAdDetailBatch(ad_id) {
             results[name] = body.data || [];
           }
         } catch (e) {
+          console.warn(`⚠️ Failed to parse batch response for ${name}`, e);
         }
       } else {
+        console.warn(`⚠️ Batch request for ${name} failed.`, item);
       }
     });
 
     return results;
   } catch (err) {
+    console.error("❌ Fatal error during ad detail batch fetch:", err);
     return {
       targeting: null,
       byHour: [],
@@ -678,6 +692,7 @@ async function fetchAdPreviewAsync(ad_id, previewBox) {
     const html = data?.data?.[0]?.body || "";
     if (previewBox) previewBox.innerHTML = html;
   } catch (err) {
+    console.warn("Preview load failed:", err);
     if (previewBox) previewBox.innerHTML = "";
   }
 }

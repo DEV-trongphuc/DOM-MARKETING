@@ -34,6 +34,7 @@ function setupFilterDropdown() {
       const yearEl = document.querySelector(".dom_select.year .dom_selected");
       const year   = parseInt(yearEl.textContent, 10);
       if (isNaN(year)) {
+        console.error("Không thể lấy năm hiện tại");
         return;
       }
 

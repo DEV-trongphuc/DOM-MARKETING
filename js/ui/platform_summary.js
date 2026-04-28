@@ -212,6 +212,7 @@ function updatePlatformSummaryUI(currentData, previousData = [], customDates = n
     const { value: valueEl, change: changeEl } = _getSummaryEls(id);
 
     if (!valueEl || !changeEl) {
+      console.warn(`Không tìm thấy element cho ID: ${id}`);
       return;
     }
 
@@ -286,6 +287,7 @@ async function fetchPlatformStats(campaignIds = []) {
 
     return data.data || [];
   } catch (err) {
+    console.error("❌ Error fetching platform stats:", err);
     return [];
   }
 }

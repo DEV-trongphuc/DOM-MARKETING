@@ -6,6 +6,7 @@ async function initializeYearData() {
     const data = await fetchAdAccountData(selectedYear);
     renderMonthlyChart(processMonthlyData(data), filter);
   } catch (error) {
+    console.error("Lỗi khi khởi tạo dữ liệu:", error);
     renderMonthlyChart(processMonthlyData([]), filter);
   }
 }

@@ -20,13 +20,14 @@ async function fetchJSON(url, options = {}, retries = 3) {
           msg = `Meta API Error: ${errData.error.message} (Code: ${errData.error.code})`;
           // Bắt lỗi Hết hạn Token (OAuthException code 190 hoặc 102)
           if (errData.error.code === 190 || errData.error.code === 102) {
+            console.error("Token Expired or Invalid! Triggering modal...");
             if (typeof window._openTokenModal === 'function') {
               window._openTokenModal();
             }
           }
         }
         if (errData.error?.code === 4 && retries > 0) {
-`);
+          console.warn(`Rate limit reached. Waiting 5s then retry... (${retries} retries left)`);
           await new Promise((r) => setTimeout(r, 5000));
           return fetchJSON(url, options, retries - 1);
         }
@@ -39,6 +40,7 @@ async function fetchJSON(url, options = {}, retries = 3) {
     CACHE_TTL.set(key, Date.now());
     return data;
   } catch (err) {
+    console.error(`Fetch failed: ${url}`, err);
     throw err;
   }
 }

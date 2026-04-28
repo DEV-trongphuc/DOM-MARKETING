@@ -64,6 +64,7 @@ async function fetchAdsAndInsights(adsetIds, onBatchProcessedCallback) {
           }),
         });
       } catch (error) {
+        console.error("Error fetching data:", error);
         return; // Nếu có lỗi, bỏ qua batch này
       }
 
@@ -71,6 +72,7 @@ async function fetchAdsAndInsights(adsetIds, onBatchProcessedCallback) {
       const processed = [];
       for (const item of adsResp) {
         if (item?.code === 190) {
+          console.error("Token Expired detected inside batch! Triggering modal...");
           if (typeof window._openTokenModal === 'function') window._openTokenModal();
           continue;
         }
@@ -290,5 +292,6 @@ async function loadDailyChart() {
     DAILY_DATA = dailyData;
     renderDetailDailyChart2(DAILY_DATA);
   } catch (err) {
+    console.error("Error in loadDailyChart:", err);
   }
 }

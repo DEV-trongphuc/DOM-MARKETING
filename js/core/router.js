@@ -152,6 +152,7 @@ window.SAAS_ROUTER = {
             return true; // Continue execution
 
         } catch (e) {
+            console.error("Router error:", e);
             alert("Could not connect to server.");
             return false;
         }
@@ -206,6 +207,7 @@ window.SAAS_ROUTER = {
                 err.style.display = 'block';
             }
         } catch (e) {
+            console.error(e);
         }
     },
 
@@ -381,6 +383,7 @@ window.SAAS_ROUTER = {
             `;
             document.body.innerHTML = html;
         } catch (e) {
+            console.error(e);
             document.body.innerHTML = `
                 <div style="display:flex; height:100vh; align-items:center; justify-content:center; background:#f8fafc; font-family:'Roboto', sans-serif;">
                     <div style="text-align:center; background:#fff; padding:3rem; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.05); max-width:400px;">
@@ -427,6 +430,7 @@ window.SAAS_ROUTER = {
                 alert("Error: " + data.error);
             }
         } catch (e) {
+            console.error(e);
             alert("Failed to create tenant");
         }
     },
@@ -511,6 +515,7 @@ window.SAAS_ROUTER = {
                 btn.disabled = false;
             }
         } catch (e) {
+            console.error(e);
             alert("Lỗi kết nối");
             btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Gửi Yêu Cầu';
             btn.disabled = false;

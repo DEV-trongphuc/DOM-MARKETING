@@ -2330,7 +2330,8 @@
           alert("Lỗi: " + (data.error || "Không thể cập nhật cấu hình"));
         }
       } catch (e) {
-alert("Lỗi kết nối");
+        console.error(e);
+        alert("Lỗi kết nối");
       }
     }
 
@@ -2375,7 +2376,8 @@ alert("Lỗi kết nối");
           btn.disabled = false;
         }
       } catch (e) {
-alert("Lỗi kết nối");
+        console.error(e);
+        alert("Lỗi kết nối");
         btn.innerHTML = originalText;
         btn.disabled = false;
       }

@@ -52,6 +52,7 @@ function setupYearDropdown() {
         })
         .catch((error) => {
           loading.classList.remove("active");
+          console.error("Lỗi khi fetch dữ liệu năm mới:", error);
           renderMonthlyChart(processMonthlyData([]), filter); // Vẽ biểu đồ rỗng
         });
 
@@ -258,6 +259,7 @@ document.addEventListener("click", (e) => {
       filterList.innerHTML = list.map(formatCampaignHTML).join("");
       filterBox.classList.add("active");
     } catch (err) {
+      console.error("[campaign-filter] renderFilteredCampaigns error:", err);
     }
   }
 
@@ -285,6 +287,7 @@ document.addEventListener("click", (e) => {
 
       renderFilteredCampaigns(filtered);
     } catch (err) {
+      console.error("[campaign-filter] filterCampaigns error:", err);
     }
   }
 
@@ -343,6 +346,7 @@ document.addEventListener("click", (e) => {
       filterInputC.value = campaign.name || "";
       safeApplyCampaignFilter(campaign.name || "");
     } catch (err) {
+      console.error("[campaign-filter] error on campaign click:", err);
     }
   });
 
@@ -366,6 +370,7 @@ async function fetchAdPreview(adId) {
     const data = await res.json();
 
     if (!data || !data.data?.length) {
+      console.warn("⚠️ No preview data found for this ad.");
       return null;
     }
 
@@ -379,6 +384,7 @@ async function fetchAdPreview(adId) {
 
     return html;
   } catch (err) {
+    console.error("❌ Error fetching ad preview:", err);
     return null;
   }
 }
@@ -536,6 +542,7 @@ async function generateDeepReportDetailed({
           .replace(/\b\w/g, (c) => c.toUpperCase());
       }
     } catch (e) {
+      console.warn("Lỗi format key:", key, e);
       return key; // Trả về key gốc nếu lỗi
     }
     return key; // Default cho Region
@@ -994,6 +1001,7 @@ async function runDeepReport() {
 function renderAdReportWithVibe(report) {
   const container = document.querySelector(".dom_ai_report_content");
   if (!container) {
+    console.error("Không tìm thấy container .dom_ai_report_content");
     return;
   }
 

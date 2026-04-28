@@ -649,6 +649,7 @@ function renderChartByDevice(dataByDevice) {
       }
     });
   } catch(err) {
+    console.error('[Device] Chart error:', err);
   }
 }
 

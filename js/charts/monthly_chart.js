@@ -9,6 +9,7 @@
 function renderMonthlyChart(data, filter) {
   const ctx = document.getElementById("detail_account_year")?.getContext("2d");
   if (!ctx) {
+    console.error("Không tìm thấy canvas #detail_account_year");
     return;
   }
 

@@ -50,6 +50,7 @@ async function loadAllDashboardCharts(campaignIds = []) {
 
     window._DASHBOARD_BATCH_RESULTS = results;
   } catch (err) {
+    console.error("Error loading dashboard charts:", err);
   } finally {
     if (loading) loading.classList.remove("active");
   }

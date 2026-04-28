@@ -2,6 +2,7 @@
   const openButton = document.querySelector(".ai_report_compare");
   const reportContainer = document.querySelector(".dom_ai_report");
   if (!openButton || !reportContainer) {
+    console.warn("Không tìm thấy các phần tử AI Report.");
     return;
   }
 
@@ -143,6 +144,7 @@ function _doDocxExport(innerHtml, fileName) {
 
     if (typeof showToast === 'function') showToast(`✅ Đã xuất: ${fileName}`);
   } catch (err) {
+    console.error("DOCX export error:", err);
     if (typeof domAlert === 'function') domAlert("❌ Lỗi khi xuất DOCX: " + err.message);
   }
 }
