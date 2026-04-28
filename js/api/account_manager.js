@@ -102,6 +102,9 @@ function _renderAccountManagerList() {
                 html += `
                 <div onclick="_switchAccount('${acc.id}', '${group.token}')" style="border: 2px solid ${isActive ? '#f59e0b' : '#e2e8f0'}; background: ${isActive ? '#fffbeb' : '#fff'}; border-radius: 12px; padding: 1.4rem; cursor: pointer; transition: all 0.2s; position: relative;" onmouseover="if(!${isActive}) this.style.borderColor='#cbd5e1'" onmouseout="if(!${isActive}) this.style.borderColor='#e2e8f0'">
                     ${isActive ? '<div style="position: absolute; top: -14px; right: -14px; background: #f59e0b; color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; border: 2px solid #fff;"><i class="fa-solid fa-check"></i></div>' : ''}
+                    ${isAdmin ? `<button onclick="event.stopPropagation(); _removeAccountFromGroup(${index}, '${acc.id}')" style="position: absolute; top: 8px; right: 8px; background: transparent; border: none; color: #94a3b8; font-size: 1.1rem; cursor: pointer; padding: 0.4rem; border-radius: 6px; transition: all 0.2s;" onmouseover="this.style.background='#fee2e2'; this.style.color='#ef4444';" onmouseout="this.style.background='transparent'; this.style.color='#94a3b8';" title="Xóa tài khoản này khỏi Workspace">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>` : ''}
                     <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem;">
                         <img src="${avatarUrl}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #e2e8f0;" onerror="this.src='https://domation.net/imgs/ICON.png'" />
                         <h5 style="margin: 0; font-size: 1.4rem; color: #1e293b; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${acc.name}">${acc.name}</h5>
@@ -225,6 +228,16 @@ window.fetchAccountsFromNewToken = async function() {
     }
 };
 
+window.toggleAmSelectAll = function(checked) {
+    const checkboxes = document.querySelectorAll("#am_fetched_accounts_list input[type='checkbox']");
+    checkboxes.forEach(cb => {
+        cb.checked = checked;
+        cb.parentElement.style.borderColor = checked ? '#3b82f6' : '#e2e8f0';
+        cb.parentElement.style.background = checked ? '#eff6ff' : 'transparent';
+    });
+    _checkAmSaveBtn();
+};
+
 function _renderFetchedAccounts() {
     const container = document.getElementById("am_fetched_accounts_container");
     const list = document.getElementById("am_fetched_accounts_list");
@@ -238,15 +251,29 @@ function _renderFetchedAccounts() {
         return;
     }
     
+    // Check which accounts are already saved
+    const token = document.getElementById("am_new_token_input").value.trim();
+    let existingIds = new Set();
+    const groups = _normalizeAccounts();
+    const currentGroup = groups.find(g => g.token === token);
+    if (currentGroup) {
+        currentGroup.accounts.forEach(a => existingIds.add(a.id.replace('act_', '')));
+    }
+    
     let html = "";
     window._am_fetched_accounts.forEach(acc => {
         // Loại bỏ act_ prefix nếu có
         const accId = acc.account_id || acc.id.replace('act_', '');
         // Do đã bỏ fetch business_profile_picture_uri, ta luôn dùng ảnh mặc định
         const avatarUri = acc._default_avatar || "https://domation.net/imgs/ICON.png";
+        
+        const isChecked = existingIds.has(accId) ? "checked" : "";
+        const borderColor = isChecked ? '#3b82f6' : '#e2e8f0';
+        const bgColor = isChecked ? '#eff6ff' : 'transparent';
+
         html += `
-        <label style="display: flex; align-items: center; gap: 1rem; padding: 1.2rem; border: 1.5px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#cbd5e1'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e2e8f0'">
-            <input type="checkbox" value="${accId}" data-name="${acc.name || `Account ${accId}`}" data-currency="${acc.currency || 'VND'}" data-avatar="${avatarUri}" onchange="this.parentElement.style.borderColor = this.checked ? '#3b82f6' : '#e2e8f0'; this.parentElement.style.background = this.checked ? '#eff6ff' : 'transparent'; _checkAmSaveBtn()" style="width: 1.2rem; height: 1.2rem; margin-top: 0.2rem; accent-color: #3b82f6; cursor: pointer;">
+        <label style="display: flex; align-items: center; gap: 1rem; padding: 1.2rem; border: 1.5px solid ${borderColor}; background: ${bgColor}; border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#cbd5e1'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e2e8f0'">
+            <input type="checkbox" value="${accId}" data-name="${acc.name || `Account ${accId}`}" data-currency="${acc.currency || 'VND'}" data-avatar="${avatarUri}" onchange="this.parentElement.style.borderColor = this.checked ? '#3b82f6' : '#e2e8f0'; this.parentElement.style.background = this.checked ? '#eff6ff' : 'transparent'; _checkAmSaveBtn(); document.getElementById('am_select_all_cb').checked = false;" style="width: 1.2rem; height: 1.2rem; margin-top: 0.2rem; accent-color: #3b82f6; cursor: pointer;" ${isChecked}>
             <img src="${avatarUri}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #e2e8f0;" onerror="this.src='https://domation.net/imgs/ICON.png'" />
             <div>
                 <p style="margin: 0; font-size: 1.1rem; color: #1e293b; font-weight: 600;">${acc.name || `Tài khoản ${accId}`}</p>
@@ -257,6 +284,18 @@ function _renderFetchedAccounts() {
     });
     
     list.innerHTML = html;
+    
+    const selectAllCb = document.getElementById("am_select_all_cb");
+    if (selectAllCb) {
+        // If all items are checked, check the select_all box too
+        const allChecked = window._am_fetched_accounts.every(acc => {
+            const accId = acc.account_id || acc.id.replace('act_', '');
+            return existingIds.has(accId);
+        });
+        selectAllCb.checked = allChecked && window._am_fetched_accounts.length > 0;
+    }
+    
+    _checkAmSaveBtn();
 }
 
 window._checkAmSaveBtn = function() {
@@ -389,6 +428,50 @@ window._removeTokenGroup = async function(index) {
         }
         
         if (typeof showToast === 'function') showToast("🗑️ Đã xóa Token");
+        _renderAccountManagerList();
+        
+    } catch (e) {
+        alert("Lỗi xóa: " + e.message);
+    }
+};
+
+window._removeAccountFromGroup = async function(groupIndex, accountId) {
+    if (!confirm("Bạn có chắc chắn muốn xóa Ad Account này khỏi Workspace?")) return;
+    
+    let groups = _normalizeAccounts();
+    const group = groups[groupIndex];
+    if (!group) return;
+    
+    group.accounts = group.accounts.filter(a => a.id !== accountId);
+    
+    try {
+        const adminEmail = window._currentUser?.email;
+        const slug = new URLSearchParams(window.location.search).get('slug') || window.location.pathname.replace(/^\/|\/$/g, '').split('?')[0];
+        
+        const res = await fetch(`${window.APP_CONFIG.SAAS_API_URL}?action=auth_update_accounts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                slug: slug,
+                admin_email: adminEmail,
+                ad_accounts: groups
+            })
+        });
+        
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error);
+        
+        window.APP_CONFIG.ALLOWED_ACCOUNTS = groups;
+        
+        let cleanId = accountId.replace('act_', '');
+        if (window.ACCOUNT_ID === cleanId) {
+            alert("Tài khoản đang xem đã bị xóa. Trang sẽ được tải lại.");
+            localStorage.removeItem(`dom_last_account_${slug}`);
+            location.reload();
+            return;
+        }
+        
+        if (typeof showToast === 'function') showToast("🗑️ Đã xóa Account");
         _renderAccountManagerList();
         
     } catch (e) {

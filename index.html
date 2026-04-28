@@ -3027,9 +3027,15 @@
           style="display: none; border-top: 1px dashed #e2e8f0; padding-top: 2rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
             <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #1e293b;">Chọn Ad Accounts để lưu</h3>
-            <span id="am_fetched_count"
-              style="background: #e2e8f0; color: #475569; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 1.2rem;">0
-              tìm thấy</span>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 1.2rem; font-weight: 600; color: #3b82f6;">
+                    <input type="checkbox" id="am_select_all_cb" onchange="if(window.toggleAmSelectAll) window.toggleAmSelectAll(this.checked)" style="width: 1.4rem; height: 1.4rem; accent-color: #3b82f6; cursor: pointer;">
+                    Chọn tất cả
+                </label>
+                <span id="am_fetched_count"
+                  style="background: #e2e8f0; color: #475569; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 1.2rem;">0
+                  tìm thấy</span>
+            </div>
           </div>
           <div id="am_fetched_accounts_list"
             style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; max-height: 300px; overflow-y: auto; padding-right: 0.5rem;">

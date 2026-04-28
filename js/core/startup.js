@@ -91,16 +91,37 @@ window._afterTokenResolved = function () {
   main();
 };
 
-// ── Format helpers ───────────────────────────────────────────────
 const formatMoney = (v) => {
-  if (v == null || isNaN(v)) {
-    const cur = window.GLOBAL_CURRENCY || 'VND';
-    return cur === 'VND' ? "0đ" : new Intl.NumberFormat("en-US", { style: "currency", currency: cur }).format(0);
-  }
   const cur = window.GLOBAL_CURRENCY || 'VND';
-  if (cur === 'VND') return Math.round(v).toLocaleString("vi-VN") + "đ";
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: cur }).format(v);
+  const val = parseFloat(v);
+  if (isNaN(val)) {
+    if (cur === 'VND') return "0đ";
+    if (cur === 'SGD') return "S$0.00";
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: cur }).format(0);
+  }
+  if (cur === 'VND') return Math.round(val).toLocaleString("vi-VN") + "đ";
+  if (cur === 'SGD') return "S$" + val.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: cur }).format(val);
 };
+window.formatMoney = formatMoney;
+
+const formatMoneyShort = (v) => {
+  const val = parseFloat(v);
+  if (isNaN(val)) return "0";
+  const abs = Math.abs(val);
+  const cur = window.GLOBAL_CURRENCY || 'VND';
+  
+  let shortVal = String(val);
+  if (abs >= 1e9) shortVal = (val / 1e9).toFixed(2) + 'B';
+  else if (abs >= 1e6) shortVal = (val / 1e6).toFixed(2) + 'M';
+  else if (abs >= 1e3) shortVal = (val / 1e3).toFixed(0) + 'K';
+  else shortVal = String(Math.round(val));
+  
+  if (cur === 'VND') return shortVal + "đ";
+  if (cur === 'SGD') return "S$" + shortVal;
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: cur }).formatToParts(0).find(x => x.type === "currency")?.value + shortVal;
+};
+window.formatMoneyShort = formatMoneyShort;
 const formatNumber = (v) => v && !isNaN(v) ? Math.round(v).toLocaleString("vi-VN") : "0";
 const calcCpm      = (spend, reach) => reach ? (spend / reach) * 1000 : 0;
 const calcFrequency = (impr, reach) => reach ? (impr / reach).toFixed(1) : "0.0";

@@ -10245,5 +10245,5 @@ tbody {
 body:not([data-theme="dark"]) .adset_item.active,
 body:not([data-theme="dark"]) .ad_item.active,
 body:not([data-theme="dark"]) .campaign_main.active {
-    background-color: #f1f5f9 !important;
+  /* background-color: #f1f5f9 !important; */
 }
