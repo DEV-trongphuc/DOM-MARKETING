@@ -718,7 +718,8 @@ try {
                         "type" => "invite",
                         "email" => $target_email,
                         "inviter_email" => $admin_email ? $admin_email : 'Admin',
-                        "slug" => $slug
+                        "slug" => $slug,
+                        "role" => $role
                     ]);
                 }
             }

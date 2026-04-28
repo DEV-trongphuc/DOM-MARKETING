@@ -24,7 +24,7 @@ function doPost(e) {
       } else if (type === "upgrade") {
         sendUpgradeSuccessEmail(email, name, slug, data.expires_at, data.add_days);
       } else if (type === "invite") {
-        sendInvitationEmail(email, data.inviter_email, slug);
+        sendInvitationEmail(email, data.inviter_email, slug, data.role);
       }
     }
     
@@ -174,9 +174,16 @@ function sendUpgradeSuccessEmail(recipient, name, slug, expiresAt, addDays) {
   });
 }
 
-function sendInvitationEmail(recipient, inviterEmail, slug) {
+function sendInvitationEmail(recipient, inviterEmail, slug, role) {
   var subject = "DOMATION - Bạn được mời tham gia Workspace";
   var username = recipient.split('@')[0];
+  var roleLabel = "Thành viên / Viewer";
+  if (role === "admin") {
+    roleLabel = "Quản trị viên / Admin";
+  } else if (role === "editor") {
+    roleLabel = "Biên tập viên / Editor";
+  }
+  
   var content = `
     <p style="color: #475569; font-size: 16px; line-height: 1.7; margin-bottom: 24px;">
         Chào <strong>${username}</strong>,<br><br>
@@ -190,7 +197,7 @@ function sendInvitationEmail(recipient, inviterEmail, slug) {
         <ul style="color: #b45309; font-size: 15px; margin: 0; padding-left: 20px; line-height: 1.8;">
             <li>ID Workspace: <strong style="color: #78350f;">${slug}</strong></li>
             <li>Đường dẫn truy cập: <a href="https://meta.domation.net/${slug}" style="color: #ea580c; text-decoration: none;">https://meta.domation.net/${slug}</a></li>
-            <li>Vai trò: <strong style="color: #78350f;">Thành viên / Viewer</strong></li>
+            <li>Vai trò: <strong style="color: #78350f;">${roleLabel}</strong></li>
         </ul>
     </div>
     
