@@ -86,9 +86,10 @@ function updateBrandDropdownUI() {
   dropdownUl.innerHTML = brands.map((b) => {
     const bFilter  = (b.filter || "").toLowerCase();
     const isActive = bFilter === current;
+    const imgSrc = (b.img && b.img.trim() !== '') ? b.img.trim() : "https://domation.net/imgs/ICON.png";
     return `
     <li data-filter="${b.filter}" class="${isActive ? "active" : ""}">
-      <img src="${b.img}" style="border-radius:50%;" onerror="this.style.display='none'"/>
+      <img src="${imgSrc}" style="border-radius:50%; width:24px; height:24px; object-fit:cover;" onerror="this.src='https://domation.net/imgs/ICON.png'"/>
       <span>${b.name}</span>
     </li>`;
   }).join("");
@@ -97,9 +98,12 @@ function updateBrandDropdownUI() {
   if (selectedBrand) {
     const parent = dropdownUl.closest(".quick_filter_detail");
     if (parent) {
-      const parentImg  = parent.querySelector("img");
-      const parentText = parent.querySelector(".dom_selected");
-      if (parentImg)  parentImg.src            = selectedBrand.img;
+      const imgSrc = (selectedBrand.img && selectedBrand.img.trim() !== '') ? selectedBrand.img.trim() : "https://domation.net/imgs/ICON.png";
+      if (parentImg) {
+        parentImg.style.display = "block";
+        parentImg.src = imgSrc;
+        parentImg.onerror = function() { this.src = 'https://domation.net/imgs/ICON.png'; };
+      }
       if (parentText) parentText.textContent   = selectedBrand.name;
     }
   }

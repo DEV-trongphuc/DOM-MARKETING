@@ -24,9 +24,10 @@ function updatePerfBrandDropdownUI() {
   dropdownUl.innerHTML = brands.map((b) => {
     const bFilter  = (b.filter || "").toLowerCase();
     const isActive = bFilter === current;
+    const imgSrc = (b.img && b.img.trim() !== '') ? b.img.trim() : "https://domation.net/imgs/ICON.png";
     return `
     <li data-filter="${b.filter}" class="${isActive ? "active" : ""}">
-      <img src="${b.img}" />
+      <img src="${imgSrc}" style="border-radius:50%; width:24px; height:24px; object-fit:cover;" onerror="this.src='https://domation.net/imgs/ICON.png'"/>
       <span>${b.name}</span>
     </li>`;
   }).join("");
@@ -37,9 +38,10 @@ function updatePerfBrandDropdownUI() {
     const parentImg  = document.getElementById("perf_selected_brand_img");
     if (parentText) parentText.textContent = selectedBrand.name;
     if (parentImg) {
-      const hideImg = !selectedBrand.img || selectedBrand.img.includes("ampersand_img.jpg");
-      parentImg.style.display = hideImg ? "none" : "block";
-      if (!hideImg) parentImg.src = selectedBrand.img;
+      const imgSrc = (selectedBrand.img && selectedBrand.img.trim() !== '') ? selectedBrand.img.trim() : "https://domation.net/imgs/ICON.png";
+      parentImg.style.display = "block";
+      parentImg.src = imgSrc;
+      parentImg.onerror = function() { this.src = 'https://domation.net/imgs/ICON.png'; };
     }
   }
 }
