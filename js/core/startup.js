@@ -91,37 +91,66 @@ window._afterTokenResolved = function () {
   main();
 };
 
-const formatMoney = (v) => {
+// ── Format helpers ───────────────────────────────────────────────
+const CURRENCY_CONFIG = {
+  VND: { symbol: 'đ', pos: 'suffix', decimals: 0 },
+  SGD: { symbol: 'S$', pos: 'prefix', decimals: 2 },
+  USD: { symbol: '$', pos: 'prefix', decimals: 2 },
+  EUR: { symbol: '€', pos: 'prefix', decimals: 2 },
+  THB: { symbol: '฿', pos: 'prefix', decimals: 2 },
+  MYR: { symbol: 'RM', pos: 'prefix', decimals: 2 },
+  IDR: { symbol: 'Rp', pos: 'prefix', decimals: 0 },
+  PHP: { symbol: '₱', pos: 'prefix', decimals: 2 },
+  AUD: { symbol: 'A$', pos: 'prefix', decimals: 2 },
+  GBP: { symbol: '£', pos: 'prefix', decimals: 2 },
+  JPY: { symbol: '¥', pos: 'prefix', decimals: 0 },
+  INR: { symbol: '₹', pos: 'prefix', decimals: 2 },
+  KRW: { symbol: '₩', pos: 'prefix', decimals: 0 },
+  TWD: { symbol: 'NT$', pos: 'prefix', decimals: 0 },
+  CAD: { symbol: 'C$', pos: 'prefix', decimals: 2 }
+};
+
+window.formatMoney = (v) => {
   const cur = window.GLOBAL_CURRENCY || 'VND';
   const val = parseFloat(v);
+  const config = CURRENCY_CONFIG[cur];
+
   if (isNaN(val)) {
-    if (cur === 'VND') return "0đ";
-    if (cur === 'SGD') return "S$0.00";
+    if (config) {
+      if (config.pos === 'suffix') return `0${config.symbol}`;
+      return `${config.symbol}0${config.decimals > 0 ? '.' + '0'.repeat(config.decimals) : ''}`;
+    }
     return new Intl.NumberFormat("en-US", { style: "currency", currency: cur }).format(0);
   }
-  if (cur === 'VND') return Math.round(val).toLocaleString("vi-VN") + "đ";
-  if (cur === 'SGD') return "S$" + val.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  if (config) {
+    const formattedNum = val.toLocaleString("en-US", { minimumFractionDigits: config.decimals, maximumFractionDigits: config.decimals });
+    return config.pos === 'suffix' ? `${formattedNum}${config.symbol}` : `${config.symbol}${formattedNum}`;
+  }
+
   return new Intl.NumberFormat("en-US", { style: "currency", currency: cur }).format(val);
 };
-window.formatMoney = formatMoney;
 
-const formatMoneyShort = (v) => {
+window.formatMoneyShort = (v) => {
+  const cur = window.GLOBAL_CURRENCY || 'VND';
   const val = parseFloat(v);
   if (isNaN(val)) return "0";
-  const abs = Math.abs(val);
-  const cur = window.GLOBAL_CURRENCY || 'VND';
   
+  const abs = Math.abs(val);
   let shortVal = String(val);
+  
   if (abs >= 1e9) shortVal = (val / 1e9).toFixed(2) + 'B';
   else if (abs >= 1e6) shortVal = (val / 1e6).toFixed(2) + 'M';
   else if (abs >= 1e3) shortVal = (val / 1e3).toFixed(0) + 'K';
   else shortVal = String(Math.round(val));
   
-  if (cur === 'VND') return shortVal + "đ";
-  if (cur === 'SGD') return "S$" + shortVal;
+  const config = CURRENCY_CONFIG[cur];
+  if (config) {
+    return config.pos === 'suffix' ? `${shortVal}${config.symbol}` : `${config.symbol}${shortVal}`;
+  }
+  
   return new Intl.NumberFormat("en-US", { style: "currency", currency: cur }).formatToParts(0).find(x => x.type === "currency")?.value + shortVal;
 };
-window.formatMoneyShort = formatMoneyShort;
 const formatNumber = (v) => v && !isNaN(v) ? Math.round(v).toLocaleString("vi-VN") : "0";
 const calcCpm      = (spend, reach) => reach ? (spend / reach) * 1000 : 0;
 const calcFrequency = (impr, reach) => reach ? (impr / reach).toFixed(1) : "0.0";
