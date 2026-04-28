@@ -24,9 +24,8 @@ function openFilterSettings() {
       }
       if (keyInp) {
           keyInp.value = t.gemini_api_key || '';
-          // Hide API Key container entirely if the user is not owner
-          // (it might just be returned as null if not owner, but better to hide the UI too if they don't have permission)
-          if (t.gemini_api_key === undefined && !t.unauthorized && t.google_email && window.SAAS_ROUTER?.userEmail && t.google_email.toLowerCase() !== window.SAAS_ROUTER.userEmail.toLowerCase()) {
+          // Hide API Key container entirely if the user is not owner and not admin
+          if (t.google_email && window.SAAS_ROUTER?.userEmail && t.google_email.toLowerCase() !== window.SAAS_ROUTER.userEmail.toLowerCase() && window._currentUser?.role !== 'admin') {
              keyInp.parentElement.style.display = 'none';
           }
       }

@@ -443,17 +443,15 @@
               <i class="fa-solid fa-wand-magic-sparkles"></i>
               <span>AI Phân tích</span>
             </button>
+            <button id="kb_shortcut_btn" class="toolbar_btn icon_only" title="Shortcuts">
+              <i class="fa-solid fa-keyboard"></i>
+            </button>
             <button id="share_url_btn" class="toolbar_btn" title="Share (Ctrl+Shift+S)"
               onclick="window.openShareModal && window.openShareModal()">
               <i class="fa-solid fa-share-nodes"></i>
               <span>Share</span>
             </button>
-            <button id="kb_shortcut_btn" class="toolbar_btn icon_only" title="Shortcuts">
-              <i class="fa-solid fa-keyboard"></i>
-            </button>
           </div>
-
-          <div class="toolbar_divider"></div>
 
           <!-- Bộ lọc Brand (được kéo dài) -->
           <div class="dom_filter" style="display:none;">
@@ -2059,16 +2057,16 @@
                   id="preview_workspace_url">https://meta.domation.net/...</span></p>
             </div>
 
-            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed #e2e8f0;">
+            <div style="margin-top: 2.5rem; padding: 2rem; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; border-radius: 12px; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.05);">
               <label
-                style="display:flex; align-items:center; gap: 0.5rem; font-weight:700; color: #475569; margin-bottom:0.8rem; font-size: 1.25rem;">
-                <i class="fa-solid fa-microchip" style="color: #10b981;"></i> Gemini API Key (Bắt buộc để dùng AI)
+                style="display:flex; align-items:center; gap: 0.8rem; font-weight:800; color: #166534; margin-bottom:1rem; font-size: 1.35rem;">
+                <i class="fa-solid fa-link" style="color: #10b981; font-size:1.6rem;"></i> Connect đồng bộ Gemini với dữ liệu hiện tại.
               </label>
               <input type="password" id="edit_workspace_gemini_key" class="dom-input" placeholder="Nhập Gemini API Key của bạn..."
-                style="width:100%; padding: 1.2rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1.35rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s;"
-                onfocus="this.style.borderColor='var(--mainClr)'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'"
-                onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
-              <p style="margin: 0.8rem 0 0; font-size: 1.15rem; color: #64748b; font-weight: 500;">Bắt buộc phải có API Key riêng để xuất báo cáo AI. Tính năng này chỉ hiển thị với Owner.</p>
+                style="width:100%; padding: 1.2rem; border: 2px solid #86efac; border-radius: 8px; font-size: 1.35rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);"
+                onfocus="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 0 3px rgba(16, 185, 129, 0.2)'"
+                onblur="this.style.borderColor='#86efac'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.02)'">
+              <p style="margin: 1rem 0 0; font-size: 1.15rem; color: #15803d; font-weight: 500;">Vui lòng nhập Gemini API Key của bạn để sử dụng tính năng phân tích nâng cao. Tính năng này chỉ hiển thị với Owner.</p>
             </div>
           </div>
 
@@ -2824,7 +2822,7 @@
 <!-- 2. API layer -->
 <script src="./js/api/constants.js?v=9"></script>
 <script src="./js/api/fetch.js?v=9"></script>
-<script src="./js/api/account.js?v=22"></script>
+<script src="./js/api/account.js?v=23"></script>
 <script src="./js/api/meta_insights.js?v=9"></script>
 
 <!-- 3. Data helpers (phải load sớm vì toggleSkeletons, getResults được dùng ở nhiều nơi) -->
@@ -2876,7 +2874,7 @@
 <!-- 9. App wiring (dashboard trước → startup gọi main() cuối cùng) -->
 <script src="./js/core/listeners.js?v=9"></script>
 <script src="./js/core/dashboard.js?v=9"></script>
-<script src="./js/api/account_manager.js?v=27"></script>
+<script src="./js/api/account_manager.js?v=28"></script>
 <script src="./js/core/startup.js?v=9"></script>
 
 <!-- ═══════════════════════════════════════════════════

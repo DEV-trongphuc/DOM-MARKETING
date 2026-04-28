@@ -11,14 +11,16 @@ $GLOBALS['raw_post_data'] = file_get_contents("php://input");
 $body = json_decode($GLOBALS['raw_post_data'], true) ?: [];
 
 // Helper
-function _json($data, $status = 200) {
+function _json($data, $status = 200)
+{
     http_response_code($status);
     echo json_encode($data);
     exit;
 }
 
 // JWT Helpers
-function generate_admin_token($payload) {
+function generate_admin_token($payload)
+{
     $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
     $payload['exp'] = time() + (86400 * 7); // 7 days expiration
     $b64Header = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
@@ -28,26 +30,32 @@ function generate_admin_token($payload) {
     return $b64Header . "." . $b64Payload . "." . $b64Signature;
 }
 
-function verify_admin_token($token) {
-    if (!$token) return false;
+function verify_admin_token($token)
+{
+    if (!$token)
+        return false;
     $parts = explode('.', $token);
-    if (count($parts) !== 3) return false;
+    if (count($parts) !== 3)
+        return false;
     list($header, $payload, $signature) = $parts;
-    
+
     $valid_signature = hash_hmac('sha256', $header . "." . $payload, ADMIN_SECRET_KEY, true);
     $b64ValidSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($valid_signature));
-    
+
     if (hash_equals($b64ValidSignature, $signature)) {
         $decoded = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $payload)), true);
-        if (isset($decoded['exp']) && $decoded['exp'] < time()) return false;
+        if (isset($decoded['exp']) && $decoded['exp'] < time())
+            return false;
         return $decoded;
     }
     return false;
 }
 
 // Fire-and-forget Email Webhook using cURL
-function _send_webhook_email($payload) {
-    if (!defined('WEBHOOK_EMAIL_URL') || !WEBHOOK_EMAIL_URL) return;
+function _send_webhook_email($payload)
+{
+    if (!defined('WEBHOOK_EMAIL_URL') || !WEBHOOK_EMAIL_URL)
+        return;
     $ch = curl_init(WEBHOOK_EMAIL_URL);
     $payload_json = json_encode($payload);
     curl_setopt_array($ch, [
@@ -67,7 +75,8 @@ $action = $_GET['action'] ?? $body['action'] ?? '';
 
 // ── Rate Limiter ─────────────────────────────────────────────────────────────
 // Simple IP-based rate limiter using DB to prevent spam/brute-force.
-function _check_rate_limit(PDO $pdo, string $ip, int $limit = RATE_LIMIT_MAX_REQUESTS, int $window = RATE_LIMIT_WINDOW): void {
+function _check_rate_limit(PDO $pdo, string $ip, int $limit = RATE_LIMIT_MAX_REQUESTS, int $window = RATE_LIMIT_WINDOW): void
+{
     try {
         // Cleanup old entries first
         $pdo->prepare("DELETE FROM saas_rate_limits WHERE created_at < DATE_SUB(NOW(), INTERVAL ? SECOND)")->execute([$window]);
@@ -87,10 +96,13 @@ function _check_rate_limit(PDO $pdo, string $ip, int $limit = RATE_LIMIT_MAX_REQ
 
 // ── Admin Email Verifier ──────────────────────────────────────────────────────
 // Returns true if $email owns or is super-admin of $slug tenant.
-function _verify_admin_for_slug(PDO $pdo, string $slug, string $admin_email): bool {
-    if (!$slug || !$admin_email) return false;
+function _verify_admin_for_slug(PDO $pdo, string $slug, string $admin_email): bool
+{
+    if (!$slug || !$admin_email)
+        return false;
     $is_super = (strtolower($admin_email) === 'dom.marketing.vn@gmail.com');
-    if ($is_super) return true;
+    if ($is_super)
+        return true;
     $stmt = $pdo->prepare("SELECT google_email FROM saas_tenants WHERE slug = ?");
     $stmt->execute([$slug]);
     $tenant = $stmt->fetch();
@@ -98,23 +110,28 @@ function _verify_admin_for_slug(PDO $pdo, string $slug, string $admin_email): bo
 }
 
 // Returns true if $email is an active member (owner or viewer) of $slug tenant AND tenant is not expired.
-function _verify_tenant_member(PDO $pdo, string $slug, string $email): bool {
-    if (!$slug || !$email) return false;
+function _verify_tenant_member(PDO $pdo, string $slug, string $email): bool
+{
+    if (!$slug || !$email)
+        return false;
     // Super admin always passes
-    if (strtolower($email) === 'dom.marketing.vn@gmail.com') return true;
+    if (strtolower($email) === 'dom.marketing.vn@gmail.com')
+        return true;
     // Check owner and tenant expiry
     $stmt = $pdo->prepare("SELECT google_email, status, expires_at FROM saas_tenants WHERE slug = ?");
     $stmt->execute([$slug]);
     $tenant = $stmt->fetch();
-    if (!$tenant) return false;
+    if (!$tenant)
+        return false;
 
     // Reject if expired or locked
     if ($tenant['status'] === 'locked' || ($tenant['expires_at'] && strtotime($tenant['expires_at']) < time())) {
         return false;
     }
 
-    if (strtolower($email) === strtolower($tenant['google_email'])) return true;
-    
+    if (strtolower($email) === strtolower($tenant['google_email']))
+        return true;
+
     // Check active viewer
     $vstmt = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ? AND status = 'active'");
     $vstmt->execute([$slug, $email]);
@@ -127,7 +144,8 @@ try {
         case 'migrate_auth':
             try {
                 $pdo->exec("ALTER TABLE saas_tenants ADD COLUMN is_public TINYINT(1) DEFAULT 0 COMMENT '1: Public Link enabled'");
-            } catch (Exception $e) {}
+            } catch (Exception $e) {
+            }
             try {
                 $pdo->exec("CREATE TABLE IF NOT EXISTS `saas_tenant_viewers` (
                   `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -141,7 +159,8 @@ try {
                   `added_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                   FOREIGN KEY (`tenant_slug`) REFERENCES `saas_tenants`(`slug`) ON DELETE CASCADE
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-            } catch (Exception $e) {}
+            } catch (Exception $e) {
+            }
             try {
                 $pdo->exec("CREATE TABLE IF NOT EXISTS `saas_rate_limits` (
                   `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -150,7 +169,8 @@ try {
                   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
                   INDEX idx_ip_created (ip, created_at)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-            } catch (Exception $e) {}
+            } catch (Exception $e) {
+            }
             _json(["ok" => true, "message" => "Migration complete"]);
             break;
 
@@ -158,7 +178,8 @@ try {
         // --- 1. SAAS CLIENT API (For End Users) ---
         case 'get_user_tenants':
             $email = $_GET['email'] ?? $body['email'] ?? '';
-            if (!$email) _json(["ok" => false, "error" => "Missing email"], 400);
+            if (!$email)
+                _json(["ok" => false, "error" => "Missing email"], 400);
 
             // 1. Fetch owned tenants
             $stmt1 = $pdo->prepare("SELECT slug, name, status, expires_at, 'owner' as role FROM saas_tenants WHERE google_email = ?");
@@ -182,16 +203,18 @@ try {
 
         // --- 1. TENANT ENDPOINTS ---
         case 'client_register':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = trim($body['slug'] ?? '');
             $name = trim($body['name'] ?? '');
             $email = trim($body['google_email'] ?? '');
             $token = trim($body['meta_token'] ?? '');
             $accounts = $body['ad_accounts'] ?? [];
-            
+
             $plan = $body['plan'] ?? 'trial';
-            
-            if (!$slug || !$name || !$token) _json(["ok" => false, "error" => "Missing required fields"], 400);
+
+            if (!$slug || !$name || !$token)
+                _json(["ok" => false, "error" => "Missing required fields"], 400);
 
             // Chặn các slug dành riêng cho hệ thống
             $reserved_slugs = ['admin', 'register', 'workspaces', 'api', 'assets', 'css', 'js', 'lib', 'server'];
@@ -207,7 +230,7 @@ try {
                     _json(["ok" => false, "error" => "Tài khoản của bạn đã sử dụng quyền dùng thử. Để tạo thêm Workspace mới, vui lòng chọn gói trả phí!"], 403);
                 }
             }
-            
+
             // VERIFY TOKEN TRƯỚC KHI TẠO
             $verify_url = "https://graph.facebook.com/v19.0/me?access_token=" . urlencode($token);
             $ch_v = curl_init();
@@ -217,7 +240,7 @@ try {
             curl_setopt($ch_v, CURLOPT_TIMEOUT, 15);
             $v_res = curl_exec($ch_v);
             curl_close($ch_v);
-            
+
             $v_data = json_decode($v_res, true);
             if (isset($v_data['error']) || !isset($v_data['id'])) {
                 _json(["ok" => false, "error" => "Meta Token không hợp lệ hoặc đã hết hạn!"], 400);
@@ -226,14 +249,14 @@ try {
             $first_account = !empty($accounts) ? $accounts[0]['id'] : '';
             $accounts_json = json_encode($accounts);
 
-            // Mặc định luôn tạo dự án mới ở trạng thái dùng thử 1 ngày
+            // Mặc định luôn tạo dự án mới ở trạng thái dùng thử 3 ngày
             $status = 'trial';
-            $interval = '1 DAY';
+            $interval = '3 DAY';
 
             try {
                 $stmt = $pdo->prepare("INSERT INTO saas_tenants (slug, name, google_email, meta_token, ad_account_id, ad_accounts, status, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL $interval))");
                 $stmt->execute([$slug, $name, $email, $token, $first_account, $accounts_json, $status]);
-                
+
                 // Nếu người dùng chọn mua gói, tự động đẩy yêu cầu vào hệ thống duyệt của Admin
                 if ($plan === '1_month' || $plan === '1_year') {
                     $phone = trim($body['phone'] ?? '');
@@ -265,21 +288,23 @@ try {
             break;
 
         case 'submit_renewal':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $plan = $body['plan'] ?? '';
             $phone = $body['phone'] ?? '';
             $email = $body['email'] ?? '';
-            
-            if (!$slug || !$plan || !$phone) _json(["ok" => false, "error" => "Vui lòng nhập đủ SĐT và Tên gói"], 400);
-            
+
+            if (!$slug || !$plan || !$phone)
+                _json(["ok" => false, "error" => "Vui lòng nhập đủ SĐT và Tên gói"], 400);
+
             $stmt = $pdo->prepare("INSERT INTO saas_renewal_requests (tenant_slug, plan, phone, email) VALUES (?, ?, ?, ?)");
             $stmt->execute([$slug, $plan, $phone, $email]);
 
             $tstmt = $pdo->prepare("SELECT name FROM saas_tenants WHERE slug = ?");
             $tstmt->execute([$slug]);
             $t = $tstmt->fetch();
-            
+
             // Bắn mail Xin gia hạn
             _send_webhook_email([
                 'type' => 'renewal',
@@ -293,9 +318,11 @@ try {
             break;
 
         case 'check_slug':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = trim($body['slug'] ?? '');
-            if (!$slug) _json(["ok" => false, "error" => "Missing slug"], 400);
+            if (!$slug)
+                _json(["ok" => false, "error" => "Missing slug"], 400);
 
             $reserved_slugs = ['admin', 'register', 'workspaces', 'api', 'assets', 'css', 'js', 'lib', 'server'];
             if (in_array(strtolower($slug), $reserved_slugs)) {
@@ -305,14 +332,16 @@ try {
             $stmt = $pdo->prepare("SELECT id FROM saas_tenants WHERE slug = ?");
             $stmt->execute([$slug]);
             $exists = $stmt->fetch() ? true : false;
-            
+
             _json(["ok" => true, "exists" => $exists]);
             break;
 
         case 'fetch_meta_accounts':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $token = $body['meta_token'] ?? '';
-            if (!$token) _json(["ok" => false, "error" => "Missing token"], 400);
+            if (!$token)
+                _json(["ok" => false, "error" => "Missing token"], 400);
 
             // Fetch Businesses
             $b_url = "https://graph.facebook.com/v19.0/me/businesses?fields=id,name,client_ad_accounts{id,name,account_id}&limit=100&access_token=" . urlencode($token);
@@ -323,7 +352,7 @@ try {
             curl_setopt($ch, CURLOPT_TIMEOUT, 20);
             $b_res = curl_exec($ch);
             curl_close($ch);
-            
+
             $b_data = json_decode($b_res, true);
             // Some tokens don't have business_management permission, so ignore (#100) error
             if (isset($b_data['error'])) {
@@ -345,25 +374,27 @@ try {
                 'businesses' => $b_data['data'] ?? [],
                 'personal_accounts' => $a_data['data'] ?? []
             ];
-            
+
             // If both failed or returned no data, but we had an error on adaccounts fetch, report that error
             if (empty($result['businesses']) && empty($result['personal_accounts']) && isset($a_data['error'])) {
                 _json(["ok" => false, "error" => $a_data['error']['message'] ?? "Invalid Token or Missing permissions (ads_read)"]);
             }
-            
+
             _json(["ok" => true, "data" => $result]);
             break;
 
         case 'get_tenant':
             $slug = $_GET['slug'] ?? '';
             $email = $_GET['email'] ?? ''; // Optional, for soft security auth
-            if (!$slug) _json(["ok" => false, "error" => "Missing slug"], 400);
+            if (!$slug)
+                _json(["ok" => false, "error" => "Missing slug"], 400);
 
             $stmt = $pdo->prepare("SELECT id, slug, name, google_email, status, expires_at, meta_token, gemini_api_key, ad_account_id, ad_accounts, brand_filter_enabled, is_public FROM saas_tenants WHERE slug = ?");
             $stmt->execute([$slug]);
             $tenant = $stmt->fetch();
 
-            if (!$tenant) _json(["ok" => false, "error" => "Tenant not found"], 404);
+            if (!$tenant)
+                _json(["ok" => false, "error" => "Tenant not found"], 404);
 
             $is_expired = false;
             if ($tenant['status'] === 'locked') {
@@ -406,35 +437,33 @@ try {
                     }
                 }
             }
-            
+
             // --- EXPIRY CHECK ---
             // Nếu đã hết hạn hoặc bị khóa, không trả về token để bắt buộc phải gia hạn
             if ($is_expired) {
                 $is_authorized = false;
             }
-            
+
             if (!$is_authorized) {
                 // Return tenant info but without sensitive token
                 $tenant['meta_token'] = null;
+                $tenant['gemini_api_key'] = null;
                 $tenant['ad_account_id'] = null;
                 $tenant['ad_accounts'] = null;
                 $tenant['unauthorized'] = true;
-            }
-
-            // ONLY owner can see their Gemini API Key
-            if (strtolower($email) !== strtolower($tenant['google_email'])) {
-                $tenant['gemini_api_key'] = null;
             }
 
             _json(["ok" => true, "tenant" => $tenant]);
             break;
 
         case 'update_token':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $token = $body['token'] ?? '';
             $admin_email = $body['admin_email'] ?? '';
-            if (!$slug || !$token) _json(["ok" => false, "error" => "Missing slug or token"], 400);
+            if (!$slug || !$token)
+                _json(["ok" => false, "error" => "Missing slug or token"], 400);
             // 🔒 Phải là owner hoặc super admin mới được update token
             if (!_verify_admin_for_slug($pdo, $slug, $admin_email)) {
                 _json(["ok" => false, "error" => "Unauthorized — chỉ Admin mới được cập nhật token"], 403);
@@ -442,7 +471,7 @@ try {
 
             $stmt = $pdo->prepare("UPDATE saas_tenants SET meta_token = ? WHERE slug = ?");
             $stmt->execute([$token, $slug]);
-            
+
             if ($stmt->rowCount() > 0) {
                 _json(["ok" => true, "message" => "Token updated"]);
             } else {
@@ -452,18 +481,21 @@ try {
 
         // --- 1.5. SAAS AUTH & SHARE ENDPOINTS ---
         case 'auth_check':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $email = $body['email'] ?? '';
-            if (!$slug) _json(["ok" => false, "error" => "Missing slug"], 400);
+            if (!$slug)
+                _json(["ok" => false, "error" => "Missing slug"], 400);
 
-            $stmt = $pdo->prepare("SELECT google_email, is_public, meta_token, ad_accounts, status, expires_at FROM saas_tenants WHERE slug = ?");
+            $stmt = $pdo->prepare("SELECT google_email, is_public, meta_token, gemini_api_key, ad_accounts, status, expires_at FROM saas_tenants WHERE slug = ?");
             $stmt->execute([$slug]);
             $tenant = $stmt->fetch();
-            if (!$tenant) _json(["ok" => false, "error" => "Workspace không tồn tại"], 404);
+            if (!$tenant)
+                _json(["ok" => false, "error" => "Workspace không tồn tại"], 404);
 
             $is_super_admin = (strtolower($email) === 'dom.marketing.vn@gmail.com');
-            
+
             // Check if request comes from Super Admin via token
             $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
             if ($authHeader) {
@@ -475,7 +507,7 @@ try {
 
             $is_admin = (strtolower($email) === strtolower($tenant['google_email']));
             $is_public = $tenant['is_public'] == 1;
-            
+
             // Expiry check
             $is_expired = false;
             if ($tenant['status'] === 'locked') {
@@ -487,14 +519,16 @@ try {
             // Strip tokens if expired
             $safe_token = $is_expired ? null : $tenant['meta_token'];
             $safe_accounts = $is_expired ? null : $tenant['ad_accounts'];
+            $safe_gemini = $tenant['gemini_api_key']; // Always return if admin
 
             if ($is_admin || $is_super_admin) {
                 _json([
-                    "ok" => true, 
-                    "role" => "admin", 
-                    "status" => "active", 
+                    "ok" => true,
+                    "role" => "admin",
+                    "status" => "active",
                     "is_public" => $is_public,
                     "meta_token" => $safe_token,
+                    "gemini_api_key" => $safe_gemini,
                     "ad_accounts" => $safe_accounts,
                     "is_expired" => $is_expired
                 ]);
@@ -507,11 +541,12 @@ try {
             if ($viewer) {
                 $is_active = ($viewer['status'] === 'active');
                 _json([
-                    "ok" => true, 
-                    "role" => $viewer['role'], 
-                    "status" => $viewer['status'], 
+                    "ok" => true,
+                    "role" => $viewer['role'],
+                    "status" => $viewer['status'],
                     "is_public" => $is_public,
                     "meta_token" => ($is_active && !$is_expired) ? $safe_token : null,
+                    "gemini_api_key" => ($is_active && !$is_expired) ? $safe_gemini : null,
                     "ad_accounts" => ($is_active && !$is_expired) ? $safe_accounts : null,
                     "is_expired" => $is_expired
                 ]);
@@ -521,7 +556,8 @@ try {
             break;
 
         case 'auth_request':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             // 🔒 Rate limit: tối đa 10 request access per IP per phút
             $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
             _check_rate_limit($pdo, $client_ip, 10, 60);
@@ -529,7 +565,8 @@ try {
             $email = $body['email'] ?? '';
             $name = $body['name'] ?? '';
             $picture = $body['picture'] ?? '';
-            if (!$slug || !$email) _json(["ok" => false, "error" => "Missing slug or email"], 400);
+            if (!$slug || !$email)
+                _json(["ok" => false, "error" => "Missing slug or email"], 400);
 
             $stmt = $pdo->prepare("INSERT INTO saas_tenant_viewers (tenant_slug, email, name, picture, role, status, request_at) VALUES (?, ?, ?, ?, 'viewer', 'request', NOW()) ON DUPLICATE KEY UPDATE name=?, picture=?, status='request', request_at=NOW()");
             $stmt->execute([$slug, $email, $name, $picture, $name, $picture]);
@@ -537,16 +574,28 @@ try {
             break;
 
         case 'auth_get_users':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $admin_email = $body['admin_email'] ?? '';
-            
+
             $stmt = $pdo->prepare("SELECT google_email, is_public FROM saas_tenants WHERE slug = ?");
             $stmt->execute([$slug]);
             $tenant = $stmt->fetch();
+
+            $is_super_admin = (strtolower($admin_email) === 'dom.marketing.vn@gmail.com');
             
-            if (!$tenant || strtolower($admin_email) !== strtolower($tenant['google_email'])) {
-                _json(["ok" => false, "error" => "Chỉ Owner mới có quyền xem danh sách"], 403);
+            // Check if request comes from Super Admin via token
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if ($authHeader) {
+                $token = str_replace('Bearer ', '', $authHeader);
+                if (verify_admin_token($token)) {
+                    $is_super_admin = true;
+                }
+            }
+
+            if (!$tenant || (strtolower($admin_email) !== strtolower($tenant['google_email']) && !$is_super_admin)) {
+                _json(["ok" => false, "error" => "Chỉ Owner hoặc Admin mới có quyền xem danh sách"], 403);
             }
 
             $ustmt = $pdo->prepare("SELECT email, name, picture, role, status, request_at, added_at FROM saas_tenant_viewers WHERE tenant_slug = ? ORDER BY added_at DESC");
@@ -563,14 +612,15 @@ try {
                 "added_at" => null,
                 "is_owner" => true
             ];
-            
+
             array_unshift($users, $admin_user);
 
             _json(["ok" => true, "users" => $users, "is_public" => $tenant['is_public'] == 1]);
             break;
 
         case 'auth_update_user':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $admin_email = $body['admin_email'] ?? '';
             $target_email = $body['target_email'] ?? '';
@@ -581,6 +631,16 @@ try {
             $stmt->execute([$slug]);
             $tenant = $stmt->fetch();
             $is_super_admin = (strtolower($admin_email) === 'dom.marketing.vn@gmail.com');
+            
+            // Check if request comes from Super Admin via token
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if ($authHeader) {
+                $token = str_replace('Bearer ', '', $authHeader);
+                if (verify_admin_token($token)) {
+                    $is_super_admin = true;
+                }
+            }
+
             if (!$tenant || (strtolower($admin_email) !== strtolower($tenant['google_email']) && !$is_super_admin)) {
                 _json(["ok" => false, "error" => "Unauthorized"], 403);
             }
@@ -601,7 +661,8 @@ try {
             break;
 
         case 'auth_toggle_public':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $admin_email = $body['admin_email'] ?? '';
             $is_public = isset($body['is_public']) && $body['is_public'] ? 1 : 0;
@@ -610,6 +671,16 @@ try {
             $stmt->execute([$slug]);
             $tenant = $stmt->fetch();
             $is_super_admin = (strtolower($admin_email) === 'dom.marketing.vn@gmail.com');
+            
+            // Check if request comes from Super Admin via token
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if ($authHeader) {
+                $token = str_replace('Bearer ', '', $authHeader);
+                if (verify_admin_token($token)) {
+                    $is_super_admin = true;
+                }
+            }
+
             if (!$tenant || (strtolower($admin_email) !== strtolower($tenant['google_email']) && !$is_super_admin)) {
                 _json(["ok" => false, "error" => "Unauthorized"], 403);
             }
@@ -619,23 +690,35 @@ try {
             break;
 
         case 'auth_update_accounts':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $admin_email = $body['admin_email'] ?? '';
             $ad_accounts = $body['ad_accounts'] ?? null;
-            
-            if (!$slug || $ad_accounts === null) _json(["ok" => false, "error" => "Missing data"], 400);
+
+            if (!$slug || $ad_accounts === null)
+                _json(["ok" => false, "error" => "Missing data"], 400);
 
             $stmt = $pdo->prepare("SELECT google_email FROM saas_tenants WHERE slug = ?");
             $stmt->execute([$slug]);
             $tenant = $stmt->fetch();
             $is_super_admin = (strtolower($admin_email) === 'dom.marketing.vn@gmail.com');
+            
+            // Check if request comes from Super Admin via token
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if ($authHeader) {
+                $token = str_replace('Bearer ', '', $authHeader);
+                if (verify_admin_token($token)) {
+                    $is_super_admin = true;
+                }
+            }
+
             if (!$tenant || (strtolower($admin_email) !== strtolower($tenant['google_email']) && !$is_super_admin)) {
                 _json(["ok" => false, "error" => "Unauthorized"], 403);
             }
 
             $json_accounts = is_array($ad_accounts) ? json_encode($ad_accounts) : $ad_accounts;
-            
+
             // Lấy account đầu tiên trong danh sách để đặt làm default ad_account_id
             $first_account_id = '';
             if (is_array($ad_accounts) && count($ad_accounts) > 0) {
@@ -655,41 +738,54 @@ try {
                     break;
                 }
             }
-            
+
             $pdo->prepare("UPDATE saas_tenants SET ad_accounts = ?, ad_account_id = ? WHERE slug = ?")
                 ->execute([$json_accounts, $first_account_id, $slug]);
-            
+
             _json(["ok" => true, "message" => "Cập nhật tài khoản thành công"]);
             break;
 
         case 'auth_update_settings':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $admin_email = $body['admin_email'] ?? '';
             $gemini_api_key = $body['gemini_api_key'] ?? '';
-            
-            if (!$slug) _json(["ok" => false, "error" => "Missing data"], 400);
+
+            if (!$slug)
+                _json(["ok" => false, "error" => "Missing data"], 400);
 
             $stmt = $pdo->prepare("SELECT google_email FROM saas_tenants WHERE slug = ?");
             $stmt->execute([$slug]);
             $tenant = $stmt->fetch();
             $is_super_admin = (strtolower($admin_email) === 'dom.marketing.vn@gmail.com');
+            
+            // Check if request comes from Super Admin via token
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if ($authHeader) {
+                $token = str_replace('Bearer ', '', $authHeader);
+                if (verify_admin_token($token)) {
+                    $is_super_admin = true;
+                }
+            }
+
             if (!$tenant || (strtolower($admin_email) !== strtolower($tenant['google_email']) && !$is_super_admin)) {
                 _json(["ok" => false, "error" => "Unauthorized"], 403);
             }
 
             $pdo->prepare("UPDATE saas_tenants SET gemini_api_key = ? WHERE slug = ?")
                 ->execute([$gemini_api_key, $slug]);
-            
+
             _json(["ok" => true, "message" => "Cập nhật cài đặt thành công"]);
             break;
 
         // --- 2. ADMIN ENDPOINTS ---
         case 'admin_login':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $username = $body['username'] ?? '';
             $password = $body['password'] ?? '';
-            
+
             $stmt = $pdo->prepare("SELECT id, password_hash, role FROM saas_users WHERE username = ?");
             $stmt->execute([$username]);
             $user = $stmt->fetch();
@@ -708,11 +804,12 @@ try {
             $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
             $token = str_replace('Bearer ', '', $authHeader);
             $decoded = verify_admin_token($token);
-            if (!$decoded) _json(["ok" => false, "error" => "Unauthorized"], 401);
-            
-            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 100;
-            $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
-            
+            if (!$decoded)
+                _json(["ok" => false, "error" => "Unauthorized"], 401);
+
+            $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 100;
+            $offset = isset($_GET['offset']) ? (int) $_GET['offset'] : 0;
+
             $stmt = $pdo->prepare("SELECT id, slug, name, google_email, status, expires_at, ad_account_id, brand_filter_enabled, created_at FROM saas_tenants ORDER BY created_at DESC LIMIT :limit OFFSET :offset");
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -725,14 +822,17 @@ try {
             $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
             $token = str_replace('Bearer ', '', $authHeader);
             $decoded = verify_admin_token($token);
-            if (!$decoded) _json(["ok" => false, "error" => "Unauthorized"], 401);
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if (!$decoded)
+                _json(["ok" => false, "error" => "Unauthorized"], 401);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
 
             $slug = trim($body['slug'] ?? '');
             $name = trim($body['name'] ?? '');
             $ad_account_id = trim($body['ad_account_id'] ?? '');
 
-            if (!$slug || !$name) _json(["ok" => false, "error" => "Missing slug or name"], 400);
+            if (!$slug || !$name)
+                _json(["ok" => false, "error" => "Missing slug or name"], 400);
 
             try {
                 $stmt = $pdo->prepare("INSERT INTO saas_tenants (slug, name, ad_account_id, status, expires_at) VALUES (?, ?, ?, 'active', DATE_ADD(NOW(), INTERVAL 1 YEAR))");
@@ -750,14 +850,17 @@ try {
             $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
             $token = str_replace('Bearer ', '', $authHeader);
             $decoded = verify_admin_token($token);
-            if (!$decoded) _json(["ok" => false, "error" => "Unauthorized"], 401);
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if (!$decoded)
+                _json(["ok" => false, "error" => "Unauthorized"], 401);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
 
             $slug = $body['slug'] ?? '';
             $status = $body['status'] ?? ''; // 'trial', 'active', 'expired', 'locked'
-            $add_days = (int)($body['add_days'] ?? 0);
+            $add_days = (int) ($body['add_days'] ?? 0);
 
-            if (!$slug) _json(["ok" => false, "error" => "Missing slug"], 400);
+            if (!$slug)
+                _json(["ok" => false, "error" => "Missing slug"], 400);
 
             $updates = [];
             $params = [];
@@ -766,7 +869,7 @@ try {
                 $updates[] = "status = ?";
                 $params[] = $status;
             }
-            
+
             if ($add_days > 0) {
                 // If it was expired, we add from NOW(). If it is active, we add from expires_at.
                 // For simplicity, let's just add to expires_at if it exists and is > NOW, else add to NOW.
@@ -775,7 +878,8 @@ try {
                 $params[] = $add_days;
             }
 
-            if (empty($updates)) _json(["ok" => false, "error" => "Nothing to update"], 400);
+            if (empty($updates))
+                _json(["ok" => false, "error" => "Nothing to update"], 400);
 
             $params[] = $slug;
             $stmt = $pdo->prepare("UPDATE saas_tenants SET " . implode(", ", $updates) . " WHERE slug = ?");
@@ -805,7 +909,8 @@ try {
             $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
             $token = str_replace('Bearer ', '', $authHeader);
             $decoded = verify_admin_token($token);
-            if (!$decoded) _json(["ok" => false, "error" => "Unauthorized"], 401);
+            if (!$decoded)
+                _json(["ok" => false, "error" => "Unauthorized"], 401);
 
             $stmt = $pdo->query("SELECT r.*, t.name as tenant_name FROM saas_renewal_requests r JOIN saas_tenants t ON r.tenant_slug = t.slug ORDER BY r.created_at DESC");
             $requests = $stmt->fetchAll();
@@ -816,12 +921,14 @@ try {
             $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
             $token = str_replace('Bearer ', '', $authHeader);
             $decoded = verify_admin_token($token);
-            if (!$decoded) _json(["ok" => false, "error" => "Unauthorized"], 401);
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
-            
+            if (!$decoded)
+                _json(["ok" => false, "error" => "Unauthorized"], 401);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
+
             $id = $body['id'] ?? '';
             $status = $body['status'] ?? 'resolved';
-            
+
             $stmt = $pdo->prepare("UPDATE saas_renewal_requests SET status = ? WHERE id = ?");
             $stmt->execute([$status, $id]);
             _json(["ok" => true]);
@@ -831,11 +938,13 @@ try {
             $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
             $token = str_replace('Bearer ', '', $authHeader);
             $decoded = verify_admin_token($token);
-            if (!$decoded) _json(["ok" => false, "error" => "Unauthorized"], 401);
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if (!$decoded)
+                _json(["ok" => false, "error" => "Unauthorized"], 401);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
-            $enabled = isset($body['enabled']) ? (int)$body['enabled'] : 1;
-            
+            $enabled = isset($body['enabled']) ? (int) $body['enabled'] : 1;
+
             $stmt = $pdo->prepare("UPDATE saas_tenants SET brand_filter_enabled = ? WHERE slug = ?");
             $stmt->execute([$enabled, $slug]);
             _json(["ok" => true, "message" => "Filter toggled"]);
@@ -843,11 +952,13 @@ try {
 
         // --- 3. AI REPORTS ENDPOINTS ---
         case 'ai_save':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $report = $body['report'] ?? [];
             $user_email = $body['user_email'] ?? '';
-            if (!$slug || empty($report) || !isset($report['id'])) _json(["ok" => false, "error" => "Missing data"], 400);
+            if (!$slug || empty($report) || !isset($report['id']))
+                _json(["ok" => false, "error" => "Missing data"], 400);
             // 🔒 Chỉ active member của tenant mới được lưu báo cáo AI
             if (!_verify_tenant_member($pdo, $slug, $user_email)) {
                 _json(["ok" => false, "error" => "Unauthorized"], 403);
@@ -871,13 +982,14 @@ try {
 
             // Keep only max 20 per tenant
             $pdo->prepare("DELETE FROM saas_ai_reports WHERE tenant_slug = ? AND local_id NOT IN (SELECT local_id FROM (SELECT local_id FROM saas_ai_reports WHERE tenant_slug = ? ORDER BY local_id DESC LIMIT 20) foo)")->execute([$slug, $slug]);
-            
+
             _json(["ok" => true]);
             break;
 
         case 'ai_list':
             $slug = $_GET['slug'] ?? $body['slug'] ?? '';
-            if (!$slug) _json(["ok" => false, "error" => "Missing slug"], 400);
+            if (!$slug)
+                _json(["ok" => false, "error" => "Missing slug"], 400);
 
             $stmt = $pdo->prepare("SELECT local_id as id, timestamp, label, brand, dateRange, preview, html FROM saas_ai_reports WHERE tenant_slug = ? ORDER BY local_id DESC");
             $stmt->execute([$slug]);
@@ -886,11 +998,13 @@ try {
             break;
 
         case 'ai_delete':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $slug = $body['slug'] ?? '';
             $local_id = $body['id'] ?? '';
             $user_email = $body['user_email'] ?? '';
-            if (!$slug || !$local_id) _json(["ok" => false, "error" => "Missing data"], 400);
+            if (!$slug || !$local_id)
+                _json(["ok" => false, "error" => "Missing data"], 400);
             // 🔒 Chỉ active member mới được xóa báo cáo
             if (!_verify_tenant_member($pdo, $slug, $user_email)) {
                 _json(["ok" => false, "error" => "Unauthorized"], 403);
@@ -902,14 +1016,16 @@ try {
             break;
 
         case 'ai_generate':
-            if ($method !== 'POST') _json(["ok" => false, "error" => "Method not allowed"], 405);
+            if ($method !== 'POST')
+                _json(["ok" => false, "error" => "Method not allowed"], 405);
             $prompt = $body['prompt'] ?? '';
-            if (empty($prompt)) _json(["ok" => false, "error" => "Missing 'prompt' field"], 400);
+            if (empty($prompt))
+                _json(["ok" => false, "error" => "Missing 'prompt' field"], 400);
 
             if (mb_strlen($prompt) > 80000) {
                 _json(["ok" => false, "error" => "Prompt quá dài"], 400);
             }
-            
+
             $slug = $body['slug'] ?? '';
             $active_api_key = '';
 
@@ -938,7 +1054,7 @@ try {
                 ],
                 "generationConfig" => [
                     "temperature" => 1.5,
-                    "maxOutputTokens" => 16384,
+                    "maxOutputTokens" => 50000,
                 ]
             ]);
 

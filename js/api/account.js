@@ -38,13 +38,13 @@ async function initAccountSelector() {
       window.APP_CONFIG.META_TOKEN = targetToken;
       // Lưu Global Currency, mặc định là VND nếu tài khoản cũ chưa có field này
       window.GLOBAL_CURRENCY = targetAccount.currency || 'VND';
-      updateSelectedAccountUI(targetAccount.name, cleanId, targetAccount.avatar || "./assets/dom_avatar.jpg");
+      updateSelectedAccountUI(targetAccount.name, cleanId, targetAccount.avatar || "https://domation.net/imgs/ICON.png");
       
       // Tự động fetch avatar mới nhất (BM hoặc User)
       fetchActiveAccountAvatar(cleanId, targetToken);
   } else {
       window.GLOBAL_CURRENCY = 'VND';
-      updateSelectedAccountUI("Chưa có Account", "---", "./assets/dom_avatar.jpg");
+      updateSelectedAccountUI("Chưa có Account", "---", "https://domation.net/imgs/ICON.png");
   }
 }
 
@@ -65,27 +65,19 @@ function updateSelectedAccountUI(name, id, avatarUrl) {
 async function fetchActiveAccountAvatar(accountId, token) {
     if (!accountId || !token) return;
     try {
-        // Fetch song song avatar của User (mặc định) và avatar của Business (nếu có quyền)
-        const meUrl = `https://graph.facebook.com/v20.0/me?fields=picture.width(200).height(200)&access_token=${token}`;
+        // Cố gắng fetch ảnh BM nếu có quyền
         const accUrl = `https://graph.facebook.com/v20.0/act_${accountId}?fields=business{profile_picture_uri}&access_token=${token}`;
-        
-        const [meRes, accRes] = await Promise.all([fetch(meUrl), fetch(accUrl)]);
-        const meData = await meRes.json();
+        const accRes = await fetch(accUrl);
         const accData = await accRes.json();
         
-        let finalAvatarUrl = null;
+        let finalAvatarUrl = "https://domation.net/imgs/ICON.png";
         
         // Ưu tiên ảnh BM nếu có và không bị lỗi permission
         if (accData && accData.business && accData.business.profile_picture_uri) {
             finalAvatarUrl = accData.business.profile_picture_uri;
-        } else if (meData && meData.picture && meData.picture.data && meData.picture.data.url) {
-            // Fallback ảnh user
-            finalAvatarUrl = meData.picture.data.url;
         }
         
-        if (finalAvatarUrl) {
-            updateSelectedAccountUI(null, null, finalAvatarUrl);
-        }
+        updateSelectedAccountUI(null, null, finalAvatarUrl);
     } catch (err) {
         console.warn("Could not fetch active account avatar:", err);
     }

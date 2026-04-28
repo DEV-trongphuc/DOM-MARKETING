@@ -247,12 +247,12 @@ YÊU CẦU PHÂN TÍCH SO SÁNH:
       
       if (err.message && err.message.includes("Chưa cấu hình GEMINI API KEY")) {
           errorHtml += `
-            <div style="background:#fffbeb; border:1px solid #fde68a; padding:1.5rem; border-radius:8px; margin-top:1rem; max-width: 500px; margin-left: auto; margin-right: auto; text-align: left;">
-              <p style="color:#d97706; font-weight:600; margin-bottom:0.5rem;"><i class="fa-solid fa-key"></i> Bạn chưa cấu hình API Key</p>
-              <p style="color:#92400e; font-size:1.1rem; margin-bottom:1rem;">Nhập Gemini API Key của bạn để sử dụng tính năng phân tích (Chỉ dành cho Admin).</p>
+            <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border:1px solid #bbf7d0; padding:2rem; border-radius:12px; margin-top:1.5rem; max-width: 550px; margin-left: auto; margin-right: auto; text-align: left; box-shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.15);">
+              <p style="color:#166534; font-size:1.4rem; font-weight:800; margin-bottom:0.8rem; display:flex; align-items:center; gap:0.8rem;"><i class="fa-solid fa-link" style="font-size:1.6rem; color:#10b981;"></i> Connect đồng bộ Gemini với dữ liệu hiện tại.</p>
+              <p style="color:#15803d; font-size:1.1rem; margin-bottom:1.5rem; line-height:1.5;">Vui lòng nhập Gemini API Key của bạn để sử dụng tính năng phân tích nâng cao (Chỉ dành cho Admin).</p>
               <div style="display:flex; gap:0.5rem;">
-                <input type="password" id="quick_api_key_input" placeholder="Nhập API Key..." class="dom-input" style="flex:1; padding:0.8rem; border-radius:6px; border:1px solid #cbd5e1; outline:none;" onfocus="this.style.borderColor='var(--mainClr)'" onblur="this.style.borderColor='#cbd5e1'">
-                <button onclick="saveQuickApiKey('quick_api_key_input')" style="background:var(--mainClr); color:#fff; border:none; padding:0 1.5rem; border-radius:6px; font-weight:600; cursor:pointer; transition:all 0.2s;">Lưu lại</button>
+                <input type="password" id="quick_api_key_input" placeholder="Nhập Gemini API Key..." class="dom-input" style="flex:1; padding:1rem 1.2rem; border-radius:8px; border:2px solid #86efac; outline:none; font-size:1.1rem; transition:all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);" onfocus="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 0 3px rgba(16, 185, 129, 0.2)'" onblur="this.style.borderColor='#86efac'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.02)'">
+                <button onclick="saveQuickApiKey('quick_api_key_input')" style="background:linear-gradient(to right, #10b981, #059669); color:#fff; border:none; padding:0 2rem; border-radius:8px; font-weight:700; font-size:1.1rem; cursor:pointer; transition:all 0.2s; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(16, 185, 129, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(16, 185, 129, 0.3)'"><i class="fa-solid fa-check"></i> Lưu lại</button>
               </div>
             </div>
           `;
@@ -907,12 +907,12 @@ YÊU CẦU PHÂN TÍCH (đầy đủ, chi tiết, có số liệu cụ thể)
       
       if (err.message && err.message.includes("Chưa cấu hình GEMINI API KEY")) {
           errorHtml += `
-            <div style="background:#fffbeb; border:1px solid #fde68a; padding:1.5rem; border-radius:8px; margin-top:1rem; max-width: 500px; text-align: left;">
-              <p style="color:#d97706; font-weight:600; margin-bottom:0.5rem;"><i class="fa-solid fa-key"></i> Bạn chưa cấu hình API Key</p>
-              <p style="color:#92400e; font-size:1.1rem; margin-bottom:1rem;">Nhập Gemini API Key của bạn để sử dụng tính năng phân tích (Chỉ dành cho Admin).</p>
+            <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border:1px solid #bbf7d0; padding:2rem; border-radius:12px; margin-top:1.5rem; max-width: 550px; text-align: left; box-shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.15);">
+              <p style="color:#166534; font-size:1.4rem; font-weight:800; margin-bottom:0.8rem; display:flex; align-items:center; gap:0.8rem;"><i class="fa-solid fa-link" style="font-size:1.6rem; color:#10b981;"></i> Connect đồng bộ Gemini với dữ liệu hiện tại.</p>
+              <p style="color:#15803d; font-size:1.1rem; margin-bottom:1.5rem; line-height:1.5;">Vui lòng nhập Gemini API Key của bạn để sử dụng tính năng phân tích nâng cao (Chỉ dành cho Admin).</p>
               <div style="display:flex; gap:0.5rem;">
-                <input type="password" id="quick_api_key_input_2" placeholder="Nhập API Key..." class="dom-input" style="flex:1; padding:0.8rem; border-radius:6px; border:1px solid #cbd5e1; outline:none;" onfocus="this.style.borderColor='var(--mainClr)'" onblur="this.style.borderColor='#cbd5e1'">
-                <button onclick="saveQuickApiKey('quick_api_key_input_2')" style="background:var(--mainClr); color:#fff; border:none; padding:0 1.5rem; border-radius:6px; font-weight:600; cursor:pointer; transition:all 0.2s;">Lưu lại</button>
+                <input type="password" id="quick_api_key_input_2" placeholder="Nhập Gemini API Key..." class="dom-input" style="flex:1; padding:1rem 1.2rem; border-radius:8px; border:2px solid #86efac; outline:none; font-size:1.1rem; transition:all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);" onfocus="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 0 3px rgba(16, 185, 129, 0.2)'" onblur="this.style.borderColor='#86efac'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.02)'">
+                <button onclick="saveQuickApiKey('quick_api_key_input_2')" style="background:linear-gradient(to right, #10b981, #059669); color:#fff; border:none; padding:0 2rem; border-radius:8px; font-weight:700; font-size:1.1rem; cursor:pointer; transition:all 0.2s; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(16, 185, 129, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(16, 185, 129, 0.3)'"><i class="fa-solid fa-check"></i> Lưu lại</button>
               </div>
             </div>
           `;
