@@ -147,6 +147,10 @@ try {
             } catch (Exception $e) {
             }
             try {
+                $pdo->exec("ALTER TABLE saas_tenant_viewers ADD COLUMN last_login DATETIME");
+            } catch (Exception $e) {
+            }
+            try {
                 $pdo->exec("CREATE TABLE IF NOT EXISTS `saas_tenant_viewers` (
                   `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
                   `tenant_slug` VARCHAR(50) NOT NULL,
@@ -157,6 +161,7 @@ try {
                   `status` ENUM('active', 'request', 'rejected') DEFAULT 'request',
                   `request_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
                   `added_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                  `last_login` DATETIME,
                   FOREIGN KEY (`tenant_slug`) REFERENCES `saas_tenants`(`slug`) ON DELETE CASCADE
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
             } catch (Exception $e) {
@@ -534,11 +539,23 @@ try {
                 ]);
             }
 
+            $name = $body['name'] ?? '';
+            $picture = $body['picture'] ?? '';
+
             $vstmt = $pdo->prepare("SELECT role, status FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ?");
             $vstmt->execute([$slug, $email]);
             $viewer = $vstmt->fetch();
 
             if ($viewer) {
+                // Update viewer info when they log in
+                if ($name && $picture) {
+                    $upd = $pdo->prepare("UPDATE saas_tenant_viewers SET name = ?, picture = ?, last_login = NOW() WHERE tenant_slug = ? AND email = ?");
+                    $upd->execute([$name, $picture, $slug, $email]);
+                } else {
+                    $upd = $pdo->prepare("UPDATE saas_tenant_viewers SET last_login = NOW() WHERE tenant_slug = ? AND email = ?");
+                    $upd->execute([$slug, $email]);
+                }
+
                 $is_active = ($viewer['status'] === 'active');
                 _json([
                     "ok" => true,
@@ -608,7 +625,7 @@ try {
                 _json(["ok" => false, "error" => "Bạn không có quyền xem danh sách"], 403);
             }
 
-            $ustmt = $pdo->prepare("SELECT email, name, picture, role, status, request_at, added_at FROM saas_tenant_viewers WHERE tenant_slug = ? ORDER BY added_at DESC");
+            $ustmt = $pdo->prepare("SELECT email, name, picture, role, status, request_at, added_at, last_login FROM saas_tenant_viewers WHERE tenant_slug = ? ORDER BY added_at DESC");
             $ustmt->execute([$slug]);
             $users = $ustmt->fetchAll();
 
@@ -620,6 +637,7 @@ try {
                 "status" => "active",
                 "request_at" => null,
                 "added_at" => null,
+                "last_login" => null,
                 "is_owner" => true
             ];
 
