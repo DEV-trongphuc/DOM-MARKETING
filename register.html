@@ -849,14 +849,14 @@
         window.onload = function () {
             // Tự động kiểm tra phiên đăng nhập
             try {
-                const s = JSON.parse(localStorage.getItem("dom_auth_v1") || 'null');
+                const s = JSON.parse(localStorage.getItem("dom_auth_v2") || 'null');
                 const SESSION_TTL = 30 * 24 * 60 * 60 * 1000;
                 if (s && s.u && s.u.email && s.ts && (Date.now() - s.ts < SESSION_TTL)) {
                     userData.email = s.u.email;
                     document.getElementById('reg_email').value = s.u.email;
                     nextStep(2);
                 } else if (s && !s.ts) {
-                    localStorage.removeItem("dom_auth_v1");
+                    localStorage.removeItem("dom_auth_v2");
                 }
             } catch (e) { }
 
@@ -891,7 +891,7 @@
                 const payload = JSON.parse(jsonPayload);
                 if (payload.email) {
                     try {
-                        localStorage.setItem("dom_auth_v1", JSON.stringify({
+                        localStorage.setItem("dom_auth_v2", JSON.stringify({
                             u: {
                                 email: payload.email,
                                 name: payload.name || payload.email.split('@')[0],
