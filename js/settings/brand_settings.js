@@ -274,7 +274,6 @@ function addNewBrandSetting() {
             style="width:100%; padding:0.65rem 0.9rem; border-radius:8px; border:1.5px solid #e2e8f0; font-size:1.25rem; outline:none; transition:border .2s; font-family:monospace; box-sizing:border-box;"
             onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
         </div>
-        </div>
         <div style="grid-column: 1 / -1; margin-top: 0.4rem; padding-top: 1rem; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; gap: 1.4rem;">
           <label style="display:flex; align-items:center; gap:0.6rem; font-size:1.1rem; font-weight:600; color:#475569; cursor:pointer;">
             <div style="position:relative; width:34px; height:20px; display:inline-block; border-radius:34px; background-color:#cbd5e1; transition:.3s;" class="brand_toggle_slider">
