@@ -6,26 +6,25 @@
 
 body[data-theme="dark"] {
   /* ── Brand / Theme ── */
-  /* Giữ nguyên màu chủ đạo (Cam) nhưng có thể làm dịu xíu nếu cần, hiện tại giữ nguyên để đồng bộ brand */
   --mainClr: #ffa900;
   --mainClr-mid: rgba(255, 169, 0, 0.3);
   --mainClr-soft: rgba(255, 169, 0, 0.1);
   --mainClr-bg: rgba(255, 169, 0, 0.05);
   --mainClr-hover: rgba(255, 169, 0, 0.15);
-  --subClr: #828bf9; /* Sáng hơn trên nền tối */
+  --subClr: #828bf9;
   --subClr-mid: rgba(130, 139, 249, 0.3);
   --subClr-soft: rgba(130, 139, 249, 0.1);
 
   /* ── Text ── */
-  --textClr: #e2e8f0;       /* Chữ xám sáng */
-  --textDark: #f8fafc;      /* Chữ trắng (tiêu đề) */
-  --textMid: #cbd5e1;       /* Xám vừa */
-  --textLight: #94a3b8;     /* Xám nhạt */
-  --textFaint: #64748b;
-  --textFaint999: #475569;
+  --textClr: #cbd5e1;       /* Chữ xám sáng */
+  --textDark: #f8fafc;      /* Chữ trắng (tiêu đề/số lớn) */
+  --textMid: #94a3b8;       /* Xám vừa */
+  --textLight: #64748b;     /* Xám nhạt */
+  --textFaint: #475569;
+  --textFaint999: #64748b;
   --textMid666: #94a3b8;
   --textClr444: #cbd5e1;
-  --textGray: #64748b;
+  --textGray: #94a3b8;
   --textSlate: #94a3b8;
   --textSlate2: #cbd5e1;
   --textNavy: #f8fafc;
@@ -39,13 +38,13 @@ body[data-theme="dark"] {
   --colorDownBg: rgba(225, 112, 85, 0.1);
 
   /* ── Background / Surface ── */
-  --fadeClr: #1e293b;       /* Nền xám đậm cho thẻ/nút */
-  --fadeClr500: #334155;    /* Sáng hơn tí khi hover */
+  --fadeClr: #1e293b;
+  --fadeClr500: #334155;
   --fadeClrG: #1e293b;
   --bgPage: #0f172a;        /* Nền trang cực tối */
   --bgWhite: #1e293b;       /* Nền card (thay cho trắng) */
-  --bgWhite80: rgba(30, 41, 59, 0.85); /* Box nửa trong suốt */
-  --bgWhite95: rgba(30, 41, 59, 0.95);
+  --bgWhite80: rgba(30, 41, 59, 0.95);
+  --bgWhite95: rgba(30, 41, 59, 0.98);
   --bgSlate50: #1e293b;
   --bgSlate100: #334155;
   --bgSlate200: #475569;
@@ -81,91 +80,190 @@ body[data-theme="dark"] {
 body[data-theme="dark"] {
   background-image: none !important;
   background-color: var(--bgPage) !important;
+  color: var(--textClr) !important;
 }
 
-/* 2. Ép màu những phần tử Hardcode màu trắng/đen (nếu có) */
+/* 2. Text Override: Ép các đoạn text hardcode màu đen/xám về màu sáng */
+body[data-theme="dark"] h1, 
+body[data-theme="dark"] h2, 
+body[data-theme="dark"] h3, 
+body[data-theme="dark"] h4,
+body[data-theme="dark"] h5,
+body[data-theme="dark"] .dom_total_report p span:first-child,
+body[data-theme="dark"] .dom_total_report p,
+body[data-theme="dark"] .dom_total_report span,
+body[data-theme="dark"] .dom_interaction_item span,
+body[data-theme="dark"] .dom_active_cp span,
+body[data-theme="dark"] label,
+body[data-theme="dark"] th,
+body[data-theme="dark"] td,
+body[data-theme="dark"] .dom_table_filter h2 {
+  color: var(--textClr) !important;
+}
+
+body[data-theme="dark"] h1,
+body[data-theme="dark"] h2,
+body[data-theme="dark"] h3,
+body[data-theme="dark"] .dom_total_report p span:first-child {
+  color: var(--textDark) !important;
+}
+
+/* 3. Cards & Panels Background */
 body[data-theme="dark"] .bgw, 
 body[data-theme="dark"] .dom_header,
 body[data-theme="dark"] .dom_sidebar,
 body[data-theme="dark"] .dom_toolbar_right,
-body[data-theme="dark"] .dom_select.quick_filter,
-body[data-theme="dark"] .dom_select.status_filter .dom_select_show,
-body[data-theme="dark"] .dom_summary,
-body[data-theme="dark"] .dom_card {
-  background: var(--bgWhite) !important;
-}
-
-/* Biểu đồ (Charts) nền */
+body[data-theme="dark"] .dom_inner,
 body[data-theme="dark"] .dom_card,
-body[data-theme="dark"] .chart-container {
-  border: 1px solid var(--borderLight);
-  box-shadow: var(--shadowMd);
+body[data-theme="dark"] .box_shadow {
+  background: var(--bgWhite) !important;
+  border-color: var(--borderMid) !important;
 }
 
-/* Dropdown / Select box Fix */
+body[data-theme="dark"] .dom_inner > div[style*="background"],
+body[data-theme="dark"] .dom_inner > section[style*="background"] {
+  background-color: transparent !important;
+}
+
+/* 4. Table & Rows (Campaign Details) */
+body[data-theme="dark"] .dom_table_header {
+  background: var(--bgSlate50) !important;
+  border-color: var(--borderMid) !important;
+}
+body[data-theme="dark"] .dom_campaign_list > li,
+body[data-theme="dark"] .view_campaign > ul > li,
+body[data-theme="dark"] tr,
+body[data-theme="dark"] td {
+  background: var(--bgWhite) !important;
+  border-color: var(--borderMid) !important;
+  color: var(--textClr) !important;
+}
+body[data-theme="dark"] .dom_campaign_list > li:hover,
+body[data-theme="dark"] .view_campaign > ul > li:hover,
+body[data-theme="dark"] tr:hover td {
+  background: var(--bgSlate100) !important;
+}
+
+/* 5. Dropdown / Select box / Quick Filters */
 body[data-theme="dark"] .dom_select {
-  background-color: var(--fadeClr) !important;
+  background: var(--fadeClr) !important;
   color: var(--textClr) !important;
   border-color: var(--borderMid) !important;
 }
 body[data-theme="dark"] .dom_select_show {
-  background-color: var(--bgWhite) !important;
+  background: var(--bgWhite) !important;
   border: 1px solid var(--borderMid) !important;
+  box-shadow: var(--shadowLg) !important;
+}
+body[data-theme="dark"] .dom_select_show li {
+  background: transparent !important;
+  color: var(--textClr) !important;
+}
+body[data-theme="dark"] .dom_select_show li span,
+body[data-theme="dark"] .dom_select_show li p {
+  color: var(--textClr) !important;
 }
 body[data-theme="dark"] .dom_select_show li:hover {
-  background-color: var(--bgSlate100) !important;
+  background: var(--bgSlate100) !important;
+}
+body[data-theme="dark"] .dom_select_show li.active,
+body[data-theme="dark"] .dom_select_show li.active span {
+  background: var(--bgAmberHover) !important;
+  color: var(--mainClr) !important;
 }
 
-/* Nút bấm toolbar Hover fix */
+/* 6. Buttons & Toolbar */
 body[data-theme="dark"] .toolbar_btn:hover {
   background: var(--bgSlate100) !important;
 }
+body[data-theme="dark"] .dom_title_button {
+  background: var(--bgSlate100) !important;
+  color: var(--textClr) !important;
+  border-color: var(--borderMid) !important;
+}
+body[data-theme="dark"] .dom_title_button:hover {
+  background: var(--bgSlate200) !important;
+}
+body[data-theme="dark"] .dom_title_button.active {
+  background: var(--mainClr-bg) !important;
+  color: var(--mainClr) !important;
+  border-color: var(--mainClr-soft) !important;
+}
 
-/* Modals */
+/* 7. ALL MODALS (Settings, Performance, Share, etc.) */
+body[data-theme="dark"] .ai_modal_box,
 body[data-theme="dark"] .dom_modal_box,
-body[data-theme="dark"] .perf_modal_box,
-body[data-theme="dark"] .ai_modal_box {
+body[data-theme="dark"] .perf_modal_box {
+  background: var(--bgPage) !important;
+  border: 1px solid var(--borderMid) !important;
+}
+body[data-theme="dark"] .ai_modal_header,
+body[data-theme="dark"] .ai_modal_footer,
+body[data-theme="dark"] .perf_header {
+  border-color: var(--borderMid) !important;
+  background: var(--bgPage) !important;
+}
+/* Xóa trắng inline trong Modals */
+body[data-theme="dark"] .ai_modal_box > div,
+body[data-theme="dark"] .ai_modal_body,
+body[data-theme="dark"] .perf_modal_box > div,
+body[data-theme="dark"] .setting-tab-content > div,
+body[data-theme="dark"] .share_container {
+  background: transparent !important;
+  border-color: var(--borderMid) !important;
+}
+/* Share Modal & Settings Modal inner panels */
+body[data-theme="dark"] .share_list_item,
+body[data-theme="dark"] [style*="background: #fff"],
+body[data-theme="dark"] [style*="background:#fff"],
+body[data-theme="dark"] [style*="background: #f8fafc"],
+body[data-theme="dark"] [style*="background: #fcfcfc"],
+body[data-theme="dark"] [style*="background: #f8f9fa"] {
   background-color: var(--bgWhite) !important;
-  border: 1px solid var(--borderMid);
-}
-body[data-theme="dark"] .perf_header,
-body[data-theme="dark"] .ai_modal_header {
-  border-bottom: 1px solid var(--borderMid) !important;
-}
-body[data-theme="dark"] .perf_sidebar,
-body[data-theme="dark"] .ai_modal_sidebar {
-  background-color: var(--bgSlate50) !important;
-  border-right: 1px solid var(--borderMid) !important;
-}
-body[data-theme="dark"] .perf_tab_btn:hover,
-body[data-theme="dark"] .ai_tab_btn:hover {
-  background-color: var(--bgSlate100) !important;
-}
-body[data-theme="dark"] .perf_tab_btn.active,
-body[data-theme="dark"] .ai_tab_btn.active {
-  background-color: var(--bgAmberLight) !important;
-}
-
-/* Inputs */
-body[data-theme="dark"] input,
-body[data-theme="dark"] textarea {
+  border-color: var(--borderMid) !important;
   color: var(--textClr) !important;
 }
+/* Ngoại trừ một số background linear-gradient cảnh báo */
+body[data-theme="dark"] [style*="background: linear-gradient(135deg,#fffbeb,#fef3c7)"] {
+  background: rgba(245, 158, 11, 0.1) !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
+}
 
-/* Tables (nếu có table data) */
-body[data-theme="dark"] table th {
-  background-color: var(--bgSlate50) !important;
+/* 8. Inputs & Textareas */
+body[data-theme="dark"] input,
+body[data-theme="dark"] textarea {
+  background: var(--bgPage) !important;
+  color: var(--textClr) !important;
+  border-color: var(--borderMid) !important;
+}
+body[data-theme="dark"] input:focus,
+body[data-theme="dark"] textarea:focus {
+  border-color: var(--mainClr) !important;
+}
+
+/* 9. Metrics Settings (Image 8) - Active Items */
+body[data-theme="dark"] #available_metrics_list > div,
+body[data-theme="dark"] #active_columns_list > div,
+body[data-theme="dark"] .metric-item {
+  background: var(--bgWhite) !important;
+  border-color: var(--borderMid) !important;
+  color: var(--textClr) !important;
+}
+body[data-theme="dark"] #available_metrics_list > div span,
+body[data-theme="dark"] #active_columns_list > div span {
+  color: var(--textClr) !important;
+}
+body[data-theme="dark"] #available_metrics_list > div[style*="border-color: var(--mainClr)"],
+body[data-theme="dark"] .metric-item.active {
+  background: var(--bgAmberLight) !important;
+  border-color: var(--mainClr) !important;
   color: var(--textDark) !important;
-  border-bottom-color: var(--borderMid) !important;
 }
-body[data-theme="dark"] table td {
-  border-bottom-color: var(--borderLight) !important;
-}
-body[data-theme="dark"] tr:hover td {
-  background-color: var(--bgSlate50) !important;
+body[data-theme="dark"] #available_metrics_list > div[style*="border-color: var(--mainClr)"] span {
+  color: var(--textDark) !important;
 }
 
-/* Date Range Picker background override */
+/* 10. Date Range Picker */
 body[data-theme="dark"] .daterangepicker {
   background-color: var(--bgWhite) !important;
   border-color: var(--borderMid) !important;
@@ -173,7 +271,7 @@ body[data-theme="dark"] .daterangepicker {
 }
 body[data-theme="dark"] .daterangepicker .calendar-table {
   background-color: var(--bgWhite) !important;
-  border-color: var(--borderWhite) !important;
+  border-color: var(--borderMid) !important;
 }
 body[data-theme="dark"] .daterangepicker td.off {
   background-color: var(--bgWhite) !important;
@@ -182,33 +280,18 @@ body[data-theme="dark"] .daterangepicker td.off {
 body[data-theme="dark"] .daterangepicker td.available:hover {
   background-color: var(--bgSlate100) !important;
 }
-body[data-theme="dark"] .daterangepicker .drp-buttons {
-  border-top-color: var(--borderMid) !important;
-}
 
-/* Sửa lỗi skeleton trên nền đen */
+/* 11. Skeleton */
 body[data-theme="dark"] .skeleton {
-  background: var(--bgSlate100);
-  background: linear-gradient(110deg, var(--bgSlate100) 8%, var(--bgSlate200) 18%, var(--bgSlate100) 33%);
-  background-size: 200% 100%;
+  background: var(--bgSlate100) !important;
+  background: linear-gradient(110deg, var(--bgSlate100) 8%, var(--bgSlate200) 18%, var(--bgSlate100) 33%) !important;
+  background-size: 200% 100% !important;
 }
 body[data-theme="dark"] .skeleton-container {
   background: var(--bgWhite) !important;
 }
 
-/* Fix màu markdown (nếu có hardcode) */
-body[data-theme="dark"] .ai_summary_content {
-  color: var(--textClr) !important;
-}
-body[data-theme="dark"] .ai_summary_content table th {
-  background: var(--bgSlate100) !important;
-}
-body[data-theme="dark"] .ai_summary_content blockquote {
-  background: var(--bgSlate50) !important;
-  border-left-color: var(--textSlate) !important;
-}
-
-/* Toggle Theme Button */
+/* Toggle Button */
 .theme-toggle-btn {
   display: flex;
   align-items: center;
