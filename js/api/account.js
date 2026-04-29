@@ -4,7 +4,12 @@ async function initAccountSelector() {
 
   let groups = typeof _normalizeAccounts === 'function' ? _normalizeAccounts() : [];
   
-  const slug = new URLSearchParams(window.location.search).get('slug') || window.location.pathname.replace(/^\/|\/$/g, '').split('?')[0];
+  let slug = new URLSearchParams(window.location.search).get('slug') || window.location.pathname.replace(/^\/|\/$/g, '').split('?')[0];
+  if (slug === 'index.html' || slug === '') {
+      if (window.location.hash) {
+          slug = window.location.hash.replace(/^#\/?/, '').split('?')[0];
+      }
+  }
   let savedId = localStorage.getItem(`dom_last_account_${slug}`);
   
   let targetAccount = null;

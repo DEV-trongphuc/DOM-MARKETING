@@ -131,6 +131,10 @@ body {
   overflow-y: auto;
 }
 
+body:has(.dom_container.ad_detail) {
+  overflow-y: hidden;
+}
+
 /* ── Skeleton Loaders ── */
 .dom_inner {
   position: relative;
@@ -2214,6 +2218,12 @@ tbody {
   width: 65%;
   background: var(--bgWhite80);
 }
+
+.dom_inner.w66 {
+  width: 60%;
+  background: var(--bgWhite80);
+}
+
 
 .dom_inner.wfull {
   width: 80%;
@@ -4940,7 +4950,7 @@ tbody {
   width: 100%;
   position: absolute;
   align-self: flex-end;
-  transform: translate(-5rem, 2rem);
+  transform: translate(-5rem, 1.8rem);
 }
 
 
@@ -10246,4 +10256,41 @@ body:not([data-theme="dark"]) .adset_item.active,
 body:not([data-theme="dark"]) .ad_item.active,
 body:not([data-theme="dark"]) .campaign_main.active {
   /* background-color: #f1f5f9 !important; */
+}
+
+/* ================= ALERTS & HEATMAP ================= */
+.heatmap-cell {
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+@keyframes bell-shake {
+  0% {
+    transform: rotate(0);
+  }
+
+  25% {
+    transform: rotate(15deg);
+  }
+
+  50% {
+    transform: rotate(-15deg);
+  }
+
+  75% {
+    transform: rotate(10deg);
+  }
+
+  100% {
+    transform: rotate(0);
+  }
+}
+
+#alert_notifications_btn:hover i {
+  animation: bell-shake 0.5s ease-in-out;
 }

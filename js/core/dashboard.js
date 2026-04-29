@@ -121,6 +121,9 @@ async function loadDashboardData() {
     if (loading) loading.classList.remove("active");
     toggleSkeletons(".dom_dashboard", false);
     console.timeEnd("[PERF] ⭐ Total Dashboard Data Load");
+
+    if (typeof window.analyzeCampaignAlerts === 'function') window.analyzeCampaignAlerts();
+    if (typeof window.renderHeatmap === 'function') window.renderHeatmap();
   });
 }
 

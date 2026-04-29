@@ -271,7 +271,8 @@
   <section id="dom" class="flex">
     <div class="dom_sidebar box_shadow flex">
       <div class="dom_logo">
-        <div onclick="window.open('https://domation.net', '_blank')" style="display:inline-flex; align-items:center; gap:1.2rem; position:relative; cursor:pointer;">
+        <div onclick="window.open('https://domation.net', '_blank')"
+          style="display:inline-flex; align-items:center; gap:1.2rem; position:relative; cursor:pointer;">
           <img id="sidebar_logo" src="https://domation.net/imgs/ICON.png" alt="DOM Report Logo"
             style="width: 4.8rem; height: 4.8rem; object-fit: contain; flex-shrink: 0;" />
 
@@ -444,11 +445,39 @@
               <i class="fa-solid fa-wand-magic-sparkles"></i>
               <span>AI Phân tích</span>
             </button>
+            <div style="position: relative;">
+              <button id="alert_notifications_btn" class="toolbar_btn icon_only" title="Cảnh báo chiến dịch"
+                onclick="window.toggleAlertPanel && window.toggleAlertPanel()">
+                <i class="fa-solid fa-bell"></i>
+                <span id="alert_badge"
+                  style="display:none; position:absolute; top:-2px; right:-2px; background:red; color:white; font-size:0.9rem; font-weight:bold; border-radius:50%; min-width:18px; height:18px; line-height:18px; text-align:center;">0</span>
+              </button>
+
+              <!-- Cảnh báo Panel -->
+              <div id="alert_panel_container"
+                style="display:none; position:absolute; top:calc(100% + 10px); right:-100%; width:36rem; background:#fff; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.15); border:1px solid #e2e8f0; z-index:9999; flex-direction:column; overflow:hidden;">
+                <div
+                  style="padding:1.5rem; border-bottom:1px solid #f1f5f9; background:#f8fafc; display:flex; justify-content:space-between; align-items:center;">
+                  <h3 style="margin:0; font-size:1.4rem; color:#1e293b; font-weight:700;"><i
+                      class="fa-solid fa-triangle-exclamation" style="color:#f59e0b; margin-right:8px;"></i> Trung tâm
+                    cảnh báo</h3>
+                  <button onclick="window.toggleAlertPanel()"
+                    style="background:transparent; border:none; color:#94a3b8; font-size:1.5rem; cursor:pointer;"><i
+                      class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div id="alert_list_content"
+                  style="max-height:40rem; overflow-y:auto; padding:1rem; display:flex; flex-direction:column; gap:1rem;">
+                  <div style="text-align:center; padding:3rem 1rem; color:#94a3b8; font-size:1.2rem;">Chưa có dữ liệu
+                    cảnh báo...</div>
+                </div>
+              </div>
+            </div>
             <button id="kb_shortcut_btn" class="toolbar_btn icon_only" title="Shortcuts">
               <i class="fa-solid fa-keyboard"></i>
             </button>
             <!-- Tạm ẩn nút Dark Theme để phát triển sau -->
-            <button id="theme_toggle_btn" class="toolbar_btn icon_only theme-toggle-btn" title="Giao diện Tối / Sáng" style="display: none !important;">
+            <button id="theme_toggle_btn" class="toolbar_btn icon_only theme-toggle-btn" title="Giao diện Tối / Sáng"
+              style="display: none !important;">
               <i class="fa-solid fa-moon"></i>
               <i class="fa-solid fa-sun" style="display:none;"></i>
             </button>
@@ -462,7 +491,9 @@
           <!-- Bộ lọc Brand (được kéo dài) -->
           <div class="dom_filter" style="display:none;">
             <div class="dom_select quick_filter_detail toolbar_select" style="padding-left: 0 !important;">
-              <img id="quick_filter_current_img" src="https://domation.net/imgs/ICON.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.src='https://domation.net/imgs/ICON.png'" />
+              <img id="quick_filter_current_img" src="https://domation.net/imgs/ICON.png"
+                style="width:24px; height:24px; border-radius:50%; object-fit:cover;"
+                onerror="this.src='https://domation.net/imgs/ICON.png'" />
               <div class="flex">
                 <p class="dom_selected" id="quick_filter_current_text">Tất cả</p>
               </div>
@@ -707,23 +738,47 @@
                   title="Gộp theo Age">
                   <i class="fa-solid fa-venus-mars"></i> Age Only
                 </span>
-                <span class="dom_title_button region" onclick="toggleRegionView()"><i class="fa-solid fa-repeat"></i>
-                  Region Chart</span>
               </div>
             </h2>
             <div>
               <canvas id="age_gender_total"></canvas>
             </div>
-            <div class="dom_platform_abs">
-              <h2 class="">
-                <span>
-                  <i class="fa-solid fa-chart-simple main_clr"></i> Region Spent</span>
-                <span class="dom_title_button region" onclick="toggleRegionView()"><i class="fa-solid fa-repeat"></i>
-                  Age &amp; Gender</span>
-              </h2>
-              <div id="region_chart_wrap">
-                <canvas id="region_chart"></canvas>
+          </div>
+        </div>
+        <div class="dom_row flex">
+          <!-- 8. Heatmap Dayparting (66%) -->
+          <div class="dom_inner dom_fade_item w66 box_shadow chart" style="background-color: white;">
+            <div class="dom_table_filter">
+              <h2><i class="fa-solid fa-clock main_clr"></i> Dayparting Heatmap</h2>
+              <div class="dom_select daily_total heatmap_metric">
+                <i class="fa-solid fa-layer-group"></i>
+                <div class="flex">
+                  <p class="dom_selected">Spend</p>
+                </div>
+                <i class="fa-solid fa-angle-down"></i>
+                <ul class="dom_select_show">
+                  <li data-view="spend" class="active"><span class="radio_box active"></span> <span>Spend</span></li>
+                  <li data-view="messages" class=""><span class="radio_box"></span> <span>Messages</span></li>
+                  <li data-view="purchases" class=""><span class="radio_box"></span> <span>Purchases</span></li>
+                  <li data-view="leads" class=""><span class="radio_box"></span> <span>Leads</span></li>
+                </ul>
+                <input type="hidden" id="heatmap_metric_select" value="spend" />
               </div>
+            </div>
+            <div id="heatmap_container" style="width:100%; overflow-x:auto; padding:1rem 0; margin-top: 2rem;">
+              <!-- Rendered by JS -->
+              <div style="text-align:center; padding:3rem; color:#94a3b8; font-size:1.2rem;"><i
+                  class="fa-solid fa-circle-notch fa-spin"></i> Chờ dữ liệu...</div>
+            </div>
+          </div>
+
+          <!-- Region Chart (33%) -->
+          <div class="dom_inner dom_fade_item w33 box_shadow chart" style="background-color: white;">
+            <h2 class="">
+              <span><i class="fa-solid fa-location-dot main_clr"></i> Region Spent</span>
+            </h2>
+            <div id="region_chart_wrap" style="padding-top: 1rem;">
+              <canvas id="region_chart"></canvas>
             </div>
           </div>
         </div>
@@ -941,6 +996,8 @@
         </div>
       </div>
 
+
+
       <!-- Show All Button & Extra Details -->
       <div class="dom_row flex show_all_container">
         <button id="show_all_btn">
@@ -990,7 +1047,7 @@
 
         <!-- 3 new charts: Video Funnel, Top Campaigns, Engagement Mix in 1 row -->
         <div id="extra_charts_row" class="dom_row flex"
-          style="margin-top:1rem;flex-wrap:nowrap;gap:2rem; padding-bottom: 15rem;width:100%;">
+          style="margin-top:1rem;flex-wrap:nowrap;gap:2rem; padding-bottom: 5rem;width:100%;">
 
           <!-- 5. Video Funnel (CSS-only, y hệt detail modal) -->
           <div class="dom_inner dom_fade_item box_shadow chart"
@@ -1017,6 +1074,8 @@
           </div>
 
         </div>
+
+
 
       </div>
 
@@ -1052,7 +1111,7 @@
             </div>
             <div class="toogle_filter box_shadow ai_report_compare">
               <i class="fa-solid fa-wand-magic-sparkles"></i>
-              <p>AI DOM</p>
+              <p>SUMMARY</p>
             </div>
           </div>
           <div id="preview_box"></div>
@@ -2070,11 +2129,14 @@
                 <i class="fa-solid fa-link" style="color: #10b981; font-size:1.6rem;"></i> Connect đồng bộ Gemini với dữ
                 liệu hiện tại.
               </label>
-              <input type="password" id="edit_workspace_gemini_key" class="dom-input"
-                placeholder="Nhập Gemini API Key của bạn..."
-                style="width:100%; padding: 1.2rem; border: 2px solid #86efac; border-radius: 8px; font-size: 1.35rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);"
-                onfocus="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 0 3px rgba(16, 185, 129, 0.2)'"
-                onblur="this.style.borderColor='#86efac'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.02)'">
+              <form onsubmit="return false;" style="margin:0; padding:0; width:100%;">
+                <input type="password" id="edit_workspace_gemini_key" class="dom-input"
+                  placeholder="Nhập Gemini API Key của bạn..."
+                  style="width:100%; padding: 1.2rem; border: 2px solid #86efac; border-radius: 8px; font-size: 1.35rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);"
+                  onfocus="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 0 3px rgba(16, 185, 129, 0.2)'"
+                  onblur="this.style.borderColor='#86efac'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.02)'"
+                  autocomplete="new-password">
+              </form>
               <p style="margin: 1rem 0 0; font-size: 1.15rem; color: #15803d; font-weight: 500;">Vui lòng nhập Gemini
                 API Key của bạn để sử dụng tính năng phân tích nâng cao. Tính năng này chỉ hiển thị với Owner.</p>
             </div>
@@ -2353,7 +2415,7 @@
     async function deleteWorkspace() {
       if (!window.SAAS_ROUTER || !window.SAAS_ROUTER.tenant) return;
       const slug = window.SAAS_ROUTER.tenant.slug;
-      
+
       const confirmMsg = `⚠ CẢNH BÁO NGUY HIỂM ⚠\n\nBạn có chắc chắn muốn XÓA VĨNH VIỄN workspace [${slug}] và TẤT CẢ dữ liệu liên quan không?\nHành động này KHÔNG THỂ hoàn tác!`;
       if (!confirm(confirmMsg)) return;
 
@@ -2928,6 +2990,8 @@
 <!-- 8. Export & Share -->
 <script src="./js/export/export_csv.js?v=10"></script>
 <script src="./js/share/share.js?v=10"></script>
+<script src="./js/core/alerts.js?v=1"></script>
+<script src="./js/charts/heatmap_chart.js?v=1"></script>
 
 <!-- 9. App wiring (dashboard trước → startup gọi main() cuối cùng) -->
 <script src="./js/core/listeners.js?v=10"></script>
@@ -3028,13 +3092,16 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
             <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #1e293b;">Chọn Ad Accounts để lưu</h3>
             <div style="display: flex; align-items: center; gap: 1rem;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 1.2rem; font-weight: 600; color: #3b82f6;">
-                    <input type="checkbox" id="am_select_all_cb" onchange="if(window.toggleAmSelectAll) window.toggleAmSelectAll(this.checked)" style="width: 1.4rem; height: 1.4rem; accent-color: #3b82f6; cursor: pointer;">
-                    Chọn tất cả
-                </label>
-                <span id="am_fetched_count"
-                  style="background: #e2e8f0; color: #475569; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 1.2rem;">0
-                  tìm thấy</span>
+              <label
+                style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 1.2rem; font-weight: 600; color: #3b82f6;">
+                <input type="checkbox" id="am_select_all_cb"
+                  onchange="if(window.toggleAmSelectAll) window.toggleAmSelectAll(this.checked)"
+                  style="width: 1.4rem; height: 1.4rem; accent-color: #3b82f6; cursor: pointer;">
+                Chọn tất cả
+              </label>
+              <span id="am_fetched_count"
+                style="background: #e2e8f0; color: #475569; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 1.2rem;">0
+                tìm thấy</span>
             </div>
           </div>
           <div id="am_fetched_accounts_list"
