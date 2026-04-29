@@ -82,6 +82,8 @@ async function handleAdsetInsightClick(btn) {
   const domDetail = document.querySelector("#dom_detail");
   if (domDetail) {
     domDetail.classList.add("active");
+    domDetail.scrollTop = 0; // Scroll container to top
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll page to top
     // Ẩn Quick Preview — adset không có thẻ quảng cáo
     const previewBox = domDetail.querySelector("#preview_box");
     const previewBtn = domDetail.querySelector("#preview_button");

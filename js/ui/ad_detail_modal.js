@@ -115,6 +115,8 @@ async function handleViewClick(e, type = "ad") {
   const domDetail = document.querySelector("#dom_detail");
   if (domDetail) {
     domDetail.classList.add("active");
+    domDetail.scrollTop = 0; // Scroll container to top
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll page to top
     // Đảm bảo preview_box và preview_button hiện lại khi xem Ad (không phải Adset)
     const previewBox = domDetail.querySelector("#preview_box");
     const previewBtn = domDetail.querySelector("#preview_button");

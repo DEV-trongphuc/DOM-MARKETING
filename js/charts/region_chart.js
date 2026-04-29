@@ -533,6 +533,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
+      // Tự động cuộn lên top khi chuyển tab (instant scroll để tránh lỗi bị kẹt do overflow:hidden)
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+
       // Add new view class based on the clicked item
       container.classList.add(view);
       
