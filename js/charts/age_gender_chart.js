@@ -364,6 +364,7 @@ function reloadDashboard() {
       applyCampaignFilter(CURRENT_CAMPAIGN_FILTER);
     }
     if (loading) loading.classList.remove("active");
+    if (typeof window.renderHeatmap === 'function') window.renderHeatmap();
   });
 
   // 🔹 Refresh Google Ads with FORCE fetch because dates changed

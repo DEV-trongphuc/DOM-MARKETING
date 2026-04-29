@@ -654,7 +654,8 @@ async function loadDeviceChart() {
     const labels = Object.keys(deviceStats).sort((a, b) => deviceStats[b] - deviceStats[a]);
     const values = labels.map(l => deviceStats[l]);
 
-    const chartContainer = document.getElementById("device_chart").closest(".dom_inner");
+    const chartElem = document.getElementById("device_chart_canvas") || document.getElementById("device_chart");
+    const chartContainer = chartElem ? chartElem.closest(".dom_inner") : null;
     if (!chartContainer) return;
 
     chartContainer.innerHTML = `
