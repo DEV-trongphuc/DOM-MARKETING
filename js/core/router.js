@@ -12,6 +12,14 @@ window.SAAS_ROUTER = {
         let hash = window.location.pathname.replace(/^\/|\/$/g, '');
         hash = hash.split('?')[0]; // Tách bỏ query string nếu có
         
+        // Hỗ trợ local dev bằng Live Server (vd: index.html#/ideas hoặc /#/ideas)
+        if (hash === 'index.html' || hash === '') {
+            if (window.location.hash) {
+                hash = window.location.hash.replace(/^#\/?/, '');
+                hash = hash.split('?')[0];
+            }
+        }
+        
         if (hash === 'admin') {
             this.isAdmin = true;
             this.adminToken = localStorage.getItem('dom_admin_token');

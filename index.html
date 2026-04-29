@@ -7,13 +7,13 @@
     (function () {
       var APP_VERSION = "v21.0"; // Tăng chuỗi này lên khi có bản cập nhật mới
       var localVer = localStorage.getItem("dom_app_version");
-      if (localVer !== APP_VERSION) {
-        if (window.location.search.indexOf("dom_cache_bust") === -1) {
-          localStorage.setItem("dom_app_version", APP_VERSION);
-          var searchPattern = window.location.search ? window.location.search + "&" : "?";
-          window.location.replace(window.location.pathname + searchPattern + "dom_cache_bust=" + new Date().getTime() + window.location.hash);
-        }
-      }
+      // if (localVer !== APP_VERSION) {
+      //   if (window.location.search.indexOf("dom_cache_bust") === -1) {
+      //     localStorage.setItem("dom_app_version", APP_VERSION);
+      //     var searchPattern = window.location.search ? window.location.search + "&" : "?";
+      //     window.location.replace(window.location.pathname + searchPattern + "dom_cache_bust=" + new Date().getTime() + window.location.hash);
+      //   }
+      // }
     })();
   </script>
   <!-- Central Configuration -->
