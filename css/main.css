@@ -10294,3 +10294,248 @@ body:not([data-theme="dark"]) .campaign_main.active {
 #alert_notifications_btn:hover i {
   animation: bell-shake 0.5s ease-in-out;
 }
+
+/* ================= EXTREME TABLET & MOBILE RESPONSIVE OPTIMIZATION ================= */
+
+/* Tablet Landscape */
+@media (max-width: 1200px) {
+  .dom_row {
+    flex-wrap: wrap;
+  }
+  .dom_inner.w20, .dom_inner.w25, .dom_inner.w30, .dom_inner.w33, .dom_inner.w35 {
+    width: calc(50% - 1rem) !important;
+  }
+  .dom_inner.w66, .dom_inner.w70, .dom_inner.wfull {
+    width: 100% !important;
+  }
+  .dom_inner {
+    padding: 1.5rem !important;
+  }
+}
+
+/* Tablet Portrait */
+@media (max-width: 992px) {
+  body {
+    overflow-x: hidden;
+  }
+  
+  #dom {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .dom_container {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding: 0 1.5rem !important;
+    box-sizing: border-box;
+  }
+
+  .dom_inner.w20, .dom_inner.w25, .dom_inner.w30, .dom_inner.w33, .dom_inner.w35,
+  .dom_inner.w45, .dom_inner.w50, .dom_inner.w65, .dom_inner.w66, .dom_inner.w70 {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+  
+  .dom_header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    box-sizing: border-box;
+    width: 100% !important;
+  }
+  
+  .dom_toolbar_right {
+    width: 100%;
+    justify-content: space-between;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .dom_table_header {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+    margin-top: 2rem; /* Fix: bộ lọc quá sát top */
+  }
+  .dom_table_header > div,
+  .dom_table_header > button {
+    width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+  }
+  .dom_campaign_filter {
+    grid-column: 1 / -1; /* Full width search */
+  }
+  .quick_filter {
+    grid-column: 1 / 2;
+  }
+  .status_filter {
+    grid-column: 2 / 3;
+  }
+  #toolbar_preset_wrap {
+    grid-column: 1 / 2;
+  }
+  #export_csv_btn {
+    grid-column: 2 / 3;
+  }
+  
+  .view_campaign {
+    overflow-x: auto !important;
+    width: 100% !important;
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .dom_inner h2 {
+    font-size: 1.6rem !important;
+    margin-bottom: 2rem !important;
+  }
+  
+  .dom_row {
+    gap: 1.2rem !important;
+  }
+  
+  .toolbar_btn span {
+    display: none;
+  }
+  
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .dom_sidebar {
+    width: 30rem;
+  }
+
+  .dom_toolbar_right {
+    margin-top: 1.5rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  /* --- FIX BỘ LỌC (TABLE HEADER) --- */
+  .dom_table_header {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.2rem;
+    margin-top: 3.5rem !important; /* Khắc phục lỗi sát top hoàn toàn */
+    margin-bottom: 2rem !important;
+  }
+  .dom_table_header > div,
+  .dom_table_header > button {
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  .dom_campaign_filter {
+    grid-column: 1 / -1 !important; /* Thanh tìm kiếm full viền */
+  }
+  .quick_filter { grid-column: 1 / 2 !important; }
+  .status_filter { grid-column: 2 / 3 !important; }
+  #toolbar_preset_wrap { grid-column: 1 / 2 !important; }
+  #export_csv_btn { 
+    grid-column: 2 / 3 !important;
+    padding: 1rem !important;
+    font-size: 1.1rem !important;
+  }
+  
+  /* --- FIX 2 CARD 1 HÀNG --- */
+  .dom_total_report > ul {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+  }
+  .dom_total_report > ul > li {
+    width: calc(50% - 0.6rem) !important; /* Trả về 2 thẻ 1 hàng */
+    min-height: 18rem !important;
+    padding: 2rem 1.5rem !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem !important; /* Fix dính chùm text bên trong card */
+  }
+  
+  /* Phóng to font size và chỉnh lại title của card */
+  .dom_total_report > ul > li > span {
+    font-size: 1.4rem !important; /* Title: Spent, Impressions */
+    margin-bottom: 0 !important;
+  }
+  .dom_total_report > ul > li p > span:first-child {
+    font-size: 2.2rem !important; /* Giá trị tiền to rỗ ràng */
+    font-weight: 700 !important;
+    word-break: break-word;
+    line-height: 1.2;
+  }
+  .dom_total_report > ul > li:not(:first-child) p > span:first-child {
+    font-size: 2rem !important; /* Giá trị cho các card khác */
+  }
+  
+  /* Reset inline styles cho preset button */
+  #toolbar_preset_btn {
+    min-width: unset !important;
+    width: 100% !important;
+    padding: 0.8rem 1rem !important;
+    font-size: 1.1rem !important;
+  }
+}
+
+@media (max-width: 992px) {
+  #mobile_menu_btn {
+    display: block !important;
+  }
+  .dom_sidebar {
+    position: fixed;
+    z-index: 9999;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+  }
+  .dom_sidebar.active {
+    transform: translateX(0);
+  }
+  /* Cập nhật header cho đẹp khi có menu, cách đỉnh màn hình */
+  .dom_header {
+    display: grid !important;
+    grid-template-columns: auto 1fr;
+    padding-top: max(2rem, env(safe-area-inset-top)) !important; /* Fix sát top hoàn toàn */
+    padding-bottom: 2rem !important;
+    gap: 1.5rem;
+    align-items: center;
+    height: auto !important; /* Quan trọng: gỡ bỏ height 8rem cố định gây tràn */
+  }
+  .dom_header_time {
+    grid-column: 2 / 3;
+    display: flex;
+    justify-content: flex-start;
+  }
+  .dom_toolbar_right {
+    grid-column: 1 / -1;
+    width: 100%;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem; /* Fix dính chùm element */
+    margin-top: 0.5rem !important;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  /* Fix overlapping labels on monthly chart by allowing scroll */
+  #monthly_chart {
+    min-width: 650px !important;
+  }
+  .chart-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+

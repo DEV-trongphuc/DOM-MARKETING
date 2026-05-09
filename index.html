@@ -23,17 +23,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DOM META REPORTS</title>
   <!-- <link rel="stylesheet" href="css/main.css" /> -->
-  <link rel="stylesheet" href="./css/main.css?v=1777451963109" />
+  <link rel="stylesheet" href="./css/main.css?v=20260509201600" />
   <!-- <link rel="stylesheet" href="./phone.css" /> -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="icon" href="https://domation.net/imgs/ICON.png" type="image/png" />
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 
   <!-- Plugin hiển thị số trên đầu cột -->
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
@@ -370,6 +370,9 @@
     </div>
     <div class="dom_container dashboard">
       <div class="dom_header flex">
+        <div id="mobile_menu_btn" style="display: none; font-size: 2.4rem; cursor: pointer; color: var(--mainClr); margin-right: 1rem;" onclick="document.querySelector('.dom_sidebar').classList.toggle('active')">
+          <i class="fa-solid fa-bars"></i>
+        </div>
         <div class="dom_header_time">
           <div class="dom_select time">
             <div class="flex">
@@ -783,7 +786,7 @@
           </div>
         </div>
         <div class="dom_row flex ad_detail">
-          <div class="dom_inner view_campaign">
+          <div class="dom_inner view_campaign table-responsive">
             <h2>
               <i class="fa-solid fa-list main_clr"></i> Detail Campaign -
               Adsets
