@@ -465,8 +465,19 @@ try {
             $admin_email = $body['admin_email'] ?? '';
             if (!$slug || !$token)
                 _json(["ok" => false, "error" => "Missing slug or token"], 400);
+            
+            // Check if request comes from Super Admin via token
+            $is_super_admin = false;
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if ($authHeader) {
+                $jwt = str_replace('Bearer ', '', $authHeader);
+                if (verify_admin_token($jwt)) {
+                    $is_super_admin = true;
+                }
+            }
+
             // 🔒 Phải là owner hoặc super admin mới được update token
-            if (!_verify_admin_for_slug($pdo, $slug, $admin_email)) {
+            if (!$is_super_admin && !_verify_admin_for_slug($pdo, $slug, $admin_email)) {
                 _json(["ok" => false, "error" => "Unauthorized — chỉ Admin mới được cập nhật token"], 403);
             }
 
