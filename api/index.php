@@ -128,7 +128,17 @@ function _verify_admin_for_slug(PDO $pdo, string $slug, string $admin_email): bo
     $stmt = $pdo->prepare("SELECT google_email FROM saas_tenants WHERE slug = ?");
     $stmt->execute([$slug]);
     $tenant = $stmt->fetch();
-    return $tenant && strtolower($admin_email) === strtolower($tenant['google_email']);
+    if ($tenant && strtolower($admin_email) === strtolower($tenant['google_email'])) {
+        return true;
+    }
+    // Allow invited admins
+    $vstmt = $pdo->prepare("SELECT role FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ? AND status = 'active'");
+    $vstmt->execute([$slug, $admin_email]);
+    $viewer = $vstmt->fetch();
+    if ($viewer && $viewer['role'] === 'admin') {
+        return true;
+    }
+    return false;
 }
 
 // Returns true if $email is an active member (owner or viewer) of $slug tenant AND tenant is not expired.
@@ -758,7 +768,18 @@ try {
             }
 
             $is_owner = !empty($admin_email) && !empty($tenant['google_email']) && strtolower($admin_email) === strtolower($tenant['google_email']);
-            if (!$tenant || (!$is_owner && !$is_super_admin)) {
+            
+            $is_invited_admin = false;
+            if (!$is_owner && !$is_super_admin && $tenant) {
+                $vstmt = $pdo->prepare("SELECT role FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ? AND status = 'active'");
+                $vstmt->execute([$slug, $admin_email]);
+                $viewer = $vstmt->fetch();
+                if ($viewer && $viewer['role'] === 'admin') {
+                    $is_invited_admin = true;
+                }
+            }
+
+            if (!$tenant || (!$is_owner && !$is_super_admin && !$is_invited_admin)) {
                 _json(["ok" => false, "error" => "Unauthorized"], 403);
             }
 
