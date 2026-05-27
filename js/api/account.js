@@ -71,7 +71,7 @@ async function fetchActiveAccountAvatar(accountId, token) {
     if (!accountId || !token) return;
     try {
         // Cố gắng fetch ảnh BM nếu có quyền
-        const accUrl = `https://graph.facebook.com/v20.0/act_${accountId}?fields=business{profile_picture_uri}&access_token=${token}`;
+        const accUrl = `https://graph.facebook.com/v25.0/act_${accountId}?fields=business{profile_picture_uri}&access_token=${token}`;
         const accRes = await fetch(accUrl);
         const accData = await accRes.json();
         

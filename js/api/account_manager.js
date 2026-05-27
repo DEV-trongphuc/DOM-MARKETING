@@ -201,7 +201,7 @@ window.fetchAccountsFromNewToken = async function() {
     
     try {
         // Fetch ad accounts
-        const accUrl = `https://graph.facebook.com/v20.0/me/adaccounts?fields=name,account_id,currency&limit=100&access_token=${token}`;
+        const accUrl = `https://graph.facebook.com/v25.0/me/adaccounts?fields=name,account_id,currency&limit=100&access_token=${token}`;
         
         const res = await fetch(accUrl);
         const data = await res.json();

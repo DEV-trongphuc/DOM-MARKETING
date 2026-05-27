@@ -233,7 +233,7 @@ try {
             }
 
             // VERIFY TOKEN TRƯỚC KHI TẠO
-            $verify_url = "https://graph.facebook.com/v19.0/me?access_token=" . urlencode($token);
+            $verify_url = "https://graph.facebook.com/v25.0/me?access_token=" . urlencode($token);
             $ch_v = curl_init();
             curl_setopt($ch_v, CURLOPT_URL, $verify_url);
             curl_setopt($ch_v, CURLOPT_RETURNTRANSFER, true);
@@ -345,7 +345,7 @@ try {
                 _json(["ok" => false, "error" => "Missing token"], 400);
 
             // Fetch Businesses
-            $b_url = "https://graph.facebook.com/v19.0/me/businesses?fields=id,name,client_ad_accounts{id,name,account_id}&limit=100&access_token=" . urlencode($token);
+            $b_url = "https://graph.facebook.com/v25.0/me/businesses?fields=id,name,client_ad_accounts{id,name,account_id}&limit=100&access_token=" . urlencode($token);
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $b_url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -361,7 +361,7 @@ try {
             }
 
             // Also fetch personal ad accounts
-            $a_url = "https://graph.facebook.com/v19.0/me/adaccounts?fields=id,name,account_id&limit=100&access_token=" . urlencode($token);
+            $a_url = "https://graph.facebook.com/v25.0/me/adaccounts?fields=id,name,account_id&limit=100&access_token=" . urlencode($token);
             $ch2 = curl_init();
             curl_setopt($ch2, CURLOPT_URL, $a_url);
             curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);

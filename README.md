@@ -57,7 +57,7 @@ window.GOOGLE_ADS_SETUP = true;   // false → ẩn tab Google Ads
 
 Khai báo trong `js/api/constants.js`:
 ```js
-const API_VERSION = "v24.0";
+const API_VERSION = "v25.0";
 ```
 
 ---

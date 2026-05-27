@@ -22,7 +22,7 @@ window.renderHeatmap = async function() {
 
   try {
     // Gọi API lấy dữ liệu theo giờ và theo ngày
-    const baseUrl = typeof BASE_URL !== 'undefined' ? BASE_URL : (window.APP_CONFIG?.META_API_URL || 'https://graph.facebook.com/v24.0');
+    const baseUrl = typeof BASE_URL !== 'undefined' ? BASE_URL : (window.APP_CONFIG?.META_API_URL || 'https://graph.facebook.com/v25.0');
     
     let url = `${baseUrl}/act_${accId}/insights` +
       `?fields=spend,actions,clicks,impressions,reach` +

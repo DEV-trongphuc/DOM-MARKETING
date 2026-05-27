@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // =================== API CONFIG ===================
 const BATCH_SIZE = 50;        // Meta Batch API max = 50 → ít roundtrips hơn
 const CONCURRENCY_LIMIT = 5;  // Giảm từ 10 → 5 để tránh rate-limit khi batch lớn hơn
-const API_VERSION = "v24.0";
+const API_VERSION = "v25.0";
 const BASE_URL = `https://graph.facebook.com/${API_VERSION}`;
 
 // =================== GOAL MAPPINGS ===================
