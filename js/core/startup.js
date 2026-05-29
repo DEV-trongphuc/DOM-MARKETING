@@ -31,6 +31,12 @@ async function bootstrapSaaS() {
   const routerReady = await SAAS_ROUTER.init();
   if (!routerReady) return;
 
+  // Hiển thị tab CRM DATA nếu là workspace /ideas
+  if (window.SAAS_ROUTER && window.SAAS_ROUTER.tenant && window.SAAS_ROUTER.tenant.slug?.toLowerCase() === 'ideas') {
+    const ideasTab = document.getElementById('ideas_crm_tab');
+    if (ideasTab) ideasTab.style.display = 'block';
+  }
+
   if (typeof window.initAuth === 'function') {
       window.initAuth();
   }
