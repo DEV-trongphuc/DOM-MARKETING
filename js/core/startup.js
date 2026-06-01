@@ -50,11 +50,11 @@ async function bootstrapSaaS() {
               <i class="fa-solid fa-database" style="font-size: 1.8rem; color: var(--mainClr); transition: transform 0.3s ease; display: inline-flex; align-items: center; justify-content: center; width: 2rem;"
                  onmouseover="this.style.transform='scale(1.15) rotate(5deg)';"
                  onmouseout="this.style.transform='none';"></i>
-              <span style="font-weight: 700; font-size: 1.25rem; letter-spacing: -0.01em;">CRM DATA</span>
+              <span style="font-weight: 700; font-size: 1.25rem; letter-spacing: -0.01em;">CRM MISA</span>
               <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 1rem; color: var(--textSlate); opacity: 0.6; margin-left: auto;"></i>
             </a>
           </li>
-          <li class="" data-view="ideas_data_automation" style="list-style: none; margin: 0; padding: 0;">
+          <li class="" data-view="ideas_auto_data" style="list-style: none; margin: 0; padding: 0;">
             <a target="_blank" href="https://ideas-data.vercel.app/rounds" 
                style="display: flex; align-items: center; gap: 1rem; padding: 1.2rem 1.6rem; border-radius: 12px; cursor: pointer; transition: all 0.25s ease; color: var(--textSlate); border: 1.5px dashed var(--mainClr-mid); background: var(--mainClr-bg); text-decoration: none;"
                onmouseover="this.style.background='var(--mainClr-soft)'; this.style.color='var(--textNavy)'; this.style.borderColor='var(--mainClr)'; this.style.transform='translateY(-1px)';"
@@ -62,7 +62,19 @@ async function bootstrapSaaS() {
               <i class="fa-solid fa-robot" style="font-size: 1.8rem; color: var(--mainClr); transition: transform 0.3s ease; display: inline-flex; align-items: center; justify-content: center; width: 2rem;"
                  onmouseover="this.style.transform='scale(1.15) rotate(5deg)';"
                  onmouseout="this.style.transform='none';"></i>
-              <span style="font-weight: 700; font-size: 1.25rem; letter-spacing: -0.01em;">DATA AUTOMATION</span>
+              <span style="font-weight: 700; font-size: 1.25rem; letter-spacing: -0.01em;">Auto Data</span>
+              <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 1rem; color: var(--textSlate); opacity: 0.6; margin-left: auto;"></i>
+            </a>
+          </li>
+          <li class="" data-view="ideas_automation" style="list-style: none; margin: 0; padding: 0;">
+            <a target="_blank" href="https://automation.ideas.edu.vn/" 
+               style="display: flex; align-items: center; gap: 1rem; padding: 1.2rem 1.6rem; border-radius: 12px; cursor: pointer; transition: all 0.25s ease; color: var(--textSlate); border: 1.5px dashed var(--mainClr-mid); background: var(--mainClr-bg); text-decoration: none;"
+               onmouseover="this.style.background='var(--mainClr-soft)'; this.style.color='var(--textNavy)'; this.style.borderColor='var(--mainClr)'; this.style.transform='translateY(-1px)';"
+               onmouseout="this.style.background='var(--mainClr-bg)'; this.style.color='var(--textSlate)'; this.style.borderColor='var(--mainClr-mid)'; this.style.transform='none';">
+              <i class="fa-solid fa-gears" style="font-size: 1.8rem; color: var(--mainClr); transition: transform 0.3s ease; display: inline-flex; align-items: center; justify-content: center; width: 2rem;"
+                 onmouseover="this.style.transform='scale(1.15) rotate(5deg)';"
+                 onmouseout="this.style.transform='none';"></i>
+              <span style="font-weight: 700; font-size: 1.25rem; letter-spacing: -0.01em;">Automation</span>
               <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 1rem; color: var(--textSlate); opacity: 0.6; margin-left: auto;"></i>
             </a>
           </li>
