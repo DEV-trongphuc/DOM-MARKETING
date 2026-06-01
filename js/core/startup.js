@@ -30,7 +30,6 @@ async function bootstrapSaaS() {
 
   const routerReady = await SAAS_ROUTER.init();
   if (!routerReady) return;
-
   // Hiển thị tab CRM DATA nếu là workspace /ideas (Render động để tránh lộ đường dẫn/cấu trúc ở các workspace khác)
   if (window.SAAS_ROUTER && window.SAAS_ROUTER.tenant && window.SAAS_ROUTER.tenant.slug?.toLowerCase() === 'ideas') {
     const sidebar = document.querySelector('.dom_sidebar');
@@ -57,7 +56,12 @@ async function bootstrapSaaS() {
           </li>
         </ul>
       `;
-      sidebar.appendChild(ideasTab);
+      const sidebarBottom = sidebar.querySelector('.dom_sidebar_bottom');
+      if (sidebarBottom) {
+        sidebar.insertBefore(ideasTab, sidebarBottom);
+      } else {
+        sidebar.appendChild(ideasTab);
+      }
     }
   }
 
