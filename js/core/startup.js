@@ -30,7 +30,7 @@ async function bootstrapSaaS() {
 
   const routerReady = await SAAS_ROUTER.init();
   if (!routerReady) return;
-  // Hiển thị tab CRM DATA nếu là workspace /ideas (Render động để tránh lộ đường dẫn/cấu trúc ở các workspace khác)
+  // Hiển thị tab CRM DATA & DATA Router nếu là workspace /ideas (Render động để tránh lộ đường dẫn/cấu trúc ở các workspace khác)
   if (window.SAAS_ROUTER && window.SAAS_ROUTER.tenant && window.SAAS_ROUTER.tenant.slug?.toLowerCase() === 'ideas') {
     const sidebar = document.querySelector('.dom_sidebar');
     if (sidebar) {
@@ -41,7 +41,7 @@ async function bootstrapSaaS() {
       ideasTab.style.paddingTop = '1.5rem';
       ideasTab.innerHTML = `
         <p class="dom_text_menu" style="margin-bottom: 0.8rem;">OTHER APP</p>
-        <ul class="dom_other_menu">
+        <ul class="dom_other_menu" style="margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.8rem;">
           <li class="" data-view="ideas_crm" style="list-style: none; margin: 0; padding: 0;">
             <a target="_blank" href="https://dev-trongphuc.github.io/DOM_MISA_IDEAS_CRM/" 
                style="display: flex; align-items: center; gap: 1rem; padding: 1.2rem 1.6rem; border-radius: 12px; cursor: pointer; transition: all 0.25s ease; color: var(--textSlate); border: 1.5px dashed var(--mainClr-mid); background: var(--mainClr-bg); text-decoration: none;"
@@ -51,6 +51,18 @@ async function bootstrapSaaS() {
                  onmouseover="this.style.transform='scale(1.15) rotate(5deg)';"
                  onmouseout="this.style.transform='none';"></i>
               <span style="font-weight: 700; font-size: 1.25rem; letter-spacing: -0.01em;">CRM DATA</span>
+              <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 1rem; color: var(--textSlate); opacity: 0.6; margin-left: auto;"></i>
+            </a>
+          </li>
+          <li class="" data-view="ideas_data_automation" style="list-style: none; margin: 0; padding: 0;">
+            <a target="_blank" href="https://ideas-data.vercel.app/rounds" 
+               style="display: flex; align-items: center; gap: 1rem; padding: 1.2rem 1.6rem; border-radius: 12px; cursor: pointer; transition: all 0.25s ease; color: var(--textSlate); border: 1.5px dashed var(--mainClr-mid); background: var(--mainClr-bg); text-decoration: none;"
+               onmouseover="this.style.background='var(--mainClr-soft)'; this.style.color='var(--textNavy)'; this.style.borderColor='var(--mainClr)'; this.style.transform='translateY(-1px)';"
+               onmouseout="this.style.background='var(--mainClr-bg)'; this.style.color='var(--textSlate)'; this.style.borderColor='var(--mainClr-mid)'; this.style.transform='none';">
+              <i class="fa-solid fa-robot" style="font-size: 1.8rem; color: var(--mainClr); transition: transform 0.3s ease; display: inline-flex; align-items: center; justify-content: center; width: 2rem;"
+                 onmouseover="this.style.transform='scale(1.15) rotate(5deg)';"
+                 onmouseout="this.style.transform='none';"></i>
+              <span style="font-weight: 700; font-size: 1.25rem; letter-spacing: -0.01em;">DATA AUTOMATION</span>
               <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 1rem; color: var(--textSlate); opacity: 0.6; margin-left: auto;"></i>
             </a>
           </li>
