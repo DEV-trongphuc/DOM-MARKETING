@@ -33,6 +33,63 @@ async function loadAgeGenderSpendChart(campaignIds = []) {
 // =================== DATE PICKER LOGIC (FB ADS STYLE) ===================
 // Variables moved to top to avoid TDZ error
 
+window.selectDatePreset = function(type) {
+  const selectBox = document.querySelector(".dom_select.time");
+  if (!selectBox) return;
+
+  const selectedText = selectBox.querySelector(".dom_selected");
+  const panel = selectBox.querySelector(".time_picker_panel");
+  const presetItems = panel.querySelectorAll(".time_picker_sidebar li[data-date]");
+  const startInput = panel.querySelector("#start_date_val");
+  const endInput = panel.querySelector("#end_date_val");
+  const quickBtns = document.querySelectorAll(".date_quick_btn");
+
+  // Reset active state in sidebar
+  presetItems.forEach((i) => i.classList.remove("active"));
+  const activeItem = Array.from(presetItems).find(i => i.dataset.date === type);
+  if (activeItem) {
+    activeItem.classList.add("active");
+  }
+
+  // Update quick buttons active state
+  quickBtns.forEach((btn) => {
+    if (btn.dataset.quickDate === type) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+
+  if (type === "custom_range") {
+    // Custom range doesn't immediately load, it just highlights in the sidebar
+    return;
+  }
+
+  const range = getDateRange(type);
+  startDate = range.start;
+  endDate = range.end;
+  tempStartDate = startDate;
+  tempEndDate = endDate;
+
+  if (startInput) startInput.value = startDate;
+  if (endInput) endInput.value = endDate;
+
+  if (selectedText) {
+    selectedText.textContent = activeItem ? activeItem.querySelector('span:last-child').textContent.trim() : type.replace('_', ' ');
+  }
+
+  if (panel) panel.classList.remove("active");
+
+  // Save selected preset to localStorage
+  localStorage.setItem("dom_report_date_preset", type);
+
+  // Update calendar highlights
+  renderCalendar();
+
+  // Refresh dashboard
+  reloadDashboard();
+};
+
 function initDateSelector() {
   const selectBox = document.querySelector(".dom_select.time");
   if (!selectBox) return;
@@ -53,6 +110,33 @@ function initDateSelector() {
     tempEndDate = endDate;
   }
 
+  // Determine starting preset
+  let savedPreset = localStorage.getItem("dom_report_date_preset");
+  if (!savedPreset || savedPreset === "custom_range") {
+    savedPreset = "last_7days";
+  }
+
+  // Set active class in sidebar & quick buttons
+  presetItems.forEach((item) => {
+    if (item.dataset.date === savedPreset) {
+      item.classList.add("active");
+      if (selectedText) {
+        selectedText.textContent = item.querySelector('span:last-child').textContent.trim();
+      }
+    } else {
+      item.classList.remove("active");
+    }
+  });
+
+  const quickBtns = document.querySelectorAll(".date_quick_btn");
+  quickBtns.forEach((btn) => {
+    if (btn.dataset.quickDate === savedPreset) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+
   // Prevent duplicate listeners
   if (selectBox.dataset.initialized) {
     return;
@@ -66,14 +150,11 @@ function initDateSelector() {
 
   // Toggle dropdown
   selectBox.addEventListener("click", (e) => {
-    // If clicking inside panel (though handled above, safety check) use return
-    if (e.target.closest(".time_picker_panel")) return;
+    if (e.target.closest(".time_picker_panel") || e.target.closest(".date_quick_actions")) return;
 
-    // Stop propagation to prevent document listeners from closing it immediately
     e.stopPropagation();
 
     const isActive = panel.classList.contains("active");
-    // Close all other dropdowns
     document.querySelectorAll(".dom_select_show").forEach(p => p.classList.remove("active"));
 
     if (!isActive) {
@@ -87,33 +168,16 @@ function initDateSelector() {
     item.addEventListener("click", (e) => {
       e.stopPropagation();
       const type = item.dataset.date;
+      window.selectDatePreset(type);
+    });
+  });
 
-      // Reset active state
-      presetItems.forEach((i) => i.classList.remove("active"));
-      item.classList.add("active");
-
-      if (type === "custom_range") {
-        // Just focus on the calendar
-        return;
-      }
-
-      const range = getDateRange(type);
-      startDate = range.start;
-      endDate = range.end;
-      tempStartDate = startDate;
-      tempEndDate = endDate;
-
-      startInput.value = startDate;
-      endInput.value = endDate;
-
-      selectedText.textContent = item.querySelector('span:last-child').textContent.trim();
-      panel.classList.remove("active");
-
-      // Update calendar highlights
-      renderCalendar();
-
-      // Refresh dashboard
-      reloadDashboard();
+  // Handle quick buttons in the header
+  quickBtns.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const type = btn.dataset.quickDate;
+      window.selectDatePreset(type);
     });
   });
 
@@ -122,7 +186,6 @@ function initDateSelector() {
     cancelBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       panel.classList.remove("active");
-      // Reset temp to match actual global
       tempStartDate = startDate;
       tempEndDate = endDate;
     });
@@ -156,6 +219,16 @@ function initDateSelector() {
       endDate = end;
       selectedText.textContent = `${fmt(start)} - ${fmt(end)}`;
       panel.classList.remove("active");
+
+      // Reset sidebar presets and quick buttons, highlight custom
+      presetItems.forEach((i) => i.classList.remove("active"));
+      const customLi = panel.querySelector('li[data-date="custom_range"]');
+      if (customLi) customLi.classList.add("active");
+
+      quickBtns.forEach((btn) => btn.classList.remove("active"));
+
+      // Set preset to custom_range in localStorage (so on next load it falls back to default)
+      localStorage.setItem("dom_report_date_preset", "custom_range");
 
       reloadDashboard();
     });
@@ -302,6 +375,10 @@ function getDateRange(type) {
     case "yesterday":
       start.setDate(today.getDate() - 1);
       end.setDate(today.getDate() - 1);
+      break;
+    case "yesterday_to_today":
+      start.setDate(today.getDate() - 1);
+      // end remains today
       break;
     case "last_7days":
       start.setDate(today.getDate() - 6);

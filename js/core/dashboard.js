@@ -73,7 +73,11 @@ async function loadCampaignList() {
 
 function initDashboard() {
   if (typeof startDate === "undefined" || !startDate) {
-    const defaultRange = getDateRange("last_7days");
+    let savedPreset = localStorage.getItem("dom_report_date_preset");
+    if (!savedPreset || savedPreset === "custom_range") {
+      savedPreset = "last_7days";
+    }
+    const defaultRange = getDateRange(savedPreset);
     startDate = defaultRange.start;
     endDate   = defaultRange.end;
   }

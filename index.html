@@ -364,6 +364,11 @@
           <i class="fa-solid fa-bars"></i>
         </div>
         <div class="dom_header_time">
+          <div class="date_quick_actions" style="display: flex; gap: 0.8rem; margin-right: 0.8rem;">
+            <button type="button" class="date_quick_btn" data-quick-date="yesterday_to_today">
+              <i class="fa-solid fa-calendar-days"></i> Yesterday - Today
+            </button>
+          </div>
           <div class="dom_select time">
             <div class="flex">
               <i class="fa-solid fa-calendar-days"></i>
@@ -378,6 +383,9 @@
                   </li>
                   <li data-date="yesterday">
                     <span class="radio_box"></span> <span>Yesterday</span>
+                  </li>
+                  <li data-date="yesterday_to_today">
+                    <span class="radio_box"></span> <span>Yesterday - Today</span>
                   </li>
                   <li data-date="last_7days" class="active">
                     <span class="radio_box"></span> <span>Last 7 days</span>

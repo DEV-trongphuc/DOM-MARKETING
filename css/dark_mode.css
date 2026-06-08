@@ -579,3 +579,23 @@ body[data-theme="dark"] .ad_item.active .ad_item_box {
   background-color: var(--bgSlate100) !important;
 }
 
+/* Today & Yesterday quick action buttons in Dark Mode */
+body[data-theme="dark"] .date_quick_btn {
+  background: var(--bgWhite) !important;
+  border-color: var(--borderMid) !important;
+  color: var(--textClr) !important;
+}
+
+body[data-theme="dark"] .date_quick_btn:hover {
+  background: var(--bgSlate100) !important;
+  color: var(--mainClr) !important;
+  border-color: var(--mainClr) !important;
+}
+
+body[data-theme="dark"] .date_quick_btn.active {
+  background: var(--mainClr) !important;
+  color: #fff !important;
+  border-color: var(--mainClr) !important;
+  box-shadow: 0 4px 10px rgba(255, 169, 0, 0.35) !important;
+}
+

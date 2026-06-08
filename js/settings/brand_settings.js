@@ -1065,13 +1065,17 @@ window.toggleMetaActivityFilter = function() {
   }
 
   function applyQuickRange(id) {
-    if (typeof getDateRange !== "function") return;
-    const r = getDateRange(id);
-    if (!r) return;
-    startDate = r.start;
-    endDate = r.end;
-    if (typeof loadDashboardData === "function") loadDashboardData();
-    showToast(`📅 ${startDate} → ${endDate}`, 2000);
+    if (typeof window.selectDatePreset === "function") {
+      window.selectDatePreset(id);
+    } else {
+      if (typeof getDateRange !== "function") return;
+      const r = getDateRange(id);
+      if (!r) return;
+      startDate = r.start;
+      endDate = r.end;
+      if (typeof loadDashboardData === "function") loadDashboardData();
+      showToast(`📅 ${startDate} → ${endDate}`, 2000);
+    }
   }
 
   let _kbFocusedIdx = -1;
