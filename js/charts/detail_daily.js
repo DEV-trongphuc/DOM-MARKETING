@@ -16,6 +16,10 @@ function renderDetailDailyChart(dataByDate, type = currentDetailDailyType) {
     if (type === "impression") return item.impressions || 0;
     if (type === "message")
       return item.actions["onsite_conversion.messaging_conversation_started_7d"] || 0;
+    if (type === "cpr") {
+      const res = getResults(item);
+      return res > 0 ? (item.spend || 0) / res : 0;
+    }
     return 0;
   });
 
@@ -49,7 +53,7 @@ function renderDetailDailyChart(dataByDate, type = currentDetailDailyType) {
 
     chart.options.plugins.datalabels.displayIndices = displayIndices;
     chart.options.plugins.tooltip.callbacks.label = (c) =>
-      `${c.dataset.label}: ${(type === "spend" || type === "cpm") ? formatMoneyShort(c.raw) : c.raw
+      `${c.dataset.label}: ${(type === "spend" || type === "cpm" || type === "cpr") ? formatMoneyShort(c.raw) : c.raw
       }`;
 
     chart.update("active");
@@ -86,7 +90,7 @@ function renderDetailDailyChart(dataByDate, type = currentDetailDailyType) {
         tooltip: {
           callbacks: {
             label: (c) =>
-              `${c.dataset.label}: ${(type === "spend" || type === "cpm") ? formatMoneyShort(c.raw) : c.raw
+              `${c.dataset.label}: ${(type === "spend" || type === "cpm" || type === "cpr") ? formatMoneyShort(c.raw) : c.raw
               }`,
           },
         },
@@ -102,7 +106,7 @@ function renderDetailDailyChart(dataByDate, type = currentDetailDailyType) {
             const index = ctx.dataIndex;
 
             if (v > 0 && indices.has(index)) {
-              return currentDetailDailyType === "spend"
+              return (currentDetailDailyType === "spend" || currentDetailDailyType === "cpr")
                 ? formatMoneyShort(v)
                 : v;
             }
@@ -1205,6 +1209,7 @@ function getChartValue(item, type) {
     reach: ["reach"],
     impression: ["impressions"],
     cpm: ["__derived_cpm__"],
+    cpr: ["__derived_cpr__"],
   };
 
   const keys = Array.isArray(typeMap[type]) ? typeMap[type] : [typeMap[type]];
@@ -1215,11 +1220,16 @@ function getChartValue(item, type) {
       const sp  = +item.spend || 0;
       return imp > 0 ? (sp / imp) * 1000 : 0;
     }
+    if (k === "__derived_cpr__") {
+      const res = getResults(item);
+      const sp  = +item.spend || 0;
+      return res > 0 ? sp / res : 0;
+    }
     if (k === "spend" && item.spend !== undefined) return +item.spend;
     if (k === "reach" && item.reach !== undefined) return +item.reach;
     if (k === "impressions" && item.impressions !== undefined) return +item.impressions;
 
-    // Tối ưu: dùng for loop thay vì find()
+    // Tối ưu: dùng for loop thay vị find()
     for (let i = 0; i < actions.length; i++) {
       if (actions[i].action_type === k) {
         return +actions[i].value;
@@ -1266,7 +1276,7 @@ function renderDetailDailyChart2(dataByDate, type = currentDetailDailyType) {
     chart.data.datasets[0].label = type.charAt(0).toUpperCase() + type.slice(1);
 
     chart.options.plugins.tooltip.callbacks.label = (c) =>
-      `${c.dataset.label}: ${(type === "spend" || type === "cpm") ? formatMoneyShort(c.raw) : c.raw
+      `${c.dataset.label}: ${(type === "spend" || type === "cpm" || type === "cpr") ? formatMoneyShort(c.raw) : c.raw
       }`;
 
     chart.options.plugins.datalabels.displayIndices = displayIndices;
@@ -1304,7 +1314,7 @@ function renderDetailDailyChart2(dataByDate, type = currentDetailDailyType) {
         tooltip: {
           callbacks: {
             label: (c) =>
-              `${c.dataset.label}: ${(type === "spend" || type === "cpm") ? formatMoneyShort(c.raw) : c.raw
+              `${c.dataset.label}: ${(type === "spend" || type === "cpm" || type === "cpr") ? formatMoneyShort(c.raw) : c.raw
               }`,
           },
         },
@@ -1319,7 +1329,7 @@ function renderDetailDailyChart2(dataByDate, type = currentDetailDailyType) {
             const index = ctx.dataIndex;
 
             if (v > 0 && indices.has(index)) {
-            return currentDetailDailyType === "spend" || currentDetailDailyType === "cpm"
+            return currentDetailDailyType === "spend" || currentDetailDailyType === "cpm" || currentDetailDailyType === "cpr"
                 ? formatMoneyShort(v)
                 : v;
             }
