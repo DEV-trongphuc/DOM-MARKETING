@@ -1243,15 +1243,15 @@ html {
 }
 
 /* 🔄 Dashboard Toggle Logic - Ẩn sạch sành sanh khi không có data */
-.dom_container.is-empty>*:not(.dom_header, .dom_dashboard) {
+.dom_container.is-empty:not(.account):not(.ad_library)>*:not(.dom_header, .dom_dashboard) {
   display: none !important;
 }
 
-.dom_container.is-empty .dom_dashboard>*:not(.dom_empty_state, #google_ads_container) {
+.dom_container.is-empty:not(.account):not(.ad_library) .dom_dashboard>*:not(.dom_empty_state, #google_ads_container) {
   display: none !important;
 }
 
-.dom_container.is-empty .dom_empty_state {
+.dom_container.is-empty:not(.account):not(.ad_library) .dom_empty_state {
   display: flex !important;
 }
 
