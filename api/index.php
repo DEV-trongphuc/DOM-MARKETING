@@ -132,7 +132,7 @@ function _verify_admin_for_slug(PDO $pdo, string $slug, string $admin_email): bo
         return true;
     }
     // Allow invited admins
-    $vstmt = $pdo->prepare("SELECT role FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ? AND status = 'active'");
+    $vstmt = $pdo->prepare("SELECT role FROM saas_tenant_viewers WHERE tenant_slug = ? AND LOWER(email) = LOWER(?) AND status = 'active'");
     $vstmt->execute([$slug, $admin_email]);
     $viewer = $vstmt->fetch();
     if ($viewer && $viewer['role'] === 'admin') {
@@ -165,7 +165,7 @@ function _verify_tenant_member(PDO $pdo, string $slug, string $email): bool
         return true;
 
     // Check active viewer
-    $vstmt = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ? AND status = 'active'");
+    $vstmt = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND LOWER(email) = LOWER(?) AND status = 'active'");
     $vstmt->execute([$slug, $email]);
     return $vstmt->fetch() !== false;
 }
@@ -430,7 +430,7 @@ try {
                 if (strtolower($email) === strtolower($tenant['google_email']) || strtolower($email) === 'dom.marketing.vn@gmail.com') {
                     $is_authorized = true;
                 } else {
-                    $chk = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ?");
+                    $chk = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND LOWER(email) = LOWER(?)");
                     $chk->execute([$slug, $email]);
                     $viewer = $chk->fetch();
                     if ($viewer && $viewer['status'] === 'active') {
@@ -549,7 +549,7 @@ try {
             $name = $body['name'] ?? '';
             $picture = $body['picture'] ?? '';
 
-            $vstmt = $pdo->prepare("SELECT role, status, last_login FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ?");
+            $vstmt = $pdo->prepare("SELECT role, status, last_login FROM saas_tenant_viewers WHERE tenant_slug = ? AND LOWER(email) = LOWER(?)");
             $vstmt->execute([$slug, $email]);
             $viewer = $vstmt->fetch();
 
@@ -559,10 +559,10 @@ try {
                 $should_update_login = (time() - $last_login_time > 900); // 900s = 15m
 
                 if ($name && $picture) {
-                    $upd = $pdo->prepare("UPDATE saas_tenant_viewers SET name = ?, picture = ?, last_login = NOW() WHERE tenant_slug = ? AND email = ?");
+                    $upd = $pdo->prepare("UPDATE saas_tenant_viewers SET name = ?, picture = ?, last_login = NOW() WHERE tenant_slug = ? AND LOWER(email) = LOWER(?)");
                     $upd->execute([$name, $picture, $slug, $email]);
                 } else if ($should_update_login) {
-                    $upd = $pdo->prepare("UPDATE saas_tenant_viewers SET last_login = NOW() WHERE tenant_slug = ? AND email = ?");
+                    $upd = $pdo->prepare("UPDATE saas_tenant_viewers SET last_login = NOW() WHERE tenant_slug = ? AND LOWER(email) = LOWER(?)");
                     $upd->execute([$slug, $email]);
                 }
 
@@ -624,11 +624,11 @@ try {
             $is_owner = ($tenant && strtolower($admin_email) === strtolower($tenant['google_email']));
             $is_member = false;
             if (!$is_owner && !$is_super_admin && $tenant) {
-                $vstmt = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ? AND status = 'active'");
-                $vstmt->execute([$slug, $admin_email]);
-                if ($vstmt->fetch()) {
-                    $is_member = true;
-                }
+                 $vstmt = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND LOWER(email) = LOWER(?) AND status = 'active'");
+                 $vstmt->execute([$slug, $admin_email]);
+                 if ($vstmt->fetch()) {
+                     $is_member = true;
+                 }
             }
 
             if (!$tenant || (!$is_owner && !$is_super_admin && !$is_member && !$tenant['is_public'])) {
@@ -686,16 +686,16 @@ try {
             }
 
             if ($action_type === 'remove') {
-                $pdo->prepare("DELETE FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ?")->execute([$slug, $target_email]);
+                $pdo->prepare("DELETE FROM saas_tenant_viewers WHERE tenant_slug = ? AND LOWER(email) = LOWER(?)")->execute([$slug, $target_email]);
             } else if ($action_type === 'approve') {
-                $pdo->prepare("UPDATE saas_tenant_viewers SET status = 'active' WHERE tenant_slug = ? AND email = ?")->execute([$slug, $target_email]);
+                $pdo->prepare("UPDATE saas_tenant_viewers SET status = 'active' WHERE tenant_slug = ? AND LOWER(email) = LOWER(?)")->execute([$slug, $target_email]);
             } else if ($action_type === 'reject') {
-                $pdo->prepare("UPDATE saas_tenant_viewers SET status = 'rejected' WHERE tenant_slug = ? AND email = ?")->execute([$slug, $target_email]);
+                $pdo->prepare("UPDATE saas_tenant_viewers SET status = 'rejected' WHERE tenant_slug = ? AND LOWER(email) = LOWER(?)")->execute([$slug, $target_email]);
             } else if ($action_type === 'role') {
-                $pdo->prepare("UPDATE saas_tenant_viewers SET role = ? WHERE tenant_slug = ? AND email = ?")->execute([$role, $slug, $target_email]);
+                $pdo->prepare("UPDATE saas_tenant_viewers SET role = ? WHERE tenant_slug = ? AND LOWER(email) = LOWER(?)")->execute([$role, $slug, $target_email]);
             } else if ($action_type === 'add') {
                 // Check if user already exists
-                $chk = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND email = ?");
+                $chk = $pdo->prepare("SELECT status FROM saas_tenant_viewers WHERE tenant_slug = ? AND LOWER(email) = LOWER(?)");
                 $chk->execute([$slug, $target_email]);
                 $existing = $chk->fetch();
 
@@ -703,11 +703,12 @@ try {
                     if ($existing['status'] === 'active' || $existing['status'] === 'request') {
                         _json(["ok" => false, "error" => "Thành viên này đã có trong danh sách."], 400);
                     } else {
-                        $pdo->prepare("UPDATE saas_tenant_viewers SET status='active', role=? WHERE tenant_slug=? AND email=?")->execute([$role, $slug, $target_email]);
+                        $pdo->prepare("UPDATE saas_tenant_viewers SET status='active', role=? WHERE tenant_slug=? AND LOWER(email)=LOWER(?)")->execute([$role, $slug, $target_email]);
                         $send_email = true;
                     }
                 } else {
-                    $pdo->prepare("INSERT INTO saas_tenant_viewers (tenant_slug, email, role, status, request_at) VALUES (?, ?, ?, 'active', NOW())")->execute([$slug, $target_email, $role]);
+                    $lower_target_email = strtolower($target_email);
+                    $pdo->prepare("INSERT INTO saas_tenant_viewers (tenant_slug, email, role, status, request_at) VALUES (?, ?, ?, 'active', NOW())")->execute([$slug, $lower_target_email, $role]);
                     $send_email = true;
                 }
 

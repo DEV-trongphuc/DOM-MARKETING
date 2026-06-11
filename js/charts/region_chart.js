@@ -457,12 +457,6 @@ document.addEventListener("click", (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  // --- 📅 Initialize Date Selector ---
-  const defaultRange = getDateRange("last_7days");
-  startDate = defaultRange.start;
-  endDate = defaultRange.end;
-  initDateSelector();
-
   const previewBtn = document.getElementById("preview_button");
 
   if (previewBtn) {
@@ -720,19 +714,21 @@ async function fetchAdAccountInfo() {
     // Lấy thông tin cần thiết từ dữ liệu trả về
     const balance = data.balance || 0;
     const amountSpent = data.amount_spent || 0;
-    const paymentMethod = data.funding_source_details
+    const paymentMethod = (data.funding_source_details && data.funding_source_details.display_string)
       ? data.funding_source_details.display_string
-      : "No payment method available";
+      : (data.funding_source_details ? `ID: ${data.funding_source_details.id || 'N/A'}` : "No payment method available");
 
     // Tính toán VAT (10%) từ số dư
     const vat = (balance * 1.1).toFixed(0);
 
     // Kiểm tra phương thức thanh toán và thêm logo tương ứng
     let paymentMethodDisplay = paymentMethod;
-    if (paymentMethod.includes("Mastercard")) {
-      paymentMethodDisplay = `<img src="https://ampersand-reports-dom.netlify.app/DOM-img/mastercard.png" alt="Mastercard" style="width:20px; margin-right: 5px;"> ${paymentMethod}`;
-    } else if (paymentMethod.includes("VISA")) {
-      paymentMethodDisplay = `<img src="https://ampersand-reports-dom.netlify.app/DOM-img/visa.png" alt="Visa" style="width:20px; margin-right: 5px;"> ${paymentMethod}`;
+    if (paymentMethod && typeof paymentMethod === 'string') {
+      if (paymentMethod.includes("Mastercard")) {
+        paymentMethodDisplay = `<img src="https://ampersand-reports-dom.netlify.app/DOM-img/mastercard.png" alt="Mastercard" style="width:20px; margin-right: 5px;"> ${paymentMethod}`;
+      } else if (paymentMethod.includes("VISA")) {
+        paymentMethodDisplay = `<img src="https://ampersand-reports-dom.netlify.app/DOM-img/visa.png" alt="Visa" style="width:20px; margin-right: 5px;"> ${paymentMethod}`;
+      }
     }
 
     // Cập nhật thông tin vào DOM
