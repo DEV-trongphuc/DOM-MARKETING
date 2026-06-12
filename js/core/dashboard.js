@@ -167,12 +167,14 @@ async function main() {
     }
   })();
 
+  // Await settings before loading dashboard to ensure configurations (columns, chart mode) are applied first
+  await window._SETTINGS_PROMISE;
+
   const googleAdsTask = (async () => {
     if (typeof fetchGoogleAdsData === "function") await fetchGoogleAdsData(false);
   })();
 
   await Promise.all([
-    window._SETTINGS_PROMISE,
     googleAdsTask,
     loadDashboardData(),
     syncAiHistoryFromApi(),

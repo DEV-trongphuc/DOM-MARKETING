@@ -122,6 +122,13 @@ window.quickToggleGoalChartMode = function () {
   window.setGoalChartMode(newMode);
   window.domSetItem("goal_chart_mode", newMode);
 
+  // Sync to database/API in background
+  if (typeof saveGoalChartModeSync === "function") {
+    saveGoalChartModeSync(newMode).catch(err => {
+      console.warn("Failed to sync goal_chart_mode:", err);
+    });
+  }
+
   // Re-render chart immediately
   if (window._ALL_CAMPAIGNS) {
     const campaigns = window._FILTERED_CAMPAIGNS || window._ALL_CAMPAIGNS;
