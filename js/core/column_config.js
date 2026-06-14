@@ -1,6 +1,6 @@
 
-let ACTIVE_COLUMNS = [];
-let CUSTOM_METRICS = [];
+var ACTIVE_COLUMNS = [];
+var CUSTOM_METRICS = [];
 
 function loadColumnConfig() {
   const saved = window.domGetItem("dom_column_config");

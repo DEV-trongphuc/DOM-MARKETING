@@ -23,15 +23,27 @@ window.renderAdLibrary = function () {
 
   // 1. Gather all ACTIVE ads
   const activeAds = [];
+  const brands = typeof loadBrandSettings === "function" ? loadBrandSettings() : [];
 
   campaigns.forEach((c) => {
-    const brandName = extractBrandFromName(c.name || "Unknown");
+    let matchedBrand = null;
+    const campaignNameLower = (c.name || "").toLowerCase();
+    for (const b of brands) {
+      if (b.filter && campaignNameLower.includes(b.filter.toLowerCase())) {
+        matchedBrand = b;
+        break;
+      }
+    }
+
+    const brandName = matchedBrand ? matchedBrand.name.toUpperCase() : extractBrandFromName(c.name || "Unknown");
+    const brandFilter = matchedBrand ? matchedBrand.filter.toLowerCase() : brandName.toLowerCase();
     
     (c.adsets || []).forEach((as) => {
       (as.ads || []).forEach((ad) => {
         if ((ad.status || "").toLowerCase() === "active") {
           activeAds.push({
             brand: brandName,
+            brandFilter: brandFilter,
             campaign_id: c.id,
             adset_id: as.id,
             ad_id: ad.id,
@@ -58,7 +70,10 @@ window.renderAdLibrary = function () {
   // Apply Global Brand Filter
   let filteredAds = activeAds;
   if (typeof CURRENT_CAMPAIGN_FILTER !== 'undefined' && CURRENT_CAMPAIGN_FILTER && CURRENT_CAMPAIGN_FILTER !== "RESET") {
-    filteredAds = activeAds.filter(ad => (ad.brand || "").toLowerCase() === CURRENT_CAMPAIGN_FILTER.toLowerCase());
+    filteredAds = activeAds.filter(ad => {
+      const filterLower = CURRENT_CAMPAIGN_FILTER.toLowerCase();
+      return (ad.brandFilter || "").toLowerCase() === filterLower || (ad.brand || "").toLowerCase() === filterLower;
+    });
   }
 
   if (filteredAds.length === 0) {

@@ -600,24 +600,8 @@
             </div>
           </div>
           <div class="dom_inner dom_fade_item w35 box_shadow chart full trendline dom_region_inner">
-            <h2 class="">
-              <span>
-                <i class="fa-solid fa-chart-simple main_clr"></i> Custom Bar Chart
-              </span>
-              <div style="display:flex;align-items:center;gap:0.8rem;">
-                <span id="goal_chart_mode_toggle" class="dom_title_button" onclick="window.quickToggleGoalChartMode()"
-                  title="Switch: Brand / Keyword">
-                  <i class="fa-solid fa-repeat"></i>
-                  <span id="goal_mode_label">Keyword</span>
-                </span>
-                <i class="fa-solid fa-gear chart_settings_btn" id="goal_settings_btn"
-                  style="cursor: pointer; opacity: 0.5; transition: opacity 0.2s;" onmouseover="this.style.opacity=1"
-                  onmouseout="this.style.opacity=0.5" onclick="openGoalSettings()"></i>
-              </div>
-            </h2>
-            <div>
-              <canvas id="goal_chart"></canvas>
-            </div>
+            <h2><i class="fa-solid fa-bullseye main_clr"></i> Meta Goal</h2>
+            <div><canvas id="extra_goal_chart"></canvas></div>
           </div>
           <!-- <div class="dom_inner dom_fade_item w35 box_shadow chart">
               <h2><i class="fa-solid fa-chart-simple main_clr"></i> Quality</h2>
@@ -1012,10 +996,26 @@
           </div>
         </div>
 
-        <!-- 2. Goal Chart -->
+        <!-- 2. Custom Bar Chart -->
         <div class="dom_inner dom_fade_item w33 box_shadow chart">
-          <h2><i class="fa-solid fa-bullseye main_clr"></i> Meta Goal</h2>
-          <div><canvas id="extra_goal_chart"></canvas></div>
+          <h2 style="display:flex; justify-content:space-between; align-items:center; width: 100%;">
+            <span>
+              <i class="fa-solid fa-chart-simple main_clr"></i> Custom Bar Chart
+            </span>
+            <div style="display:flex;align-items:center;gap:0.8rem;">
+              <span id="goal_chart_mode_toggle" class="dom_title_button" onclick="window.quickToggleGoalChartMode()"
+                 title="Switch: Brand / Keyword">
+                 <i class="fa-solid fa-repeat"></i>
+                 <span id="goal_mode_label">Keyword</span>
+              </span>
+              <i class="fa-solid fa-gear chart_settings_btn" id="goal_settings_btn"
+                 style="cursor: pointer; opacity: 0.5; transition: opacity 0.2s;" onmouseover="this.style.opacity=1"
+                 onmouseout="this.style.opacity=0.5" onclick="openGoalSettings()"></i>
+            </div>
+          </h2>
+          <div>
+            <canvas id="goal_chart"></canvas>
+          </div>
         </div>
 
         <!-- 3. Device Chart -->

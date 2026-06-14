@@ -12,10 +12,10 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 phút
 function clearFetchCache() { CACHE.clear(); CACHE_TTL.clear(); }
 
 // =================== FILTER STATE ===================
-let DAILY_DATA = [];
-let CURRENT_CAMPAIGN_FILTER = "";
-let GOAL_CHART_MODE = "keyword";
-let GOAL_KEYWORDS = ["Reach", "Engagement", "View", "Message", "Traffic", "Lead"];
+var DAILY_DATA = [];
+var CURRENT_CAMPAIGN_FILTER = "";
+var GOAL_CHART_MODE = "keyword";
+var GOAL_KEYWORDS = ["Reach", "Engagement", "View", "Message", "Traffic", "Lead"];
 
 try {
   const saved = window.domGetItem("goal_keywords");
