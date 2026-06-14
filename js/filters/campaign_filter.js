@@ -2,6 +2,10 @@
 async function applyCampaignFilter(keyword) {
   CURRENT_CAMPAIGN_FILTER = keyword || "";
 
+  if (typeof window.domSetItem === "function") {
+    window.domSetItem("dom_selected_brand", CURRENT_CAMPAIGN_FILTER);
+  }
+
   if (typeof updateBrandDropdownUI === "function") updateBrandDropdownUI();
   if (typeof updatePerfBrandDropdownUI === "function") updatePerfBrandDropdownUI();
   if (typeof refreshGoogleAds === "function") refreshGoogleAds();

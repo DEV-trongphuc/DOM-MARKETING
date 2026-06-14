@@ -58,7 +58,7 @@ window.renderAdLibrary = function () {
   // Apply Global Brand Filter
   let filteredAds = activeAds;
   if (typeof CURRENT_CAMPAIGN_FILTER !== 'undefined' && CURRENT_CAMPAIGN_FILTER && CURRENT_CAMPAIGN_FILTER !== "RESET") {
-    filteredAds = activeAds.filter(ad => ad.brand === CURRENT_CAMPAIGN_FILTER);
+    filteredAds = activeAds.filter(ad => (ad.brand || "").toLowerCase() === CURRENT_CAMPAIGN_FILTER.toLowerCase());
   }
 
   if (filteredAds.length === 0) {

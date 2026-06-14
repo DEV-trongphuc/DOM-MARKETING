@@ -86,6 +86,13 @@ if (_origLoadDashboardData) {
       const b = window._URL_RESTORE_BRAND;
       window._URL_RESTORE_BRAND = undefined;
       if (b && typeof applyCampaignFilter === "function") await applyCampaignFilter(b);
+    } else {
+      if (typeof window.domGetItem === "function" && typeof applyCampaignFilter === "function") {
+        const savedBrand = window.domGetItem("dom_selected_brand");
+        if (savedBrand && savedBrand !== "RESET" && savedBrand.trim() !== "") {
+          await applyCampaignFilter(savedBrand);
+        }
+      }
     }
   };
 }
