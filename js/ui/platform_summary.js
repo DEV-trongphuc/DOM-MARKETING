@@ -162,7 +162,22 @@ function updatePlatformSummaryUI(currentData, previousData = [], customDates = n
 
   // --- Helper function tính toán % thay đổi và xác định trạng thái ---
   const calculateChange = (current, previous) => {
+    if (previous === 0) {
+      if (current > 0) {
+        return { percentage: null, type: "new", icon: "fa-solid fa-caret-up", colorClass: "increase" };
+      }
+      return { percentage: null, type: "equal", icon: "fa-solid fa-equals", colorClass: "equal" };
+    }
+
     const change = ((current - previous) / previous) * 100;
+
+    if (!isFinite(change)) {
+      if (change > 0) {
+        return { percentage: null, type: "new", icon: "fa-solid fa-caret-up", colorClass: "increase" };
+      }
+      return { percentage: null, type: "equal", icon: "fa-solid fa-equals", colorClass: "equal" };
+    }
+
     let type = "equal";
     let icon = "fa-solid fa-equals";
     let colorClass = "equal";

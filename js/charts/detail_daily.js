@@ -990,7 +990,7 @@ const getLogo = (key, groupKey = "") => {
       k.includes("ipad") ||
       k.includes("macbook")
     )
-      return "https://raw.githubusercontent.com/DEV-trongphuc/META-REPORT/refs/heads/main/logo_ip%20(1).png";
+      return "https://static.vecteezy.com/system/resources/thumbnails/070/730/255/small/computer-logo-white-phone-icon-in-transparent-background-free-png.png";
     if (k.includes("android") || k.includes("mobile"))
       return "https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg";
     if (k.includes("desktop") || k.includes("pc"))

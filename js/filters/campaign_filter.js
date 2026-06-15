@@ -640,7 +640,7 @@ function renderVideoFunnel(adsetObj) {
 
   if (!hasVideo) {
     content.innerHTML = `<p style="text-align:center;padding:2rem;color:#94a3b8;font-size:1.3rem;">
-      <i class="fa-solid fa-circle-info"></i> Không có dữ liệu video.
+      <i class="fa-solid fa-circle-info"></i> Kh\u00f4ng c\u00f3 d\u1eef li\u1ec7u video.
     </p>`;
     return;
   }
@@ -707,7 +707,7 @@ window.toggleVideoFunnel = function () {
       z-index: 99999; display: flex; align-items: center; gap: 1rem;
       box-shadow: 0 8px 24px rgba(0,0,0,0.25);
     `;
-    toast.innerHTML = `<i class="fa-solid fa-circle-xmark" style="color:#f87171;"></i> Không có định dạng video.`;
+    toast.innerHTML = `<i class="fa-solid fa-circle-xmark" style="color:#f87171;"></i> Kh\u00f4ng c\u00f3 \u0111\u1ecbnh d\u1ea1ng video.`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
     return;
