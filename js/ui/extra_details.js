@@ -188,7 +188,7 @@ function _aggregateExtraStats(campaigns) {
 }
 
 async function loadExtraCharts() {
-    const campaigns = window._ALL_CAMPAIGNS || [];
+    const campaigns = (window._FILTERED_CAMPAIGNS || window._ALL_CAMPAIGNS) || [];
     const btnContainer = document.getElementById("show_all_btn")?.parentElement;
     const extraContainer = document.getElementById("extra_details_container");
     const chartsRow = document.getElementById("extra_charts_row");
@@ -197,11 +197,16 @@ async function loadExtraCharts() {
         if (btnContainer) btnContainer.style.display = "none";
         if (extraContainer) extraContainer.style.display = "none";
         if (chartsRow) chartsRow.style.display = "none";
+        if (window.extra_goal_chart_instance) {
+            window.extra_goal_chart_instance.destroy();
+            window.extra_goal_chart_instance = null;
+        }
         return;
     }
 
     // Guard: skip full re-render if date range and dataset haven't changed
-    const _cacheKey = `${startDate}_${endDate}_${campaigns.length}`;
+    const campaignIdsKey = campaigns.map(c => c.id).join(",");
+    const _cacheKey = `${startDate}_${endDate}_${campaigns.length}_${campaignIdsKey}`;
     if (window._extraChartsKey === _cacheKey) {
         if (btnContainer && btnContainer.style.display === "none") {
             btnContainer.style.display = "flex";
@@ -210,13 +215,17 @@ async function loadExtraCharts() {
     }
     window._extraChartsKey = _cacheKey;
 
-    // Single-pass aggregation â€” shared by all render functions below
+    // Single-pass aggregation — shared by all render functions below
     const stats = _aggregateExtraStats(campaigns);
 
     if (stats.totalSpend === 0 && stats.impressions === 0) {
         if (btnContainer) btnContainer.style.display = "none";
         if (extraContainer) extraContainer.style.display = "none";
         if (chartsRow) chartsRow.style.display = "none";
+        if (window.extra_goal_chart_instance) {
+            window.extra_goal_chart_instance.destroy();
+            window.extra_goal_chart_instance = null;
+        }
         return;
     }
 
@@ -243,7 +252,7 @@ function renderExtraOverview(stats) {
     let cpr = results > 0 ? totalSpend / results : 0;
     let cprLabel = "CPR";
 
-    const campaigns = window._ALL_CAMPAIGNS || [];
+    const campaigns = (window._FILTERED_CAMPAIGNS || window._ALL_CAMPAIGNS) || [];
     if (campaigns.length > 0) {
         const firstGoal = stats.firstGoal;
         if (firstGoal === "REACH" || firstGoal === "IMPRESSIONS") {

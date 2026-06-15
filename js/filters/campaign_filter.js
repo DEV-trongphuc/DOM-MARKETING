@@ -22,6 +22,7 @@ async function applyCampaignFilter(keyword) {
     renderGoalChart(buildAllAdsForGoalChart(window._ALL_CAMPAIGNS));
     resetUIFilter();
     await loadAllDashboardCharts();
+    if (typeof loadExtraCharts === "function") loadExtraCharts();
     return;
   }
 
@@ -46,6 +47,7 @@ async function applyCampaignFilter(keyword) {
   if (filtered.length === 0) {
     window._FILTERED_CAMPAIGNS = [];
     if (!isGoogleAdsView) domContainer?.classList.add("is-empty");
+    if (typeof loadExtraCharts === "function") loadExtraCharts();
     return;
   }
 
@@ -55,6 +57,7 @@ async function applyCampaignFilter(keyword) {
   await loadAllDashboardCharts(ids);
 
   renderGoalChart(buildAllAdsForGoalChart(filtered));
+  if (typeof loadExtraCharts === "function") loadExtraCharts();
 }
 
 /** Shared helper — build the allAds array used by renderGoalChart */
