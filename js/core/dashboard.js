@@ -109,26 +109,43 @@ async function loadDashboardData() {
 
   console.time("[PERF] ⭐ Total Dashboard Data Load");
 
-  await Promise.all([
-    (async () => {
-      console.time("[PERF] loadAllDashboardCharts");
+  try {
+    await Promise.all([
+      (async () => {
+        console.time("[PERF] initializeYearData");
+        await initializeYearData();
+        console.timeEnd("[PERF] initializeYearData");
+      })(),
+      loadCampaignList(),
+    ]);
+
+    // ⭐ Áp dụng bộ lọc Brand từ URL hoặc đã lưu trong storage nếu có
+    let brandFilterApplied = false;
+    const urlBrand = window._URL_RESTORE_BRAND || new URLSearchParams(window.location.search).get("brand");
+    if (urlBrand && urlBrand.trim()) {
+      if (typeof window.restoreBrandFilterFromURL === "function") {
+        brandFilterApplied = await window.restoreBrandFilterFromURL();
+      }
+    } else if (typeof window.domGetItem === "function" && typeof applyCampaignFilter === "function") {
+      const savedBrand = window.domGetItem("dom_selected_brand");
+      if (savedBrand && savedBrand !== "RESET" && savedBrand.trim() !== "") {
+        await applyCampaignFilter(savedBrand);
+        brandFilterApplied = true;
+      }
+    }
+
+    // Nếu không có bộ lọc Brand nào, tải dữ liệu biểu đồ cho toàn bộ campaign
+    if (!brandFilterApplied) {
       await loadAllDashboardCharts();
-      console.timeEnd("[PERF] loadAllDashboardCharts");
-    })(),
-    (async () => {
-      console.time("[PERF] initializeYearData");
-      await initializeYearData();
-      console.timeEnd("[PERF] initializeYearData");
-    })(),
-    loadCampaignList(),
-  ]).finally(() => {
+    }
+  } finally {
     if (loading) loading.classList.remove("active");
     toggleSkeletons(".dom_dashboard", false);
     console.timeEnd("[PERF] ⭐ Total Dashboard Data Load");
 
     if (typeof window.analyzeCampaignAlerts === 'function') window.analyzeCampaignAlerts();
     if (typeof window.renderHeatmap === 'function') window.renderHeatmap();
-  });
+  }
 }
 
 async function main() {

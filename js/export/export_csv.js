@@ -206,7 +206,7 @@ function updateBrandDropdownUI() {
         parentImg.style.display = "block";
         parentImg.src = "https://domation.net/imgs/ICON.png";
       }
-      if (parentText) parentText.textContent = "Tất cả";
+      if (parentText) parentText.textContent = (current && current !== "reset") ? CURRENT_CAMPAIGN_FILTER.toUpperCase() : "Tất cả";
     }
   }
 }

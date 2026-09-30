@@ -18,13 +18,19 @@
  *            renderPlatformSpendUI, renderPlatformPosition, renderAgeGenderChart,
  *            renderRegionChart, renderDetailDailyChart2, toggleSkeletons
  */
+let _loadDashboardChartsSeq = 0;
 async function loadAllDashboardCharts(campaignIds = []) {
+  const seq = ++_loadDashboardChartsSeq;
   const loading = document.querySelector(".loading");
   if (loading) loading.classList.add("active");
 
   try {
     window._LAST_CAMPAIGN_IDS = campaignIds;
     const results = await fetchDashboardInsightsBatch(campaignIds);
+    if (seq !== _loadDashboardChartsSeq) {
+      console.log(`[dashboard_charts] Request #${seq} superseded by #${_loadDashboardChartsSeq}. Ignoring.`);
+      return;
+    }
 
     const insights   = Array.isArray(results.platformStats) ? results.platformStats[0] || {} : results.platformStats || {};
     const totalSpend = +insights.spend || 0;

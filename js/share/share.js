@@ -84,7 +84,7 @@ if (_origInitDashboard) {
  */
 window.restoreBrandFilterFromURL = async function () {
   const urlBrand = window._URL_RESTORE_BRAND || new URLSearchParams(window.location.search).get("brand");
-  if (!urlBrand || !urlBrand.trim()) return;
+  if (!urlBrand || !urlBrand.trim()) return false;
   const raw = urlBrand.trim();
   let targetBrand = raw;
   if (typeof loadBrandSettings === "function") {
@@ -95,11 +95,13 @@ window.restoreBrandFilterFromURL = async function () {
     if (match && match.filter) targetBrand = match.filter;
   }
   if (typeof applyCampaignFilter === "function") {
-    await applyCampaignFilter(targetBrand);
+    await applyCampaignFilter(targetFilter);
     if (typeof showToast === "function") {
       showToast(`🔗 Đã áp dụng bộ lọc: ${targetBrand}`, 3000);
     }
+    return true;
   }
+  return false;
 };
 
 // Patch loadDashboardData to apply brand after data loads
