@@ -241,30 +241,64 @@ function renderTargetingToDOM(targeting) {
   // === FLEXIBLE SPEC (Interests / Education / etc.) ===
   const freqWrap = targetBox.querySelector(".frequency_tag");
   if (freqWrap) {
-    const tags = [];
     const flex = targeting.flexible_spec || [];
 
-    flex.forEach((fs) => {
+    const extractItems = (fs) => {
+      const items = [];
+      if (!fs || typeof fs !== "object") return items;
       for (const [key, arr] of Object.entries(fs)) {
         if (!Array.isArray(arr)) continue;
         arr.forEach((item) => {
-          const name = item?.name || item;
+          const name = item?.name || item?.id || item;
           const cleanKey = key
             .replace(/_/g, " ")
             .replace(/\b\w/g, (c) => c.toUpperCase());
-          tags.push(`${name} (${cleanKey})`);
+          items.push(`${name} (${cleanKey})`);
         });
       }
-    });
+      return items;
+    };
 
-    freqWrap.innerHTML = tags.length
-      ? tags
-        .map(
-          (t) =>
-            `<p class="freq_tag_item"><span class="tag_dot"></span><span class="tag_name">${t}</span></p>`
-        )
-        .join("")
-      : `<p class="freq_tag_item"><span class="tag_dot"></span><span class="tag_name">Advantage targeting</span></p>`;
+    if (!Array.isArray(flex) || flex.length === 0) {
+      freqWrap.innerHTML = `<p class="freq_tag_item"><span class="tag_dot"></span><span class="tag_name">Advantage targeting</span></p>`;
+    } else if (flex.length === 1) {
+      const tags = extractItems(flex[0]);
+      freqWrap.innerHTML = tags.length
+        ? tags
+            .map(
+              (t) =>
+                `<p class="freq_tag_item"><span class="tag_dot"></span><span class="tag_name">${t}</span></p>`
+            )
+            .join("")
+        : `<p class="freq_tag_item"><span class="tag_dot"></span><span class="tag_name">Advantage targeting</span></p>`;
+    } else {
+      // Multiple groups in flexible_spec: Group 0 is "Include", Group 1+ is "and must also match" (AND targeting)
+      let html = `<div style="display:flex; flex-direction:column; gap:0.6rem; width:100%;">`;
+      flex.forEach((fs, idx) => {
+        const tags = extractItems(fs);
+        if (tags.length === 0) return;
+
+        if (idx > 0) {
+          html += `
+            <div class="and_target_divider" style="display:flex; align-items:center; gap:0.8rem; width:100%; margin: 1rem 0 0.5rem;">
+              <span style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.25rem 0.8rem; background:#fff7ed; color:#ea580c; border:1px solid #fed7aa; border-radius:6px; font-weight:700; font-size:1.1rem; text-transform:uppercase; letter-spacing:0.04em;">
+                <i class="fa-solid fa-code-merge" style="transform:rotate(90deg); font-size:1rem;"></i> AND
+              </span>
+              <span style="font-weight:600; font-size:1.2rem; color:#64748b;">and must also match</span>
+              <div style="flex:1; height:1px; background:#e2e8f0;"></div>
+            </div>
+          `;
+        }
+
+        html += `<div style="display:flex; flex-wrap:wrap; gap:0.8rem; align-items:center; justify-content:flex-start;">`;
+        tags.forEach((t) => {
+          html += `<p class="freq_tag_item"><span class="tag_dot"></span><span class="tag_name">${t}</span></p>`;
+        });
+        html += `</div>`;
+      });
+      html += `</div>`;
+      freqWrap.innerHTML = html;
+    }
   }
 
   // === CUSTOM & LOOKALIKE AUDIENCES ===
@@ -303,6 +337,7 @@ function renderTargetingToDOM(targeting) {
       excluded_interests,
       excluded_behaviors,
       excluded_geo_locations,
+      exclusions,
     } = targeting || {};
 
     if (Array.isArray(excluded_custom_audiences))
@@ -319,6 +354,19 @@ function renderTargetingToDOM(targeting) {
       excluded_behaviors.forEach((e) =>
         excluded.push(`${e.name || e.id} (Behavior)`)
       );
+
+    if (exclusions && typeof exclusions === "object") {
+      for (const [key, arr] of Object.entries(exclusions)) {
+        if (!Array.isArray(arr)) continue;
+        arr.forEach((item) => {
+          const name = item?.name || item?.id || item;
+          const cleanKey = key
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, (c) => c.toUpperCase());
+          excluded.push(`${name} (${cleanKey})`);
+        });
+      }
+    }
 
     if (excluded_geo_locations?.countries)
       excluded_geo_locations.countries.forEach((c) =>
