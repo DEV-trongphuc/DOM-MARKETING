@@ -31,6 +31,9 @@ function shareCurrentView() {
   if (since && until) {
     window._URL_RESTORE = { since, until, brand: brand || "" };
   }
+  if (brand && brand.trim()) {
+    window._URL_RESTORE_BRAND = brand.trim();
+  }
 })();
 
 // Hook into initDashboard to restore URL params after init
@@ -71,21 +74,43 @@ if (_origInitDashboard) {
       
       document.querySelectorAll(".date_quick_btn").forEach((btn) => btn.classList.remove("active"));
       
-      window._URL_RESTORE_BRAND = brandFilter;
       showToast(`🔗 Restored view: ${since} → ${until}${brandFilter ? " | Brand: " + brandFilter : ""}`, 4000);
     }
   };
 }
+
+/**
+ * Khôi phục bộ lọc Brand từ URL sau khi dữ liệu dashboard đã sẵn sàng
+ */
+window.restoreBrandFilterFromURL = async function () {
+  const urlBrand = window._URL_RESTORE_BRAND || new URLSearchParams(window.location.search).get("brand");
+  if (!urlBrand || !urlBrand.trim()) return;
+  const raw = urlBrand.trim();
+  let targetBrand = raw;
+  if (typeof loadBrandSettings === "function") {
+    const brands = loadBrandSettings();
+    const match = brands.find(
+      (b) => (b.filter || "").toLowerCase() === raw.toLowerCase() || (b.name || "").toLowerCase() === raw.toLowerCase()
+    );
+    if (match && match.filter) targetBrand = match.filter;
+  }
+  if (typeof applyCampaignFilter === "function") {
+    await applyCampaignFilter(targetBrand);
+    if (typeof showToast === "function") {
+      showToast(`🔗 Đã áp dụng bộ lọc: ${targetBrand}`, 3000);
+    }
+  }
+};
 
 // Patch loadDashboardData to apply brand after data loads
 const _origLoadDashboardData = typeof loadDashboardData === "function" ? loadDashboardData : null;
 if (_origLoadDashboardData) {
   window.loadDashboardData = async function (...args) {
     await _origLoadDashboardData.apply(this, args);
-    if (window._URL_RESTORE_BRAND !== undefined) {
-      const b = window._URL_RESTORE_BRAND;
+    const urlBrand = window._URL_RESTORE_BRAND || new URLSearchParams(window.location.search).get("brand");
+    if (urlBrand && urlBrand.trim()) {
       window._URL_RESTORE_BRAND = undefined;
-      if (b && typeof applyCampaignFilter === "function") await applyCampaignFilter(b);
+      await window.restoreBrandFilterFromURL();
     } else {
       if (typeof window.domGetItem === "function" && typeof applyCampaignFilter === "function") {
         const savedBrand = window.domGetItem("dom_selected_brand");

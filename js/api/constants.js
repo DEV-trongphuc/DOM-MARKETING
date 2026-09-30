@@ -46,7 +46,7 @@ const goalMapping = {
   Message:     ["REPLIES"],
   Traffic:     ["LINK_CLICKS", "PROFILE_VISIT", "LANDING_PAGE_VIEWS"],
   Sales:       ["OFFSITE_CONVERSIONS", "VALUE", "CONVERSIONS"],
-  Pagelike:    ["PAGE_LIKES"],
+  Pagelike:    ["PAGE_LIKES", "PAGE_FOLLOWS", "FOLLOW", "LIKE", "PAGELIKE"],
 };
 
 const resultMapping = {
@@ -61,6 +61,9 @@ const resultMapping = {
   REPLIES:         "onsite_conversion.messaging_conversation_started_7d",
   IMPRESSIONS:     "impressions",
   PAGE_LIKES:      "page_like",
+  PAGE_FOLLOWS:    "page_follow",
+  FOLLOW:          "page_follow",
+  LIKE:            "page_like",
   OFFSITE_CONVERSIONS: "offsite_conversion.fb_pixel_custom",
   VALUE:           "offsite_conversion.fb_pixel_purchase",
   CONVERSIONS:     "offsite_conversion.fb_pixel_custom",
@@ -85,6 +88,11 @@ for (const group in goalMapping) {
     GOAL_GROUP_LOOKUP[goal] = group;
   }
 }
+GOAL_GROUP_LOOKUP["PAGE_LIKES"] = "Pagelike";
+GOAL_GROUP_LOOKUP["PAGE_FOLLOWS"] = "Pagelike";
+GOAL_GROUP_LOOKUP["FOLLOW"] = "Pagelike";
+GOAL_GROUP_LOOKUP["LIKE"] = "Pagelike";
+GOAL_GROUP_LOOKUP["PAGELIKE"] = "Pagelike";
 
 // O(1) reverse lookup: action_type → label (built from METRIC_REGISTRY after it is defined)
 // Populated in config.js after METRIC_REGISTRY is available.

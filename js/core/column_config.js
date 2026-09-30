@@ -73,9 +73,29 @@ function getMetricValue(item, metricId) {
       if (metricId === "video_view") {
         act = actions.find(a => a.action_type === "video_3_sec_watched_actions" || a.action_type === "video_view");
       }
-      // Tên thay thế cho Page Like/Follows
+      // Tên thay thế cho Page Like/Follows (lấy like + follow)
       if (metricId === "follow") {
-        act = actions.find(a => a.action_type === "page_like" || a.action_type === "like" || a.action_type === "onsite_conversion.page_like");
+        let likes = 0;
+        let follows = 0;
+        let igFollows = 0;
+        if (Array.isArray(actions)) {
+          actions.forEach(a => {
+            if (!a) return;
+            const t = a.action_type || "";
+            const v = +a.value || 0;
+            if (t === "page_like" || t === "like" || t === "onsite_conversion.page_like") {
+              likes = Math.max(likes, v);
+            }
+            if (t === "page_follow" || t === "follow" || t === "follows" || t === "onsite_conversion.page_follow" || t === "onsite_conversion.follow") {
+              follows = Math.max(follows, v);
+            }
+            if (t === "instagram_profile_follow" || t === "onsite_conversion.instagram_profile_follow") {
+              igFollows = Math.max(igFollows, v);
+            }
+          });
+        }
+        const totalFollow = Math.max(likes, follows) + igFollows;
+        if (totalFollow > 0) return totalFollow;
       }
       // Tên thay thế cho ThruPlay
       if (metricId === "thruplay") {
@@ -99,7 +119,14 @@ function getMetricValue(item, metricId) {
     const spend = +item.spend || 0;
     const reach = +item.reach || 0;
     const impressions = +item.impressions || 0;
-    const result = +item.result || 0;
+    let result = +item.result;
+    if (!result || isNaN(result) || result === 0) {
+      if (typeof getResults === "function") {
+        result = getResults(item, item.optimization_goal || item.optimizationGoal || item.objective || (typeof VIEW_GOAL !== "undefined" ? VIEW_GOAL : "")) || 0;
+      } else {
+        result = 0;
+      }
+    }
 
     if (metricId === "result") return result;
     if (metricId === "cpr") {

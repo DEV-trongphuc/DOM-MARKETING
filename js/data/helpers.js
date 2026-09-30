@@ -112,13 +112,35 @@ function getResults(item, goal) {
   const insights = item.insights?.data?.[0] || item.insights || item;
   if (!insights) return 0;
 
-  let optGoal = goal || VIEW_GOAL || item.optimization_goal || insights.optimization_goal || "";
+  let rawGoal = (
+    goal ||
+    (typeof VIEW_GOAL !== "undefined" ? VIEW_GOAL : "") ||
+    item.optimization_goal ||
+    insights.optimization_goal ||
+    item.objective ||
+    insights.objective ||
+    item.optimizationGoal ||
+    ""
+  ).toString().trim();
+
+  let optGoal = rawGoal.toUpperCase();
+
+  const itemName = (item.name || item.ad_name || item.campaign_name || insights.campaign_name || "").toLowerCase();
+  const isLikeCampaign =
+    optGoal.includes("LIKE") ||
+    optGoal.includes("FOLLOW") ||
+    /like\s*page|page\s*like|likepage|follow/i.test(itemName) ||
+    ((item.objective || insights.objective || "").toUpperCase() === "PAGE_LIKES");
 
   // If goal is a group name (e.g. "Lead Form"), resolve to a technical goal key
-  let goalKey = GOAL_GROUP_LOOKUP[optGoal];
+  let goalKey = GOAL_GROUP_LOOKUP[optGoal] || GOAL_GROUP_LOOKUP[rawGoal];
   if (!goalKey && goalMapping[optGoal]) {
     goalKey = optGoal;
     optGoal = goalMapping[goalKey][0];
+  }
+  if (!goalKey && isLikeCampaign) {
+    goalKey = "Pagelike";
+    optGoal = "PAGE_LIKES";
   }
 
   if (optGoal === "REACH" || goalKey === "Awareness") {
@@ -127,51 +149,140 @@ function getResults(item, goal) {
   if (optGoal === "IMPRESSIONS") return +insights.impressions || 0;
 
   const actions  = insights.actions || {};
-  let resultType = resultMapping[optGoal];
+  let resultType = resultMapping[optGoal] || resultMapping[rawGoal];
 
   if (!resultType && goalKey) resultType = GOAL_KEY_RESULT_MAP[goalKey];
+  if (!resultType && isLikeCampaign) resultType = "page_like";
   if (!resultType) resultType = resultMapping.DEFAULT;
 
+  const getVal = (type) => {
+    if (Array.isArray(actions)) {
+      const found = actions.find((a) => a && a.action_type === type);
+      return found ? +found.value || 0 : 0;
+    }
+    return actions && typeof actions === "object" ? +actions[type] || 0 : 0;
+  };
+
+  if (resultType === "page_like" || goalKey === "Pagelike" || isLikeCampaign) {
+    // Facebook page likes & follows
+    const fbLikes = Math.max(
+      getVal("page_like"),
+      getVal("onsite_conversion.page_like"),
+      getVal("like")
+    );
+    const fbFollows = Math.max(
+      getVal("page_follow"),
+      getVal("onsite_conversion.page_follow"),
+      getVal("follow"),
+      getVal("follows"),
+      getVal("onsite_conversion.follow")
+    );
+    // Instagram profile follows
+    const igFollows = Math.max(
+      getVal("instagram_profile_follow"),
+      getVal("onsite_conversion.instagram_profile_follow")
+    );
+
+    // Đối với FB Page: lấy max giữa like và follow để tránh đếm trùng 1 hành vi trên Trang;
+    // cộng thêm lượt follow Instagram nếu có.
+    const fbTotal = Math.max(fbLikes, fbFollows);
+    let total = fbTotal + igFollows;
+
+    // Fallback: quét các key thay thế nếu total = 0
+    if (total === 0) {
+      const fallbackKeys = [
+        "page_like", "like", "page_follow", "follow", "follows",
+        "instagram_profile_follow", "onsite_conversion.page_like",
+        "onsite_conversion.page_follow", "onsite_conversion.follow",
+        "onsite_conversion.instagram_profile_follow"
+      ];
+      for (const k of fallbackKeys) {
+        const v = getVal(k);
+        if (v > 0) total = Math.max(total, v);
+      }
+    }
+
+    if (total === 0 && item.follow > 0) {
+      total = +item.follow || 0;
+    }
+
+    return total;
+  }
+
+  let finalRes = 0;
   if (Array.isArray(actions)) {
     if (insights[resultType]) {
       const sp = insights[resultType];
-      if (Array.isArray(sp))               return sp.reduce((s, a) => s + (+a.value || 0), 0);
-      if (typeof sp === "number" || typeof sp === "string") return +sp;
-      if (sp.value)                        return +sp.value;
+      if (Array.isArray(sp)) finalRes = sp.reduce((s, a) => s + (+a.value || 0), 0);
+      else if (typeof sp === "number" || typeof sp === "string") finalRes = +sp;
+      else if (sp.value) finalRes = +sp.value;
     }
 
-    for (let i = 0; i < actions.length; i++) {
-      if (actions[i].action_type === resultType) return +actions[i].value || 0;
+    if (!finalRes) {
+      for (let i = 0; i < actions.length; i++) {
+        if (actions[i].action_type === resultType) {
+          finalRes = +actions[i].value || 0;
+          break;
+        }
+      }
     }
 
-    if (goalKey) {
+    if (!finalRes && goalKey) {
       for (const g of goalMapping[goalKey]) {
         const altType = resultMapping[g];
         if (!altType) continue;
         if (insights[altType]) {
           const asp = insights[altType];
-          if (Array.isArray(asp)) return asp.reduce((s, a) => s + (+a.value || 0), 0);
+          if (Array.isArray(asp)) {
+            finalRes = asp.reduce((s, a) => s + (+a.value || 0), 0);
+            if (finalRes) break;
+          }
         }
         for (let i = 0; i < actions.length; i++) {
-          if (actions[i].action_type === altType) return +actions[i].value || 0;
+          if (actions[i].action_type === altType) {
+            finalRes = +actions[i].value || 0;
+            break;
+          }
         }
+        if (finalRes) break;
       }
     }
     // Sales fallback: try fb_pixel_purchase if fb_pixel_custom is 0
-    if (goalKey === 'Sales') {
+    if (!finalRes && goalKey === 'Sales') {
       for (let i = 0; i < actions.length; i++) {
-        if (actions[i].action_type === 'offsite_conversion.fb_pixel_purchase') return +actions[i].value || 0;
+        if (actions[i].action_type === 'offsite_conversion.fb_pixel_purchase') {
+          finalRes = +actions[i].value || 0;
+          break;
+        }
       }
     }
-    return 0;
   } else {
-    if (actions[resultType]) return +actions[resultType];
-    if (goalKey) {
+    if (actions[resultType]) finalRes = +actions[resultType];
+    if (!finalRes && goalKey) {
       for (const g of goalMapping[goalKey]) {
         const altType = resultMapping[g];
-        if (altType && actions[altType]) return +actions[altType];
+        if (altType && actions[altType]) {
+          finalRes = +actions[altType];
+          break;
+        }
       }
     }
-    return 0;
   }
+
+  // Fallback for anonymous breakdown objects (e.g. in hour/date charts) where goal is not specified
+  if (finalRes === 0) {
+    const likeVal = Math.max(
+      getVal("page_like"),
+      getVal("onsite_conversion.page_like"),
+      getVal("like"),
+      getVal("page_follow"),
+      getVal("follow")
+    );
+    const hasLeadOrSale = getVal("lead") || getVal("onsite_conversion.lead_grouped") || getVal("purchase") || getVal("omni_purchase");
+    if (likeVal > 0 && !hasLeadOrSale) {
+      return likeVal;
+    }
+  }
+
+  return finalRes;
 }

@@ -17,8 +17,17 @@ async function handleAdsetInsightClick(btn) {
   const spend = adsetObj ? adsetObj.spend : parseFloat(btn.dataset.spend || 0);
   const reach = adsetObj ? adsetObj.reach : parseFloat(btn.dataset.reach || 0);
   const impressions = adsetObj ? adsetObj.impressions : parseFloat(btn.dataset.impressions || 0);
-  const result = adsetObj ? adsetObj.result : parseFloat(btn.dataset.result || 0);
-  const cpr = adsetObj ? getMetricValue(adsetObj, "cpr") : parseFloat(btn.dataset.cpr || 0);
+  const calculatedResult = (adsetObj && adsetObj.result > 0)
+    ? adsetObj.result
+    : (adsetObj ? (getResults(adsetObj, goal) || 0) : parseFloat(btn.dataset.result || 0));
+  const result = calculatedResult;
+  let cpr = (adsetObj && adsetObj.cpr > 0)
+    ? adsetObj.cpr
+    : (adsetObj ? getMetricValue(adsetObj, "cpr") : parseFloat(btn.dataset.cpr || 0));
+  if (result > 0 && (!cpr || isNaN(cpr))) {
+    const isThousand = (goal === "REACH" || goal === "IMPRESSIONS");
+    cpr = isThousand ? (spend / result) * 1000 : spend / result;
+  }
 
   // Hiển thị ngay Actions Detail từ bộ nhớ (trước khi gọi API breakdown)
   if (adsetObj) {

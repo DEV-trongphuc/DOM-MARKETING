@@ -219,7 +219,7 @@ function renderBarChart(id, data) {
 
   const labels = Object.keys(data);
   const spentData = labels.map((l) => data[l].spend || 0);
-  const resultData = labels.map((l) => getResults(data[l]));
+  const resultData = labels.map((l) => getResults(data[l], VIEW_GOAL));
 
   if (window[`${id}_chart`]) window[`${id}_chart`].destroy(); // Hủy chart cũ
   window[`${id}_chart`] = null; // Gán null
@@ -302,7 +302,7 @@ function renderChartByHour(dataByHour) {
   const labels = hourKeys.map((h) => parseInt(h.slice(0, 2), 10) + "h");
 
   const spentData = hourKeys.map((h) => dataByHour[h].spend || 0);
-  const resultData = hourKeys.map((h) => getResults(dataByHour[h]));
+  const resultData = hourKeys.map((h) => getResults(dataByHour[h], VIEW_GOAL));
 
   const spentDisplayIndices = calculateIndicesToShow(spentData, 5);
   const resultDisplayIndices = calculateIndicesToShow(resultData, 5);

@@ -39,8 +39,17 @@ async function handleViewClick(e, type = "ad") {
   const impressions = itemObj ? itemObj.impressions : parseFloat(adViewEl.dataset.impressions || 0);
   const goal = itemObj ? itemObj.optimization_goal : (adViewEl.dataset.goal || "");
   const name = itemObj ? (itemObj.name || itemObj.ad_name) : (adViewEl.dataset.name || "");
-  const result = itemObj ? itemObj.result : parseFloat(adViewEl.dataset.result || 0);
-  const cpr = itemObj ? getMetricValue(itemObj, "cpr") : parseFloat(adViewEl.dataset.cpr || 0);
+  const calculatedResult = (itemObj && itemObj.result > 0)
+    ? itemObj.result
+    : (itemObj ? (getResults(itemObj, goal) || 0) : parseFloat(adViewEl.dataset.result || 0));
+  const result = calculatedResult;
+  let cpr = (itemObj && itemObj.cpr > 0)
+    ? itemObj.cpr
+    : (itemObj ? getMetricValue(itemObj, "cpr") : parseFloat(adViewEl.dataset.cpr || 0));
+  if (result > 0 && (!cpr || isNaN(cpr))) {
+    const isThousand = (goal === "REACH" || goal === "IMPRESSIONS");
+    cpr = isThousand ? (spend / result) * 1000 : spend / result;
+  }
 
   // ✅ Luôn reset funnel khi mở ad mới (kể cả khi không có cache)
   window._videoFunnelLoaded = false;
