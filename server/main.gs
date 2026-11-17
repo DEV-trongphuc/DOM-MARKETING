@@ -972,26 +972,37 @@ function ensureOfflineConversionAction() {
 }
 
 function _formatAdsConversionDateTime(val) {
-  let d = null;
   if (val instanceof Date && !isNaN(val.getTime())) {
-    d = val;
-  } else if (typeof val === "number" && !isNaN(val)) {
-    d = new Date(Math.round((val - 25569) * 86400 * 1000));
-  } else {
-    const s = String(val || "").trim();
-    if (!s) return null;
-    // Match dd/MM/yyyy HH:mm:ss or yyyy-MM-dd HH:mm:ss
-    const dmy = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-    if (dmy) {
-      const dd = dmy[1].padStart(2, "0"), mm = dmy[2].padStart(2, "0"), yyyy = dmy[3];
-      const hh = (dmy[4] || "00").padStart(2, "0"), mi = (dmy[5] || "00").padStart(2, "0"), ss = (dmy[6] || "00").padStart(2, "0");
-      return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}+07:00`;
-    }
-    const parsed = new Date(s);
-    if (!isNaN(parsed.getTime())) d = parsed;
+    return Utilities.formatDate(val, "Asia/Ho_Chi_Minh", "yyyy-MM-dd HH:mm:ss") + "+07:00";
   }
-  if (!d) return null;
-  return Utilities.formatDate(d, "Asia/Ho_Chi_Minh", "yyyy-MM-dd HH:mm:ss") + "+07:00";
+  if (typeof val === "number" && !isNaN(val)) {
+    const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+    return Utilities.formatDate(d, "UTC", "yyyy-MM-dd HH:mm:ss") + "+07:00";
+  }
+  const s = String(val || "").trim();
+  if (!s) return null;
+
+  // Match yyyy-MM-dd HH:mm:ss (hoặc ISO yyyy-MM-ddTHH:mm:ss) -> giữ nguyên giờ GMT+7 hiển thị trên Sheet
+  const ymd = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})(?:[T\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (ymd) {
+    const yyyy = ymd[1], mm = ymd[2].padStart(2, "0"), dd = ymd[3].padStart(2, "0");
+    const hh = (ymd[4] || "00").padStart(2, "0"), mi = (ymd[5] || "00").padStart(2, "0"), ss = (ymd[6] || "00").padStart(2, "0");
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}+07:00`;
+  }
+
+  // Match dd/MM/yyyy HH:mm:ss
+  const dmy = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (dmy) {
+    const dd = dmy[1].padStart(2, "0"), mm = dmy[2].padStart(2, "0"), yyyy = dmy[3];
+    const hh = (dmy[4] || "00").padStart(2, "0"), mi = (dmy[5] || "00").padStart(2, "0"), ss = (dmy[6] || "00").padStart(2, "0");
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}+07:00`;
+  }
+
+  const parsed = new Date(s);
+  if (!isNaN(parsed.getTime())) {
+    return Utilities.formatDate(parsed, "Asia/Ho_Chi_Minh", "yyyy-MM-dd HH:mm:ss") + "+07:00";
+  }
+  return null;
 }
 
 function _extractClickTracking(text) {
@@ -1013,7 +1024,8 @@ function _collectOfflineLeadsFromSheet() {
   const sh = ss.getSheetByName(OFFLINE_CONVERSION_CONFIG.SHEET_NAME);
   if (!sh) throw new Error(`Không tìm thấy tab "${OFFLINE_CONVERSION_CONFIG.SHEET_NAME}"`);
 
-  const values = sh.getDataRange().getValues();
+  // Dùng getDisplayValues() để lấy đúng chuỗi giờ trên Sheet (tránh lệch timezone của Apps Script)
+  const values = sh.getDataRange().getDisplayValues();
   if (values.length < 2) return [];
 
   const header = values[0].map(h => String(h || "").trim().toLowerCase());
@@ -1139,6 +1151,7 @@ function uploadOfflineConversionsFromSheet(dryRun) {
   const pending = allLeads.filter(l => !uploadedMap[l.dedupeKey]);
   console.log(`📋 Tìm thấy ${allLeads.length} lead có gclid/gbraid/wbraid; chưa upload: ${pending.length}.`);
   if (!pending.length) return { ok: true, total: allLeads.length, pending: 0, uploaded: 0 };
+  console.log(`🕒 Khoảng thời gian: ${pending[0].conversionDateTime} → ${pending[pending.length - 1].conversionDateTime}`);
 
   const actionId = ensureOfflineConversionAction();
   if (!actionId) throw new Error("Không lấy được Conversion Action ID.");
