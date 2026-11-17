@@ -1214,18 +1214,20 @@ function uploadOfflineConversionsFromSheet(dryRun) {
         payload: JSON.stringify(buildPayload(loginOpt)),
         muteHttpExceptions: true
       });
-      if (resp.getResponseCode() === 200) {
+      const rCode = resp.getResponseCode();
+      if (rCode === 200) {
         console.log(`✅ Khớp loginAccount: ${loginOpt || "(none)"}`);
         break;
       }
-      if (resp.getResponseCode() !== 403) break;
+      console.warn(`⚠️ loginAccount=${loginOpt || "(none)"} -> HTTP ${rCode}: ${resp.getContentText()}`);
+      if (rCode !== 403) break;
     }
 
     const code = resp.getResponseCode();
     const text = resp.getContentText();
     if (code !== 200) {
       failedCount += batch.length;
-      throw new Error(`Data Manager API HTTP ${code}: ${text.slice(0, 800)}`);
+      throw new Error(`Data Manager API HTTP ${code}: ${text}`);
     }
 
     const resJson = JSON.parse(text || "{}");
