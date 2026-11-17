@@ -1261,6 +1261,9 @@ function uploadOfflineConversionsFromSheet(dryRun) {
         uploadedCount++;
       });
       props.setProperty(_OFFLINE_PROP_KEY, JSON.stringify(uploadedMap));
+      if (resJson.requestId) {
+        props.setProperty("dom_last_offline_request_id", String(resJson.requestId));
+      }
     } else {
       uploadedCount += batch.length;
     }
@@ -1268,6 +1271,26 @@ function uploadOfflineConversionsFromSheet(dryRun) {
 
   console.log(`${isDry ? "🧪 [DRY RUN OK]" : "✅ [INGEST SENT]"} Số lead hợp lệ: ${uploadedCount}, Thất bại: ${failedCount}` + (requestIds.length ? ` | requestId: ${requestIds.join(", ")}` : ""));
   return { ok: failedCount === 0, dryRun: isDry, actionId, total: allLeads.length, pending: pending.length, uploadedCount, failedCount, requestIds };
+}
+
+/**
+ * Kiểm tra trạng thái xử lý bất đồng bộ của lần đẩy Offline Conversion gần nhất trên Data Manager API.
+ * Có thể truyền requestId cụ thể hoặc để trống để tự kiểm tra requestId vừa đẩy.
+ */
+function checkOfflineUploadStatus(requestId) {
+  const props = PropertiesService.getScriptProperties();
+  const rid = String(requestId || props.getProperty("dom_last_offline_request_id") || "12644d70-1f1e-4c0d-8fc3-ab4d602d4370").trim();
+  const url = `https://datamanager.googleapis.com/v1/requestStatus:retrieve?requestId=${encodeURIComponent(rid)}`;
+  const resp = UrlFetchApp.fetch(url, {
+    method: "get",
+    headers: { "Authorization": "Bearer " + ScriptApp.getOAuthToken() },
+    muteHttpExceptions: true
+  });
+  const code = resp.getResponseCode();
+  let text = resp.getContentText();
+  try { text = JSON.stringify(JSON.parse(text)); } catch (_) {}
+  console.log(`🔎 requestId=${rid} | HTTP ${code}: ${text}`);
+  return { code, requestId: rid, body: text };
 }
 
 function resetOfflineUploadHistory() {
