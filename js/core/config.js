@@ -1,5 +1,5 @@
-// URL cho Google Ads Sync (vẫn dùng Google AppScript)
-const GOOGLE_SHEET_API_URL = window.APP_CONFIG.GOOGLE_SHEET_API_URL || "https://script.google.com/macros/s/AKfycbzpl49TWIpHkcKNd0WRURLVOZGreY_lEYwq8COqWzuiY4TcOtzvelaIvTJpaz9tYQnYcA/exec";
+// URL cho Google Ads (kết nối trực tiếp qua Google Apps Script Web App)
+const GOOGLE_SHEET_API_URL = window.GOOGLE_ADS_API_URL || window.APP_CONFIG.GOOGLE_SHEET_API_URL || "https://script.google.com/macros/s/AKfycbzpl49TWIpHkcKNd0WRURLVOZGreY_lEYwq8COqWzuiY4TcOtzvelaIvTJpaz9tYQnYcA/exec";
 
 let monthlyChartInstance = null;
 let startDate, endDate;

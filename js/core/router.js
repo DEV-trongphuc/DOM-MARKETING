@@ -138,6 +138,20 @@ window.SAAS_ROUTER = {
             window.APP_CONFIG.ACCOUNT_ID = this.tenant.ad_account_id;
             window.APP_CONFIG.META_TOKEN = this.tenant.meta_token;
             window.APP_CONFIG.BRAND_FILTER_ENABLED = this.tenant.brand_filter_enabled == 1;
+
+            const tenantSlug = String(this.tenant.slug || hash || '').toLowerCase().trim();
+            const gadsCustomerId = this.tenant.google_ads_customer_id || (tenantSlug === 'ecolifesignature' ? '295-339-0933' : '');
+            if (gadsCustomerId) {
+                window.GOOGLE_ADS_SETUP = true;
+                window.GOOGLE_ADS_CUSTOMER_ID = gadsCustomerId;
+                window.GOOGLE_ADS_DEVELOPER_TOKEN = this.tenant.google_ads_developer_token || 'oBqM_GUwxCs4t-leZtW6pQ';
+                window.GOOGLE_ADS_API_URL = this.tenant.google_ads_api_url || 'https://script.google.com/macros/s/AKfycby0BDtgLxuC8xN-grb9lXZk4ISK9C0NN77muj48YQ6GmpfsAF7RzfRa7uyrMjBonHs3/exec';
+                window.APP_CONFIG.GOOGLE_ADS_SETUP = true;
+                window.APP_CONFIG.GOOGLE_SHEET_API_URL = window.GOOGLE_ADS_API_URL;
+            } else {
+                window.GOOGLE_ADS_SETUP = false;
+                window.APP_CONFIG.GOOGLE_ADS_SETUP = false;
+            }
             
             try {
                 window.APP_CONFIG.ALLOWED_ACCOUNTS = JSON.parse(this.tenant.ad_accounts || "[]");

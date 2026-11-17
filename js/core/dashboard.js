@@ -149,16 +149,19 @@ async function loadDashboardData() {
 }
 
 async function main() {
-  // Ẩn Google Ads nếu SETUP là false
+  // Hiển thị hoặc ẩn Google Ads dựa theo GOOGLE_ADS_SETUP của workspace hiện tại
+  const gadsTitle = document.getElementById("gads_menu_title");
+  const gadsItem  = document.getElementById("gads_menu_item");
   if (window.GOOGLE_ADS_SETUP === false) {
-    const gadsTitle = document.getElementById("gads_menu_title");
-    const gadsItem  = document.getElementById("gads_menu_item");
     if (gadsTitle) gadsTitle.style.display = "none";
     if (gadsItem)  gadsItem.style.display  = "none";
 
     const shareBtn     = document.getElementById("share_url_btn");
     const actionsGroup = document.querySelector(".toolbar_actions_group");
     if (shareBtn && actionsGroup) actionsGroup.appendChild(shareBtn);
+  } else {
+    if (gadsTitle) gadsTitle.style.display = "";
+    if (gadsItem)  gadsItem.style.display  = "";
   }
 
   // Ẩn Brand Filter nếu BRAND_FILTER_SETUP là false
@@ -188,7 +191,7 @@ async function main() {
   await window._SETTINGS_PROMISE;
 
   const googleAdsTask = (async () => {
-    if (typeof fetchGoogleAdsData === "function") await fetchGoogleAdsData(false);
+    if (window.GOOGLE_ADS_SETUP !== false && typeof fetchGoogleAdsData === "function") await fetchGoogleAdsData(false);
   })();
 
   await Promise.all([
