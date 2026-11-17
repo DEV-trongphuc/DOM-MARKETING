@@ -1219,12 +1219,20 @@ function uploadOfflineConversionsFromSheet(dryRun) {
         console.log(`✅ Khớp loginAccount: ${loginOpt || "(none)"}`);
         break;
       }
-      console.warn(`⚠️ loginAccount=${loginOpt || "(none)"} -> HTTP ${rCode}: ${resp.getContentText()}`);
+      let compactErr = resp.getContentText();
+      try {
+        const ej = JSON.parse(compactErr);
+        compactErr = JSON.stringify(ej);
+        const fv = (ej.error && ej.error.details || []).flatMap(d => d.fieldViolations || []);
+        if (fv.length) console.error("❌ fieldViolations:", JSON.stringify(fv));
+      } catch (_) {}
+      console.warn(`⚠️ loginAccount=${loginOpt || "(none)"} -> HTTP ${rCode}: ${compactErr}`);
       if (rCode !== 403) break;
     }
 
     const code = resp.getResponseCode();
-    const text = resp.getContentText();
+    let text = resp.getContentText();
+    try { text = JSON.stringify(JSON.parse(text)); } catch (_) {}
     if (code !== 200) {
       failedCount += batch.length;
       throw new Error(`Data Manager API HTTP ${code}: ${text}`);
