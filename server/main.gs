@@ -868,3 +868,287 @@ function createDailyTrigger() {
   console.log('✅ Trigger tự động 2h sáng đã được tạo.');
 }
 function revokeOAuth() { ScriptApp.invalidateAuth(); console.log('✅ Đã xóa OAuth cũ.'); }
+
+// ════════════════════════════════════════════════════════════
+//  OFFLINE CONVERSION UPLOAD (Google Ads API v23)
+//  Đọc lead có gclid / gbraid / wbraid từ Sheet và đẩy bù về Google Ads
+// ════════════════════════════════════════════════════════════
+
+const OFFLINE_CONVERSION_CONFIG = {
+  SPREADSHEET_ID:       "1tFYwBIpCtxcN5_YUnUlY3rvsuaDhnlpuA6GirllqEKA",
+  SHEET_NAME:           "website",
+  CUSTOMER_ID:          "295-339-0933",
+  CONVERSION_ACTION_ID: "", // Để trống để script tự tìm/tạo Conversion Action loại UPLOAD_CLICKS
+  ACTION_NAME:          "Submit lead form (Offline Import)",
+  DEFAULT_VALUE:        1,
+  CURRENCY_CODE:        "VND",
+};
+
+const _OFFLINE_PROP_KEY = "dom_uploaded_offline_leads_v1";
+
+function _adsApiPostWithMccFallback(url, payloadObj, devToken) {
+  let headers = _getApiHeaders(devToken);
+  let resp = UrlFetchApp.fetch(url, {
+    method: "post",
+    headers: headers,
+    payload: JSON.stringify(payloadObj),
+    muteHttpExceptions: true
+  });
+  if (resp.getResponseCode() === 403 && headers["login-customer-id"]) {
+    headers = _getApiHeaders(devToken, true);
+    resp = UrlFetchApp.fetch(url, {
+      method: "post",
+      headers: headers,
+      payload: JSON.stringify(payloadObj),
+      muteHttpExceptions: true
+    });
+  }
+  return resp;
+}
+
+/**
+ * Tìm hoặc tạo Conversion Action loại UPLOAD_CLICKS (category: SUBMIT_LEAD_FORM).
+ * Lưu ý: Google Ads cần ~4-6 giờ sau khi tạo mới một Conversion Action để API uploadClickConversions chấp nhận.
+ */
+function ensureOfflineConversionAction() {
+  if (OFFLINE_CONVERSION_CONFIG.CONVERSION_ACTION_ID) {
+    return String(OFFLINE_CONVERSION_CONFIG.CONVERSION_ACTION_ID).trim();
+  }
+  const customerId = OFFLINE_CONVERSION_CONFIG.CUSTOMER_ID.replace(/-/g, "");
+  const searchUrl = `${GADS_API_BASE}/customers/${customerId}/googleAds:searchStream`;
+  const q = `SELECT conversion_action.id, conversion_action.name, conversion_action.type, conversion_action.category, conversion_action.status FROM conversion_action WHERE conversion_action.type = 'UPLOAD_CLICKS' AND conversion_action.status != 'REMOVED'`;
+
+  const searchResp = _adsApiPostWithMccFallback(searchUrl, { query: q });
+  if (searchResp.getResponseCode() !== 200) {
+    throw new Error("Không truy vấn được conversion_action: " + searchResp.getContentText().slice(0, 400));
+  }
+
+  const parsed = JSON.parse(searchResp.getContentText() || "[]");
+  const rows = [];
+  (Array.isArray(parsed) ? parsed : [parsed]).forEach(b => (b.results || []).forEach(r => {
+    if (r.conversionAction) rows.push(r.conversionAction);
+  }));
+
+  const exact = rows.find(a => a.name === OFFLINE_CONVERSION_CONFIG.ACTION_NAME)
+             || rows.find(a => String(a.category || "").toUpperCase() === "SUBMIT_LEAD_FORM")
+             || rows[0];
+
+  if (exact && exact.id) {
+    console.log(`✅ Dùng Conversion Action sẵn có: "${exact.name}" (ID: ${exact.id})`);
+    return String(exact.id);
+  }
+
+  const mutateUrl = `${GADS_API_BASE}/customers/${customerId}/conversionActions:mutate`;
+  const createPayload = {
+    operations: [{
+      create: {
+        name: OFFLINE_CONVERSION_CONFIG.ACTION_NAME,
+        type: "UPLOAD_CLICKS",
+        category: "SUBMIT_LEAD_FORM",
+        status: "ENABLED",
+        primaryForGoal: true,
+        countingType: "ONE_PER_CLICK",
+        valueSettings: {
+          defaultValue: OFFLINE_CONVERSION_CONFIG.DEFAULT_VALUE,
+          defaultCurrencyCode: OFFLINE_CONVERSION_CONFIG.CURRENCY_CODE,
+          alwaysUseDefaultValue: false
+        }
+      }
+    }],
+    partialFailure: false,
+    validateOnly: false
+  };
+
+  const createResp = _adsApiPostWithMccFallback(mutateUrl, createPayload);
+  const createText = createResp.getContentText();
+  if (createResp.getResponseCode() !== 200) {
+    throw new Error("Không tạo được Conversion Action UPLOAD_CLICKS: " + createText.slice(0, 500));
+  }
+  const resJson = JSON.parse(createText || "{}");
+  const resName = resJson.results && resJson.results[0] && resJson.results[0].resourceName;
+  const newId = resName ? String(resName).split("/").pop() : "";
+  console.log(`✅ Đã tạo mới Conversion Action "${OFFLINE_CONVERSION_CONFIG.ACTION_NAME}" (ID: ${newId}). Lưu ý: Google Ads cần 4-6 tiếng đồng bộ trước khi nhận uploadClickConversions.`);
+  return newId;
+}
+
+function _formatAdsConversionDateTime(val) {
+  let d = null;
+  if (val instanceof Date && !isNaN(val.getTime())) {
+    d = val;
+  } else if (typeof val === "number" && !isNaN(val)) {
+    d = new Date(Math.round((val - 25569) * 86400 * 1000));
+  } else {
+    const s = String(val || "").trim();
+    if (!s) return null;
+    // Match dd/MM/yyyy HH:mm:ss or yyyy-MM-dd HH:mm:ss
+    const dmy = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+    if (dmy) {
+      const dd = dmy[1].padStart(2, "0"), mm = dmy[2].padStart(2, "0"), yyyy = dmy[3];
+      const hh = (dmy[4] || "00").padStart(2, "0"), mi = (dmy[5] || "00").padStart(2, "0"), ss = (dmy[6] || "00").padStart(2, "0");
+      return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}+07:00`;
+    }
+    const parsed = new Date(s);
+    if (!isNaN(parsed.getTime())) d = parsed;
+  }
+  if (!d) return null;
+  return Utilities.formatDate(d, "Asia/Ho_Chi_Minh", "yyyy-MM-dd HH:mm:ss") + "+07:00";
+}
+
+function _extractClickTracking(text) {
+  const s = String(text || "").replace(/&amp;/g, "&");
+  const pick = (key) => {
+    const m = s.match(new RegExp("(?:[?&#]|^)" + key + "=([^&#\\s]+)", "i"));
+    if (!m) return "";
+    try { return decodeURIComponent(m[1]).trim(); } catch (_) { return m[1].trim(); }
+  };
+  return {
+    gclid:  pick("gclid"),
+    gbraid: pick("gbraid"),
+    wbraid: pick("wbraid")
+  };
+}
+
+function _collectOfflineLeadsFromSheet() {
+  const ss = SpreadsheetApp.openById(OFFLINE_CONVERSION_CONFIG.SPREADSHEET_ID);
+  const sh = ss.getSheetByName(OFFLINE_CONVERSION_CONFIG.SHEET_NAME);
+  if (!sh) throw new Error(`Không tìm thấy tab "${OFFLINE_CONVERSION_CONFIG.SHEET_NAME}"`);
+
+  const values = sh.getDataRange().getValues();
+  if (values.length < 2) return [];
+
+  const header = values[0].map(h => String(h || "").trim().toLowerCase());
+  const colIdx = (kwList, fallback) => {
+    const idx = header.findIndex(h => kwList.some(k => h.includes(k)));
+    return idx >= 0 ? idx : fallback;
+  };
+
+  const iId     = colIdx(["mã lead", "ma lead", "id"], 0);
+  const iTime   = colIdx(["thời gian", "thoi gian", "created"], 1);
+  const iSource = colIdx(["phân loại", "nguồn", "source"], 7);
+  const iUtm    = colIdx(["utm", "campaign"], 9);
+  const iUrl    = colIdx(["trang đích", "vị trí form", "url"], 10);
+
+  const cutoffMs = Date.now() - 89 * 86400000;
+  const leads = [];
+
+  for (let r = 1; r < values.length; r++) {
+    const row = values[r];
+    const tracking = _extractClickTracking((row[iUrl] || "") + " " + (row[iUtm] || ""));
+    if (!tracking.gclid && !tracking.gbraid && !tracking.wbraid) continue;
+
+    const convDt = _formatAdsConversionDateTime(row[iTime]);
+    if (!convDt) continue;
+    const convMs = new Date(convDt.replace(" ", "T")).getTime();
+    if (!isNaN(convMs) && convMs < cutoffMs) continue; // quá hạn 90 ngày của Google Ads
+
+    const leadCode = String(row[iId] || `ROW_${r + 1}`).trim();
+    const dedupeKey = `${leadCode}|${tracking.gclid || tracking.gbraid || tracking.wbraid}`;
+
+    const item = {
+      leadCode,
+      dedupeKey,
+      source: String(row[iSource] || ""),
+      conversionDateTime: convDt,
+      conversionValue: OFFLINE_CONVERSION_CONFIG.DEFAULT_VALUE,
+      currencyCode: OFFLINE_CONVERSION_CONFIG.CURRENCY_CODE
+    };
+    // Google Ads chỉ cho phép 1 định danh click trên mỗi conversion object
+    if (tracking.gclid) item.gclid = tracking.gclid;
+    else if (tracking.gbraid) item.gbraid = tracking.gbraid;
+    else if (tracking.wbraid) item.wbraid = tracking.wbraid;
+
+    leads.push(item);
+  }
+  return leads;
+}
+
+/** Chạy thử (không gửi thật) để xem danh sách lead đủ điều kiện upload */
+function previewOfflineConversionsFromSheet() {
+  return uploadOfflineConversionsFromSheet(true);
+}
+
+/**
+ * Đẩy toàn bộ lead có gclid/gbraid/wbraid chưa upload từ tab "website" lên Google Ads.
+ * @param {boolean} dryRun true = chỉ validateOnly, không ghi nhận thật
+ */
+function uploadOfflineConversionsFromSheet(dryRun) {
+  const isDry = dryRun === true;
+  const props = PropertiesService.getScriptProperties();
+  let uploadedMap = {};
+  try { uploadedMap = JSON.parse(props.getProperty(_OFFLINE_PROP_KEY) || "{}"); } catch (_) {}
+
+  const allLeads = _collectOfflineLeadsFromSheet();
+  const pending = allLeads.filter(l => !uploadedMap[l.dedupeKey]);
+  console.log(`📋 Tìm thấy ${allLeads.length} lead có gclid/gbraid/wbraid; chưa upload: ${pending.length}.`);
+  if (!pending.length) return { ok: true, total: allLeads.length, pending: 0, uploaded: 0 };
+
+  const actionId = ensureOfflineConversionAction();
+  if (!actionId) throw new Error("Không lấy được Conversion Action ID.");
+
+  const customerId = OFFLINE_CONVERSION_CONFIG.CUSTOMER_ID.replace(/-/g, "");
+  const convActionResource = `customers/${customerId}/conversionActions/${actionId}`;
+  const endpoint = `${GADS_API_BASE}/customers/${customerId}:uploadClickConversions`;
+
+  let uploadedCount = 0;
+  let failedCount = 0;
+  const errors = [];
+
+  for (let i = 0; i < pending.length; i += 200) {
+    const batch = pending.slice(i, i + 200);
+    const conversions = batch.map(l => {
+      const c = {
+        conversionAction: convActionResource,
+        conversionDateTime: l.conversionDateTime,
+        conversionValue: l.conversionValue,
+        currencyCode: l.currencyCode
+      };
+      if (l.gclid) c.gclid = l.gclid;
+      else if (l.gbraid) c.gbraid = l.gbraid;
+      else if (l.wbraid) c.wbraid = l.wbraid;
+      return c;
+    });
+
+    const payload = {
+      conversions: conversions,
+      partialFailure: true,
+      validateOnly: isDry
+    };
+
+    const resp = _adsApiPostWithMccFallback(endpoint, payload);
+    const code = resp.getResponseCode();
+    const text = resp.getContentText();
+    if (code !== 200) {
+      throw new Error(`uploadClickConversions HTTP ${code}: ${text.slice(0, 600)}`);
+    }
+
+    const resJson = JSON.parse(text || "{}");
+    const results = resJson.results || [];
+    if (resJson.partialFailureError) {
+      console.warn("⚠️ partialFailureError:", JSON.stringify(resJson.partialFailureError).slice(0, 800));
+      errors.push(resJson.partialFailureError.message || "Partial failure");
+    }
+
+    if (!isDry) {
+      batch.forEach((lead, idx) => {
+        const rItem = results[idx];
+        if (rItem && Object.keys(rItem).length > 0) {
+          uploadedMap[lead.dedupeKey] = new Date().toISOString();
+          uploadedCount++;
+        } else {
+          failedCount++;
+        }
+      });
+      props.setProperty(_OFFLINE_PROP_KEY, JSON.stringify(uploadedMap));
+    } else {
+      uploadedCount += batch.length;
+    }
+  }
+
+  console.log(`${isDry ? "🧪 [DRY RUN]" : "✅ [UPLOAD DONE]"} Thành công: ${uploadedCount}, Thất bại: ${failedCount}`);
+  return { ok: failedCount === 0, dryRun: isDry, actionId, total: allLeads.length, pending: pending.length, uploadedCount, failedCount, errors };
+}
+
+function resetOfflineUploadHistory() {
+  PropertiesService.getScriptProperties().deleteProperty(_OFFLINE_PROP_KEY);
+  console.log("✅ Đã reset lịch sử upload offline conversion.");
+}
