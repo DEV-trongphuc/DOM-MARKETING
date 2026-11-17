@@ -878,7 +878,7 @@ const OFFLINE_CONVERSION_CONFIG = {
   SPREADSHEET_ID:       "1tFYwBIpCtxcN5_YUnUlY3rvsuaDhnlpuA6GirllqEKA",
   SHEET_NAME:           "website",
   CUSTOMER_ID:          "295-339-0933",
-  CONVERSION_ACTION_ID: "", // Để trống để script tự tìm/tạo Conversion Action loại UPLOAD_CLICKS
+  CONVERSION_ACTION_ID: "7906112050", // Conversion Action "Submit lead form (Offline Import)"
   ACTION_NAME:          "Submit lead form (Offline Import)",
   DEFAULT_VALUE:        1,
   CURRENCY_CODE:        "VND",
@@ -1068,7 +1068,10 @@ function previewOfflineConversionsFromSheet() {
 }
 
 /**
- * Đẩy toàn bộ lead có gclid/gbraid/wbraid chưa upload từ tab "website" lên Google Ads.
+ * Đẩy toàn bộ lead có gclid/gbraid/wbraid chưa upload từ tab "website" lên Google Ads
+ * thông qua Google Data Manager API v1 (events:ingest).
+ * Yêu cầu GCP Project bật "Data Manager API" và appsscript.json có scope:
+ *   "https://www.googleapis.com/auth/datamanager"
  * @param {boolean} dryRun true = chỉ validateOnly, không ghi nhận thật
  */
 function uploadOfflineConversionsFromSheet(dryRun) {
@@ -1086,57 +1089,78 @@ function uploadOfflineConversionsFromSheet(dryRun) {
   if (!actionId) throw new Error("Không lấy được Conversion Action ID.");
 
   const customerId = OFFLINE_CONVERSION_CONFIG.CUSTOMER_ID.replace(/-/g, "");
-  const convActionResource = `customers/${customerId}/conversionActions/${actionId}`;
-  const endpoint = `${GADS_API_BASE}/customers/${customerId}:uploadClickConversions`;
+  const loginId = (CONFIG.LOGIN_CUSTOMER_ID || "").replace(/-/g, "") || customerId;
+  const endpoint = "https://datamanager.googleapis.com/v1/events:ingest";
+  const authHeaders = {
+    "Authorization": "Bearer " + ScriptApp.getOAuthToken(),
+    "Content-Type": "application/json"
+  };
 
   let uploadedCount = 0;
   let failedCount = 0;
-  const errors = [];
+  const requestIds = [];
 
-  for (let i = 0; i < pending.length; i += 200) {
-    const batch = pending.slice(i, i + 200);
-    const conversions = batch.map(l => {
-      const c = {
-        conversionAction: convActionResource,
-        conversionDateTime: l.conversionDateTime,
+  for (let i = 0; i < pending.length; i += 2000) {
+    const batch = pending.slice(i, i + 2000);
+    const events = batch.map(l => {
+      const adIds = {};
+      if (l.gclid) adIds.gclid = l.gclid;
+      else if (l.gbraid) adIds.gbraid = l.gbraid;
+      else if (l.wbraid) adIds.wbraid = l.wbraid;
+
+      // Data Manager API dùng chuẩn RFC 3339 (có chữ T giữa ngày và giờ)
+      const rfc3339Ts = String(l.conversionDateTime).replace(" ", "T");
+      return {
+        eventTimestamp: rfc3339Ts,
+        eventSource: "WEB",
+        transactionId: l.leadCode,
+        adIdentifiers: adIds,
         conversionValue: l.conversionValue,
-        currencyCode: l.currencyCode
+        currency: l.currencyCode
       };
-      if (l.gclid) c.gclid = l.gclid;
-      else if (l.gbraid) c.gbraid = l.gbraid;
-      else if (l.wbraid) c.wbraid = l.wbraid;
-      return c;
     });
 
-    const payload = {
-      conversions: conversions,
-      partialFailure: true,
-      validateOnly: isDry
-    };
+    const buildPayload = (loginAccId) => ({
+      destinations: [{
+        operatingAccount: { accountType: "GOOGLE_ADS", accountId: customerId },
+        loginAccount: { accountType: "GOOGLE_ADS", accountId: loginAccId },
+        productDestinationId: String(actionId)
+      }],
+      validateOnly: isDry,
+      events: events
+    });
 
-    const resp = _adsApiPostWithMccFallback(endpoint, payload);
+    let resp = UrlFetchApp.fetch(endpoint, {
+      method: "post",
+      headers: authHeaders,
+      payload: JSON.stringify(buildPayload(loginId)),
+      muteHttpExceptions: true
+    });
+
+    if ((resp.getResponseCode() === 403 || resp.getResponseCode() === 400) && loginId !== customerId) {
+      resp = UrlFetchApp.fetch(endpoint, {
+        method: "post",
+        headers: authHeaders,
+        payload: JSON.stringify(buildPayload(customerId)),
+        muteHttpExceptions: true
+      });
+    }
+
     const code = resp.getResponseCode();
     const text = resp.getContentText();
     if (code !== 200) {
-      throw new Error(`uploadClickConversions HTTP ${code}: ${text.slice(0, 600)}`);
+      failedCount += batch.length;
+      throw new Error(`Data Manager API HTTP ${code}: ${text.slice(0, 800)}`);
     }
 
     const resJson = JSON.parse(text || "{}");
-    const results = resJson.results || [];
-    if (resJson.partialFailureError) {
-      console.warn("⚠️ partialFailureError:", JSON.stringify(resJson.partialFailureError).slice(0, 800));
-      errors.push(resJson.partialFailureError.message || "Partial failure");
-    }
+    if (resJson.requestId) requestIds.push(resJson.requestId);
+    console.log("📨 Data Manager API response:", text);
 
     if (!isDry) {
-      batch.forEach((lead, idx) => {
-        const rItem = results[idx];
-        if (rItem && Object.keys(rItem).length > 0) {
-          uploadedMap[lead.dedupeKey] = new Date().toISOString();
-          uploadedCount++;
-        } else {
-          failedCount++;
-        }
+      batch.forEach(lead => {
+        uploadedMap[lead.dedupeKey] = new Date().toISOString();
+        uploadedCount++;
       });
       props.setProperty(_OFFLINE_PROP_KEY, JSON.stringify(uploadedMap));
     } else {
@@ -1144,8 +1168,8 @@ function uploadOfflineConversionsFromSheet(dryRun) {
     }
   }
 
-  console.log(`${isDry ? "🧪 [DRY RUN]" : "✅ [UPLOAD DONE]"} Thành công: ${uploadedCount}, Thất bại: ${failedCount}`);
-  return { ok: failedCount === 0, dryRun: isDry, actionId, total: allLeads.length, pending: pending.length, uploadedCount, failedCount, errors };
+  console.log(`${isDry ? "🧪 [DRY RUN OK]" : "✅ [INGEST SENT]"} Số lead hợp lệ: ${uploadedCount}, Thất bại: ${failedCount}` + (requestIds.length ? ` | requestId: ${requestIds.join(", ")}` : ""));
+  return { ok: failedCount === 0, dryRun: isDry, actionId, total: allLeads.length, pending: pending.length, uploadedCount, failedCount, requestIds };
 }
 
 function resetOfflineUploadHistory() {
