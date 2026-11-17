@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <script>
     (function () {
-      var APP_VERSION = "v23.1"; // Tăng chuỗi này lên khi có bản cập nhật mới
+      var APP_VERSION = "v23.2"; // Tăng chuỗi này lên khi có bản cập nhật mới
       var localVer = localStorage.getItem("dom_app_version");
       if (localVer !== APP_VERSION) {
         if (window.location.search.indexOf("dom_cache_bust") === -1) {
@@ -17,13 +17,13 @@
     })();
   </script>
   <!-- Central Configuration -->
-  <script src="./lib/config_env.js?v=1794889870478"></script>
+  <script src="./lib/config_env.js?v=1794890889799"></script>
   <!-- SaaS Router -->
-  <script src="./js/core/router.js?v=1794889870478"></script>
+  <script src="./js/core/router.js?v=1794890889799"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DOM META REPORTS</title>
   <!-- <link rel="stylesheet" href="css/main.css" /> -->
-  <link rel="stylesheet" href="./css/main.css?v=1794889870478" />
+  <link rel="stylesheet" href="./css/main.css?v=1794890889799" />
   <!-- <link rel="stylesheet" href="./phone.css" /> -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
@@ -1591,6 +1591,20 @@
                     </p>
                   </li>
                   <li>
+                    <span><i class="fa-solid fa-file-signature"></i> Lead Form</span>
+                    <p id="g_lead_forms">
+                      <span>-</span>
+                      <span>-%</span>
+                    </p>
+                  </li>
+                  <li>
+                    <span><i class="fa-solid fa-phone"></i> Calls</span>
+                    <p id="g_calls">
+                      <span>-</span>
+                      <span>-%</span>
+                    </p>
+                  </li>
+                  <li>
                     <span><i class="fa-solid fa-store"></i> Store Visit</span>
                     <p id="g_store">
                       <span>-</span>
@@ -1626,6 +1640,7 @@
                     <li data-view="cpc"><span class="radio_box"></span><span>CPC</span></li>
                     <li data-view="impression"><span class="radio_box"></span><span>Impression</span></li>
                     <li data-view="all_conversions"><span class="radio_box"></span><span>All Conversions</span></li>
+                    <li data-view="lead_forms"><span class="radio_box"></span><span>Lead Form</span></li>
                     <li data-view="store_visits"><span class="radio_box"></span><span>Store Visit</span></li>
                     <li data-view="directions"><span class="radio_box"></span><span>Directions</span></li>
                     <li data-view="calls"><span class="radio_box"></span><span>Calls</span></li>
@@ -1653,6 +1668,7 @@
                     <li data-view="spent" class="active"><span class="radio_box active"></span><span>Spent</span></li>
                     <li data-view="click"><span class="radio_box"></span><span>Click</span></li>
                     <li data-view="all_conversions"><span class="radio_box"></span><span>All Conversions</span></li>
+                    <li data-view="lead_forms"><span class="radio_box"></span><span>Lead Form</span></li>
                     <li data-view="ctr"><span class="radio_box"></span><span>CTR (%)</span></li>
                     <li data-view="cpc"><span class="radio_box"></span><span>CPC</span></li>
                     <li data-view="cpa"><span class="radio_box"></span><span>CPA</span></li>
@@ -1675,12 +1691,16 @@
               <div id="g_funnel_wrap" class="g_funnel_wrap" style="flex:1;overflow-y:auto;min-height:0;"></div>
               <div class="g_metric_row">
                 <div class="g_metric_item">
-                  <div class="g_metric_label"><i class="fa-solid fa-utensils"></i> Menu</div>
-                  <div id="g_stat_menu" class="g_metric_val">-</div>
+                  <div class="g_metric_label"><i class="fa-solid fa-file-signature"></i> Lead Form</div>
+                  <div id="g_stat_leads" class="g_metric_val">-</div>
                 </div>
                 <div class="g_metric_item">
                   <div class="g_metric_label"><i class="fa-solid fa-phone"></i> Calls</div>
                   <div id="g_stat_calls" class="g_metric_val">-</div>
+                </div>
+                <div class="g_metric_item">
+                  <div class="g_metric_label"><i class="fa-solid fa-map-location-dot"></i> Directions</div>
+                  <div id="g_stat_dir" class="g_metric_val">-</div>
                 </div>
                 <div class="g_metric_item">
                   <div class="g_metric_label"><i class="fa-solid fa-bag-shopping"></i> Orders</div>
@@ -1784,41 +1804,52 @@
 
             <!-- Card: Location Performance -->
             <div class="dom_inner box_shadow chart"
-              style="flex:1.2; min-width:0; display:flex; flex-direction:column; background-color: white;">
+              style="flex:1.15; min-width:0; display:flex; flex-direction:column; background-color: white;">
               <h2><i class="fa-solid fa-location-dot main_clr"></i> Location Performance</h2>
-              <p style="font-size:0.8rem;color:#94a3b8;margin:-0.3rem 0 0.6rem;">Top tỉnh/thành theo metric đã chọn</p>
-              <div id="g_location_chart_wrap" style="position:relative; flex:1; min-height:220px;">
+              <p style="font-size:1.15rem;color:#94a3b8;margin:-0.2rem 0 0.6rem;">Top tỉnh/thành theo metric đã chọn</p>
+              <div id="g_location_chart_wrap" style="position:relative; width:100%; min-height:240px;">
                 <canvas id="g_location_chart"></canvas>
               </div>
             </div>
 
             <!-- Card: Distance Radius -->
             <div class="dom_inner box_shadow chart"
-              style="flex:1.4; min-width:0; display:flex; flex-direction:column; background-color: white;">
+              style="flex:1; min-width:0; display:flex; flex-direction:column; background-color: white;">
               <h2><i class="fa-solid fa-circle-dot main_clr"></i> Distance Radius</h2>
-              <p style="font-size:0.8rem;color:#94a3b8;margin:-0.3rem 0 0.6rem;">Bán kính từ cửa hàng — metric đã chọn
-              </p>
-              <div style="position:relative; flex:1; min-height:220px;">
+              <p style="font-size:1.15rem;color:#94a3b8;margin:-0.2rem 0 0.6rem;">Bán kính từ cửa hàng — metric đã chọn</p>
+              <div id="g_distance_chart_wrap" style="position:relative; flex:1; min-height:240px; display:flex; flex-direction:column; justify-content:center;">
                 <canvas id="g_distance_chart"></canvas>
               </div>
             </div>
             <!-- Card: Channel Breakdown -->
 
             <div class="dom_inner box_shadow chart"
-              style="flex:1; min-width:0; display:flex; flex-direction:column; background-color: white;">
+              style="flex:1.15; min-width:0; display:flex; flex-direction:column; background-color: white;">
               <h2><i class="fa-solid fa-chart-pie main_clr"></i> Channel Breakdown</h2>
-              <p style="font-size:0.8rem;color:#94a3b8;margin:-0.3rem 0 0.6rem;">Phân bổ chi tiêu theo kênh</p>
+              <p style="font-size:1.15rem;color:#94a3b8;margin:-0.2rem 0 0.6rem;">Phân bổ chi tiêu theo kênh</p>
               <span id="g_channel_chart" style="display:none;"></span>
-              <div class="g_channel_body" style="flex:1;"></div>
+              <div class="g_channel_body" style="flex:1; min-width:0;"></div>
             </div>
 
+          </div>
+
+          <!-- ROW 4.5: Lead Form Submissions -->
+          <div class="dom_row flex" id="g_lead_form_row">
+            <div class="dom_inner view_campaign g_campaign_wrap" style="margin-top: 1rem;">
+              <div class="dom_table_header" style="margin-bottom: 1.2rem;">
+                <h2><i class="fa-solid fa-file-signature main_clr"></i> Lead Form Submissions</h2>
+                <span id="g_lead_form_badge"
+                  style="margin-left:auto; padding:0.45rem 1.2rem; border-radius:999px; background:#fff7ed; color:#ea580c; font-weight:700; font-size:1.2rem; border:1px solid #fed7aa;">0 leads</span>
+              </div>
+              <div id="g_lead_form_body"></div>
+            </div>
           </div>
 
 
           <!-- ROW 5: Detail Campaign Table -->
 
           <div class="dom_row flex">
-            <div class="dom_inner view_campaign g_campaign_wrap" style="margin-top: 3rem;">
+            <div class="dom_inner view_campaign g_campaign_wrap" style="margin-top: 2rem;">
               <div class="dom_table_header">
                 <h2><i class="fa-solid fa-list main_clr"></i> Detail Campaigns</h2>
                 <div class="dom_active_report" style="margin-left:auto;align-items:center;gap:1.5rem;">
@@ -1833,22 +1864,25 @@
                   </button>
                 </div>
               </div>
-              <!-- Column header -->
-              <div class="view_campaign_header">
-                <div class="g_tbl_header">
-                  <div class="ads_name">Campaign Name</div>
-                  <div class="ad_metric g_col_center">Keywords</div>
-                  <div class="ad_metric">Spent</div>
-                  <div class="ad_metric">Impression</div>
-                  <div class="ad_metric">Click</div>
-                  <div class="ad_metric">Conv</div>
-                  <div class="ad_metric">CPC</div>
-                  <div class="ad_metric">CPA</div>
-                  <div class="ad_metric">CTR</div>
-                  <div class="ad_metric">Store Visit</div>
+              <div class="g_table_scroll">
+                <!-- Column header -->
+                <div class="view_campaign_header">
+                  <div class="g_tbl_header">
+                    <div class="ads_name">Campaign Name</div>
+                    <div class="ad_metric g_col_center">Keywords</div>
+                    <div class="ad_metric">Spent</div>
+                    <div class="ad_metric">Impression</div>
+                    <div class="ad_metric">Click</div>
+                    <div class="ad_metric">Conv</div>
+                    <div class="ad_metric">Lead Form</div>
+                    <div class="ad_metric">CPC</div>
+                    <div class="ad_metric">CPA</div>
+                    <div class="ad_metric">CTR</div>
+                    <div class="ad_metric">Store Visit</div>
+                  </div>
                 </div>
+                <div id="g_campaign_table"></div>
               </div>
-              <div id="g_campaign_table"></div>
             </div>
           </div>
 
@@ -2929,82 +2963,82 @@
 </body>
 <!-- Foundation: lib/ (token, auth, settings, setup) -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="./lib/token.js?v=1794889870478"></script>
-<script src="./lib/settings.js?v=1794889870478"></script>
-<script src="./lib/auth.js?v=1794889870478"></script>
+<script src="./lib/token.js?v=1794890889799"></script>
+<script src="./lib/settings.js?v=1794890889799"></script>
+<script src="./lib/auth.js?v=1794890889799"></script>
 
 <!-- ═══════════════════════════════════════════════════
      JS MODULES — Thứ tự load quan trọng (dependency order)
      ═══════════════════════════════════════════════════ -->
 
 <!-- 1. Core: config, metrics, column, preset -->
-<script src="./js/core/config.js?v=1794889870478"></script>
-<script src="./js/core/metric_config.js?v=1794889870478"></script>
-<script src="./js/core/column_config.js?v=1794889870478"></script>
-<script src="./js/core/preset_view.js?v=1794889870478"></script>
-<script src="./js/core/utils.js?v=1794889870478"></script>
-<script src="./js/core/chart_theme.js?v=1794889870478"></script>
+<script src="./js/core/config.js?v=1794890889799"></script>
+<script src="./js/core/metric_config.js?v=1794890889799"></script>
+<script src="./js/core/column_config.js?v=1794890889799"></script>
+<script src="./js/core/preset_view.js?v=1794890889799"></script>
+<script src="./js/core/utils.js?v=1794890889799"></script>
+<script src="./js/core/chart_theme.js?v=1794890889799"></script>
 
 <!-- 2. API layer -->
-<script src="./js/api/constants.js?v=1794889870478"></script>
-<script src="./js/api/fetch.js?v=1794889870478"></script>
-<script src="./js/api/account.js?v=1794889870478"></script>
-<script src="./js/api/meta_insights.js?v=1794889870478"></script>
-<script src="./js/api/google_ads.js?v=1794889870478"></script>
+<script src="./js/api/constants.js?v=1794890889799"></script>
+<script src="./js/api/fetch.js?v=1794890889799"></script>
+<script src="./js/api/account.js?v=1794890889799"></script>
+<script src="./js/api/meta_insights.js?v=1794890889799"></script>
+<script src="./js/api/google_ads.js?v=1794890889799"></script>
 
 <!-- 3. Data helpers (phải load sớm vì toggleSkeletons, getResults được dùng ở nhiều nơi) -->
-<script src="./js/data/helpers.js?v=1794889870478"></script>
+<script src="./js/data/helpers.js?v=1794890889799"></script>
 
 <!-- 4. Data processing -->
-<script src="./js/data/group.js?v=1794889870478"></script>
-<script src="./js/data/year_data.js?v=1794889870478"></script>
-<script src="./js/data/year_filter.js?v=1794889870478"></script>
+<script src="./js/data/group.js?v=1794890889799"></script>
+<script src="./js/data/year_data.js?v=1794890889799"></script>
+<script src="./js/data/year_filter.js?v=1794890889799"></script>
 
 <!-- 4. Charts -->
-<script src="./js/charts/goal_chart.js?v=1794889870478"></script>
-<script src="./js/charts/daily_filter.js?v=1794889870478"></script>
-<script src="./js/charts/detail_daily.js?v=1794889870478"></script>
-<script src="./js/charts/platform_chart.js?v=1794889870478"></script>
-<script src="./js/charts/platform_position.js?v=1794889870478"></script>
-<script src="./js/charts/dashboard_charts.js?v=1794889870478"></script>
-<script src="./js/charts/age_gender_chart.js?v=1794889870478"></script>
-<script src="./js/charts/render_age_gender.js?v=1794889870478"></script>
-<script src="./js/charts/region_chart.js?v=1794889870478"></script>
-<script src="./js/charts/monthly_chart.js?v=1794889870478"></script>
+<script src="./js/charts/goal_chart.js?v=1794890889799"></script>
+<script src="./js/charts/daily_filter.js?v=1794890889799"></script>
+<script src="./js/charts/detail_daily.js?v=1794890889799"></script>
+<script src="./js/charts/platform_chart.js?v=1794890889799"></script>
+<script src="./js/charts/platform_position.js?v=1794890889799"></script>
+<script src="./js/charts/dashboard_charts.js?v=1794890889799"></script>
+<script src="./js/charts/age_gender_chart.js?v=1794890889799"></script>
+<script src="./js/charts/render_age_gender.js?v=1794890889799"></script>
+<script src="./js/charts/region_chart.js?v=1794890889799"></script>
+<script src="./js/charts/monthly_chart.js?v=1794890889799"></script>
 
 <!-- 5. UI Components -->
-<script src="./js/ui/render_campaign.js?v=1794889870478"></script>
-<script src="./js/ui/platform_summary.js?v=1794889870478"></script>
-<script src="./js/ui/selection_bar.js?v=1794889870478"></script>
-<script src="./js/ui/adset_modal.js?v=1794889870478"></script>
-<script src="./js/ui/ad_detail_modal.js?v=1794889870478"></script>
-<script src="./js/ui/ad_library.js?v=1794889870478"></script>
-<script src="./js/ui/ai_report.js?v=1794889870478"></script>
-<script src="./js/ui/ai_modal_setup.js?v=1794889870478"></script>
-<script src="./js/ui/year_dropdown.js?v=1794889870478"></script>
-<script src="./js/ui/performance_detail.js?v=1794889870478"></script>
-<script src="./js/ui/extra_details.js?v=1794889870478"></script>
+<script src="./js/ui/render_campaign.js?v=1794890889799"></script>
+<script src="./js/ui/platform_summary.js?v=1794890889799"></script>
+<script src="./js/ui/selection_bar.js?v=1794890889799"></script>
+<script src="./js/ui/adset_modal.js?v=1794890889799"></script>
+<script src="./js/ui/ad_detail_modal.js?v=1794890889799"></script>
+<script src="./js/ui/ad_library.js?v=1794890889799"></script>
+<script src="./js/ui/ai_report.js?v=1794890889799"></script>
+<script src="./js/ui/ai_modal_setup.js?v=1794890889799"></script>
+<script src="./js/ui/year_dropdown.js?v=1794890889799"></script>
+<script src="./js/ui/performance_detail.js?v=1794890889799"></script>
+<script src="./js/ui/extra_details.js?v=1794890889799"></script>
 
 <!-- 6. Filters -->
-<script src="./js/filters/campaign_filter.js?v=1794889870478"></script>
-<script src="./js/filters/quick_filter.js?v=1794889870478"></script>
+<script src="./js/filters/campaign_filter.js?v=1794890889799"></script>
+<script src="./js/filters/quick_filter.js?v=1794890889799"></script>
 
 <!-- 7. Settings -->
-<script src="./js/settings/perf_brand_ui.js?v=1794889870478"></script>
-<script src="./js/settings/brand_settings.js?v=1794889870478"></script>
-<script src="./js/settings/goal_settings.js?v=1794889870478"></script>
+<script src="./js/settings/perf_brand_ui.js?v=1794890889799"></script>
+<script src="./js/settings/brand_settings.js?v=1794890889799"></script>
+<script src="./js/settings/goal_settings.js?v=1794890889799"></script>
 
 <!-- 8. Export & Share -->
-<script src="./js/export/export_csv.js?v=1794889870478"></script>
-<script src="./js/share/share.js?v=1794889870478"></script>
-<script src="./js/core/alerts.js?v=1794889870478"></script>
-<script src="./js/charts/heatmap_chart.js?v=1794889870478"></script>
+<script src="./js/export/export_csv.js?v=1794890889799"></script>
+<script src="./js/share/share.js?v=1794890889799"></script>
+<script src="./js/core/alerts.js?v=1794890889799"></script>
+<script src="./js/charts/heatmap_chart.js?v=1794890889799"></script>
 
 <!-- 9. App wiring (dashboard trước → startup gọi main() cuối cùng) -->
-<script src="./js/core/listeners.js?v=1794889870478"></script>
-<script src="./js/core/dashboard.js?v=1794889870478"></script>
-<script src="./js/api/account_manager.js?v=1794889870478"></script>
-<script src="./js/core/startup.js?v=1794889870478"></script>
+<script src="./js/core/listeners.js?v=1794890889799"></script>
+<script src="./js/core/dashboard.js?v=1794890889799"></script>
+<script src="./js/api/account_manager.js?v=1794890889799"></script>
+<script src="./js/core/startup.js?v=1794890889799"></script>
 
 <!-- ═══════════════════════════════════════════════════
      ACCOUNT MANAGER MODAL

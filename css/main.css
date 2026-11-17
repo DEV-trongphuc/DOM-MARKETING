@@ -8723,14 +8723,22 @@ tbody {
 }
 
 /* ── Shared grid template – same for header + rows ── */
+.g_table_scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
 .g_tbl_header,
 .g_tbl_row {
   display: grid !important;
-  grid-template-columns: 3fr 0.8fr 1fr 1fr 0.9fr 0.9fr 1fr 1fr 1fr 1fr !important;
+  grid-template-columns: 2.5fr 0.75fr 0.95fr 0.9fr 0.75fr 0.75fr 0.8fr 0.85fr 0.85fr 0.7fr 0.85fr !important;
   align-items: center;
-  padding: 0 1.5rem !important;
+  padding: 0 1.2rem !important;
   font-size: 1.25rem;
   width: 100%;
+  min-width: 96rem;
   box-sizing: border-box;
 }
 
@@ -8867,8 +8875,56 @@ tbody {
 /* ── Campaign table wrapper ─────────────────────────── */
 .dom_inner.g_campaign_wrap {
   width: 100%;
-  background: transparent !important;
-  padding-bottom: 3rem;
+  min-width: 0;
+  max-width: 100%;
+  background: #fff !important;
+  padding-bottom: 2.4rem;
+  overflow: hidden;
+}
+
+.g_campaign_wrap .view_campaign_header {
+  min-width: 96rem;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.g_campaign_wrap .g_tbl_body {
+  min-width: 96rem;
+  width: 100%;
+  overflow-x: visible;
+}
+
+.g_lead_table_wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.g_lead_table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.25rem;
+  min-width: 68rem;
+}
+
+.g_lead_table th {
+  text-align: left;
+  padding: 1rem 1.2rem;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  border-bottom: 1.5px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.g_lead_table td {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  vertical-align: top;
+}
+
+.g_lead_table tr:hover td {
+  background: #fffbf0;
 }
 
 
@@ -8994,6 +9050,23 @@ tbody {
    ───────────────────────────────────────────────────── */
 
 /* Row 1: all cards same height via stretch */
+#google_ads_container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+#google_ads_container .dom_row {
+  min-width: 0;
+  max-width: 100%;
+}
+
+#google_ads_container .dom_inner {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 #google_ads_container .dom_row:first-child {
   align-items: stretch;
 }
@@ -9003,17 +9076,26 @@ tbody {
   align-items: stretch;
 }
 
-/* Summary card narrower (20% instead of 25%) */
+/* Summary card (24% width so 2-col metrics never squash) */
+#google_ads_container .dom_row:first-child .dom_inner.w20,
 #google_ads_container .dom_row:first-child .dom_inner.w25 {
-  width: 20%;
-  flex-shrink: 0;
+  flex: 0 0 24%;
+  width: 24%;
+  min-width: 24rem;
   height: auto;
 }
 
 /* Daily Spent chart fills remaining space (flex:1) */
 #google_ads_container .dom_row:first-child .dom_inner.trendline {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   width: auto;
+}
+
+#google_ads_container .dom_row:first-child .dom_inner.w35 {
+  flex: 0 0 33%;
+  width: 33%;
+  min-width: 0;
 }
 
 /* Hide Performance / KPI mini cards section */
@@ -9029,11 +9111,32 @@ tbody {
   flex-direction: column;
 }
 
-/* Summary card (w25) is NOT a canvas card – keep block layout */
+/* Summary card (w20/w25) is NOT a canvas card – keep block layout */
+#google_ads_container .dom_inner.chart.w20,
 #google_ads_container .dom_inner.chart.w25 {
   display: block !important;
   height: auto !important;
   min-height: 0;
+}
+
+@media (max-width: 1280px) {
+  #google_ads_container .dom_row.flex {
+    flex-wrap: wrap;
+  }
+  #google_ads_container .dom_row:first-child .dom_inner.w20,
+  #google_ads_container .dom_row:first-child .dom_inner.w25 {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  #google_ads_container .dom_row:first-child .dom_inner.trendline,
+  #google_ads_container .dom_row:first-child .dom_inner.w35,
+  #google_ads_container .dom_inner.w65,
+  #google_ads_container .dom_inner.w35,
+  #google_ads_container .dom_inner.g_third {
+    flex: 1 1 calc(50% - 1rem);
+    width: auto;
+    min-width: 32rem;
+  }
 }
 
 /* Title bar: fixed size, does not grow */

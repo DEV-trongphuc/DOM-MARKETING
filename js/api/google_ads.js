@@ -3,6 +3,7 @@ let googleAdsRawData = [];
 let googleAdsFilteredData = [];
 let googleAdsPrevData = [];
 let googleAdsMonthlyData = [];
+let googleAdsLeadForms = [];
 let gTrendMode = 'daily'; // 'daily' or 'monthly'
 let isGAdsFetching = false;
 let isMonthlyFetching = false;
@@ -78,6 +79,7 @@ window.fetchGoogleAdsData = async function (force = false) {
 
         // Transform COMPACT JSON back to array of objects
         const allData = _fromCompact(compactData);
+        googleAdsLeadForms = Array.isArray(compactData.leadForms) ? compactData.leadForms : [];
 
         // Show last sync time — always use client time (Asia/Ho_Chi_Minh) to avoid
         // UTC↔GMT+7 day/month swap from Apps Script's Date.toString()
@@ -262,7 +264,7 @@ function renderGoogleAdsView() {
 
     // Calculate totals & derived metrics
     let totSpent = 0, totImp = 0, totClick = 0, totConv = 0, totStore = 0;
-    let totDir = 0, totCalls = 0, totMenu = 0, totOrders = 0, totOther = 0;
+    let totDir = 0, totCalls = 0, totMenu = 0, totOrders = 0, totOther = 0, totLeadForms = 0;
     // device totals ? all lowercase keys
     let devMob = { imp: 0, click: 0, conv: 0, visits: 0, dir: 0, calls: 0, menu: 0, orders: 0, spent: 0 };
     let devDesk = { imp: 0, click: 0, conv: 0, visits: 0, dir: 0, calls: 0, menu: 0, orders: 0, spent: 0 };
@@ -279,6 +281,7 @@ function renderGoogleAdsView() {
         totMenu += parseFloat(item.menu || 0);
         totOrders += parseFloat(item.orders || 0);
         totOther += parseFloat(item.other || 0);
+        totLeadForms += parseFloat(item.lead_forms || 0);
 
         // Parse device JSON ? keys: "Impression", "Click", "All Conversions", "Store Visits", "Directions", "Calls", "Menu", "Orders"
         const mob  = item._pMob  ?? (item._pMob  = _parseDeviceJson(item.mobile));
@@ -314,20 +317,29 @@ function renderGoogleAdsView() {
         ? prevFilteredByDate.filter(item => item.campaign && item.campaign.toLowerCase().includes(brandLabel.toLowerCase()))
         : prevFilteredByDate;
 
-    const prevTotals = { spent: 0, imp: 0, click: 0, conv: 0, store: 0 };
+    const prevTotals = { spent: 0, imp: 0, click: 0, conv: 0, lead_forms: 0, calls: 0, store: 0 };
     prevFiltered.forEach(item => {
         prevTotals.spent += parseFloat(item.spent || 0);
         prevTotals.imp += parseFloat(item.impression || 0);
         prevTotals.click += parseFloat(item.click || 0);
         prevTotals.conv += parseFloat(item.all_conversions || 0);
+        prevTotals.lead_forms += parseFloat(item.lead_forms || 0);
+        prevTotals.calls += parseFloat(item.calls || 0);
         prevTotals.store += parseFloat(item.store_visits || 0);
     });
+
+    const filteredLeadSubmissions = _filterLeadFormSubmissions(googleAdsLeadForms, startDate, endDate, brandLabel);
+    if (totLeadForms === 0 && filteredLeadSubmissions.length > 0) {
+        totLeadForms = filteredLeadSubmissions.length;
+    }
 
     const metricsMap = [
         { id: "g_spent", cur: totSpent, prev: prevTotals.spent, fmt: _fmtMoney },
         { id: "g_impression", cur: totImp, prev: prevTotals.imp, fmt: _fmtNum },
         { id: "g_click", cur: totClick, prev: prevTotals.click, fmt: _fmtNum },
         { id: "g_conv", cur: totConv, prev: prevTotals.conv, fmt: _fmtNum },
+        { id: "g_lead_forms", cur: totLeadForms, prev: prevTotals.lead_forms, fmt: _fmtNum },
+        { id: "g_calls", cur: totCalls, prev: prevTotals.calls, fmt: _fmtNum },
         { id: "g_store", cur: totStore, prev: prevTotals.store, fmt: _fmtNum }
     ];
 
@@ -391,7 +403,7 @@ function renderGoogleAdsView() {
 
     _renderBarChart(googleAdsFilteredData, barSel, groupedCampData);
     _renderDonutChart(googleAdsFilteredData, groupedCampData);
-    _renderFunnelChart(totImp, totClick, totConv, totStore, totDir);
+    _renderFunnelChart(totImp, totClick, totConv, totStore, totDir, totLeadForms);
     _renderCPVisitChart(googleAdsFilteredData, groupedCampData);
     _renderDualAxisChart(googleAdsFilteredData);
 
@@ -411,6 +423,7 @@ function renderGoogleAdsView() {
     _renderHourlyChart(googleAdsFilteredData, '__all__', _gHourlyMetric);
     _renderDeviceChart(devMob, devDesk, devTab);
     _renderTopCampaignCards(googleAdsFilteredData, sortedCampsBySpent);
+    _renderLeadFormSection(filteredLeadSubmissions, totLeadForms, groupedCampData);
     _renderCampaignTable(googleAdsFilteredData, "", groupedCampData);
 
     // -- NEW: Channel / Location / Distance charts
@@ -419,8 +432,10 @@ function renderGoogleAdsView() {
     _renderDistanceChart(googleAdsFilteredData);
 
 
-    // -- Funnel stats: Menu / Calls / Orders / Other
+    // -- Funnel stats: Lead Form / Calls / Directions / Orders / Other
     const _setStatEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = _fmtNum(v); };
+    _setStatEl('g_stat_leads', totLeadForms);
+    _setStatEl('g_stat_dir', totDir);
     _setStatEl('g_stat_menu', totMenu);
     _setStatEl('g_stat_calls', totCalls);
     _setStatEl('g_stat_orders', totOrders);
@@ -556,7 +571,7 @@ function _renderTrendChart(data, metric) {
     const metricLabels = {
         spent: "Spent (đ)", click: "Click", total_conversions: "Conversions",
         impression: "Impression", store_visits: "Store Visit",
-        all_conversions: "All Conversions",
+        all_conversions: "All Conversions", lead_forms: "Lead Form",
         directions: "Directions", calls: "Calls", menu: "Menu", orders: "Orders",
         cpc: "CPC (đ/click)", cpm: "CPM (đ/1k imp)"
     };
@@ -725,7 +740,8 @@ function _renderBarChart(data, metric, preCampaigns) {
         if (metric === "ctr") return c.imp > 0 ? +(c.click / c.imp * 100).toFixed(2) : 0;
         if (metric === "cpc") return c.click > 0 ? +(c.spent / c.click).toFixed(0) : 0;
         if (metric === "cpa") return c.conv > 0 ? +(c.spent / c.conv).toFixed(0) : 0;
-        if (metric === "total_conversions") return +(c.conv || 0);   // fix: grouped key is "conv"
+        if (metric === "all_conversions" || metric === "total_conversions") return +(c.conv || 0);
+        if (metric === "lead_forms") return +(c.lead_forms || 0);
         if (metric === "store_visits") return +(c.store || 0);   // fix: grouped key is "store"
         if (metric === "spent") return +(c.spent || 0);
         if (metric === "click") return +(c.click || 0);
@@ -887,7 +903,7 @@ function _renderDonutChart(data, preCampaigns) {
 // ---------------------------------------------
 // 4. FUNNEL CHART
 // ---------------------------------------------
-function _renderFunnelChart(imp, click, conv, store, dir) {
+function _renderFunnelChart(imp, click, conv, store, dir, leadForms = 0) {
     const container = document.getElementById("g_funnel_wrap");
     if (!container) return;
 
@@ -903,11 +919,17 @@ function _renderFunnelChart(imp, click, conv, store, dir) {
             { label: "Click", value: click, icon: "fa-arrow-pointer", color: "#ffa900" },
         ];
 
-    const steps = [
-        ...topPair,
-        { label: "Directions", value: dir, icon: "fa-map-location-dot", color: "#4285F4" },
-        { label: "Store Visit", value: store, icon: "fa-store", color: "#EA4335" },
-    ];
+    const steps = (leadForms > 0 || (store === 0 && dir === 0))
+        ? [
+            ...topPair,
+            { label: "Lead Form", value: leadForms, icon: "fa-file-signature", color: "#8B5CF6" },
+            { label: "Directions", value: dir, icon: "fa-map-location-dot", color: "#4285F4" },
+        ]
+        : [
+            ...topPair,
+            { label: "Directions", value: dir, icon: "fa-map-location-dot", color: "#4285F4" },
+            { label: "Store Visit", value: store, icon: "fa-store", color: "#EA4335" },
+        ];
 
     const max = Math.max(...steps.map(s => s.value), 1);
 
@@ -1353,6 +1375,7 @@ function _renderCampaignTable(data, filterText = "", precalculatedGroup = null) 
           <div class="ad_metric">${_fmtNum(c.imp)}</div>
           <div class="ad_metric">${_fmtNum(c.click)}</div>
           <div class="ad_metric">${_fmtNum(c.conv)}</div>
+          <div class="ad_metric g_bold_val" style="color:#7c3aed!important;">${_fmtNum(c.lead_forms || 0)}</div>
           <div class="ad_metric">${cpc > 0 ? _fmtMoney(cpc) : '-'}</div>
           <div class="ad_metric">${cpa > 0 ? _fmtMoney(cpa) : '-'}</div>
           <div class="ad_metric">${ctr.toFixed(2)}%</div>
@@ -1626,13 +1649,108 @@ window.exportGoogleCsv = function () {
 // ---------------------------------------------
 // HELPERS
 // ---------------------------------------------
+function _filterLeadFormSubmissions(list, sDate, eDate, brandLabel) {
+    if (!Array.isArray(list) || !list.length) return [];
+    const hasBrand = brandLabel && brandLabel.toUpperCase() !== "RESET" && brandLabel !== "Ampersand Group";
+    return list.filter(item => {
+        const dt = String(item.submission_date_time || item.date || "").slice(0, 10);
+        if (sDate && dt && dt < sDate) return false;
+        if (eDate && dt && dt > eDate) return false;
+        if (hasBrand) {
+            const cname = String(item.campaign || "").toLowerCase();
+            if (!cname.includes(brandLabel.toLowerCase())) return false;
+        }
+        return true;
+    });
+}
+
+function _escapeHtml(val) {
+    return String(val ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function _renderLeadFormSection(submissions, totalLeadForms, groupedCampData) {
+    const body = document.getElementById("g_lead_form_body");
+    const badge = document.getElementById("g_lead_form_badge");
+    if (!body) return;
+
+    const list = Array.isArray(submissions) ? submissions : [];
+    const displayCount = Math.max(list.length, Math.round(totalLeadForms || 0));
+    if (badge) {
+        badge.textContent = `${_fmtNum(displayCount)} lead${displayCount !== 1 ? 's' : ''}`;
+    }
+
+    if (list.length > 0) {
+        const rowsHtml = list.slice(0, 50).map(item => {
+            const fields = Array.isArray(item.fields) ? item.fields : [];
+            const getField = (keys) => {
+                const hit = fields.find(f => keys.some(k => String(f.field_type || f.name || '').toLowerCase().includes(k)));
+                return hit ? (hit.field_value || hit.value || '') : '';
+            };
+            const name = item.name || getField(['full_name', 'first_name', 'name', 'họ']) || '-';
+            const phone = item.phone || getField(['phone', 'sđt', 'mobile']) || '-';
+            const email = item.email || getField(['email']) || '-';
+            const extra = fields
+                .filter(f => !['full_name', 'first_name', 'last_name', 'phone_number', 'email'].includes(String(f.field_type || '').toLowerCase()))
+                .map(f => `${f.field_type || f.name || 'Field'}: ${f.field_value || f.value || ''}`)
+                .join(' · ');
+            return `<tr>
+                <td style="white-space:nowrap; color:#64748b;">${_escapeHtml(item.submission_date_time || item.date || '-')}</td>
+                <td style="font-weight:600; color:#1e293b;">${_escapeHtml(item.campaign || '-')}</td>
+                <td style="font-weight:600;">${_escapeHtml(name)}</td>
+                <td>${_escapeHtml(phone)}</td>
+                <td>${_escapeHtml(email)}</td>
+                <td style="color:#64748b; max-width:28rem;">${_escapeHtml(extra || '-')}</td>
+            </tr>`;
+        }).join('');
+
+        body.innerHTML = `<div class="g_lead_table_wrap">
+            <table class="g_lead_table">
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Campaign</th>
+                        <th>Họ tên</th>
+                        <th>Số điện thoại</th>
+                        <th>Email</th>
+                        <th>Thông tin thêm</th>
+                    </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+        </div>`;
+        return;
+    }
+
+    const campWithLeads = Object.values(groupedCampData || {}).filter(c => (c.lead_forms || 0) > 0);
+    if (campWithLeads.length > 0) {
+        body.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:1rem;">
+            ${campWithLeads.map(c => `
+                <div style="padding:1rem 1.4rem; border-radius:10px; background:#f8fafc; border:1px solid #e2e8f0; min-width:22rem;">
+                    <div style="font-size:1.2rem; font-weight:700; color:#1e293b;">${_escapeHtml(c.name)}</div>
+                    <div style="font-size:1.35rem; font-weight:800; color:#7c3aed; margin-top:0.3rem;">${_fmtNum(c.lead_forms)} Lead Form conversions</div>
+                </div>
+            `).join('')}
+        </div>`;
+        return;
+    }
+
+    body.innerHTML = `<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; padding:1.4rem 1.6rem; border-radius:12px; background:#f8fafc; border:1px dashed #cbd5e1; color:#64748b; font-size:1.25rem;">
+        <div><i class="fa-solid fa-circle-info" style="color:#f59e0b; margin-right:0.6rem;"></i>Chưa ghi nhận Lead Form submission nào trong khoảng thời gian đã chọn (<b>${_escapeHtml(startDate || '')} → ${_escapeHtml(endDate || '')}</b>).</div>
+        <div style="font-size:1.15rem; color:#94a3b8;">Hệ thống sẽ tự hiển thị danh sách khách hàng ngay khi có Lead Form mới từ Google Ads.</div>
+    </div>`;
+}
+
 function _groupByCampaign(data) {
     const map = {};
     data.forEach(item => {
         const name = item.campaign || "Unknown";
         if (!map[name]) map[name] = {
             name, id: item.campaign_id || '',
-            spent: 0, imp: 0, click: 0, conv: 0, store: 0, dir: 0, calls: 0, menu: 0, orders: 0, other: 0
+            spent: 0, imp: 0, click: 0, conv: 0, lead_forms: 0, store: 0, dir: 0, calls: 0, menu: 0, orders: 0, other: 0
         };
         // Keep first non-empty campaign_id found
         if (!map[name].id && item.campaign_id) map[name].id = item.campaign_id;
@@ -1640,6 +1758,7 @@ function _groupByCampaign(data) {
         map[name].imp += parseFloat(item.impression || 0);
         map[name].click += parseFloat(item.click || 0);
         map[name].conv += parseFloat(item.all_conversions || 0);
+        map[name].lead_forms += parseFloat(item.lead_forms || 0);
         map[name].store += parseFloat(item.store_visits || 0);
         map[name].dir += parseFloat(item.directions || 0);
         map[name].calls += parseFloat(item.calls || 0);
@@ -1782,16 +1901,16 @@ function _buildDeviceChart(metric) {
     const topPct = donutTotal > 0 ? ((donutValues[0] / donutTotal) * 100).toFixed(1) : '0';
 
     wrap.innerHTML = `
-    <div style="display:flex;align-items:center;gap:2rem;">
-      <div id="g_dev_list" style="flex:1.4;display:flex;flex-direction:column;gap:1rem;"></div>
-      <div style="flex:0 0 160px;">
-        <div style="position:relative;width:160px;height:160px;">
-          <canvas id="g_device_chart" width="160" height="160"
-                  style="width:160px!important;height:160px!important;display:block;"></canvas>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.4rem;">
+      <div id="g_dev_list" style="flex:1 1 18rem;min-width:0;display:flex;flex-direction:column;gap:0.9rem;"></div>
+      <div style="flex:0 0 145px;margin:0 auto;">
+        <div style="position:relative;width:145px;height:145px;">
+          <canvas id="g_device_chart" width="145" height="145"
+                  style="width:145px!important;height:145px!important;display:block;"></canvas>
           <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
                       text-align:center;pointer-events:none;">
-            <div style="font-size:1.8rem;font-weight:800;color:#1e293b;line-height:1;">${topPct}%</div>
-            <div style="font-size:0.95rem;color:#888;margin-top:0.2rem;">${LABELS[0]}</div>
+            <div style="font-size:1.7rem;font-weight:800;color:#1e293b;line-height:1;">${topPct}%</div>
+            <div style="font-size:1.05rem;color:#64748b;margin-top:0.2rem;">${LABELS[0]}</div>
           </div>
         </div>
       </div>
@@ -1805,17 +1924,17 @@ function _buildDeviceChart(metric) {
             const pct = donutTotal > 0 ? (donutValues[i] / donutTotal * 100).toFixed(1) : '0';
             const sub = _fmtMoney(d['spent'] || 0);
             return `
-            <div style="padding:1rem 1.2rem;border-radius:12px;border:1px solid #f0f0f0;
+            <div style="padding:0.9rem 1.2rem;border-radius:12px;border:1px solid #f0f0f0;
                         background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
               <div style="display:flex;align-items:center;gap:0.7rem;font-weight:600;
-                          color:#555;font-size:1rem;margin-bottom:0.3rem;">
-                <i class="fa-solid ${ICONS[i]}" style="color:${COLORS[i]};font-size:1.1rem;"></i>
+                          color:#555;font-size:1.15rem;margin-bottom:0.25rem;">
+                <i class="fa-solid ${ICONS[i]}" style="color:${COLORS[i]};font-size:1.15rem;"></i>
                 <span>${LABELS[i]}</span>
               </div>
-              <div style="font-weight:800;font-size:1.5rem;color:#1e293b;padding-left:1.8rem;">
+              <div style="font-weight:800;font-size:1.5rem;color:#1e293b;padding-left:1.85rem;">
                 ${(isCPC || isSpent) ? _fmtShort(v) : _fmtNum(v)}
               </div>
-              <div style="font-size:1rem;color:#94a3b8;padding-left:1.8rem;">
+              <div style="font-size:1.05rem;color:#94a3b8;padding-left:1.85rem;">
                 ${pct}% — ${sub}
               </div>
             </div>`;
@@ -1993,8 +2112,8 @@ function _renderHourlyChart(data, campFilter, metric) {
 }
 
 function _fmtMoney(v) {
-    if (!v || isNaN(v)) return "0d";
-    return Math.round(v).toLocaleString("vi-VN") + "d";
+    if (!v || isNaN(v)) return "0đ";
+    return Math.round(v).toLocaleString("vi-VN") + "đ";
 }
 
 function _fmtNum(v) {
@@ -2146,37 +2265,36 @@ function _buildChannelChart(agg, metric) {
     if (!body) return;
 
     body.innerHTML = `
-    <div style="font-size:0.82rem;color:#94a3b8;margin:-0.2rem 0 1rem;font-weight:500;">Theo: <strong style="color:#475569;">${metInfo.label}</strong></div>
-    <div style="display:flex;align-items:flex-start;gap:1.2rem;">
-      <div id="g_ch_list" style="flex:1.4;display:flex;flex-direction:column;gap:1rem;"></div>
-      <div style="flex:0 0 160px;">
-        <div style="position:relative;width:160px;height:160px;">
-          <canvas id="g_channel_donut" width="160" height="160"
-                  style="width:160px!important;height:160px!important;display:block;"></canvas>
+    <div style="font-size:1.15rem;color:#94a3b8;margin:-0.2rem 0 1rem;font-weight:500;">Theo: <strong style="color:#475569;">${metInfo.label}</strong></div>
+    <div style="display:flex;align-items:flex-start;flex-wrap:wrap;gap:1.2rem;">
+      <div id="g_ch_list" style="flex:1 1 20rem;min-width:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));gap:0.8rem;max-height:30rem;overflow-y:auto;padding-right:0.3rem;"></div>
+      <div style="flex:0 0 140px;margin:0 auto;">
+        <div style="position:relative;width:140px;height:140px;">
+          <canvas id="g_channel_donut" width="140" height="140"
+                  style="width:140px!important;height:140px!important;display:block;"></canvas>
           <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
-            <div style="font-size:1.8rem;font-weight:800;color:#1e293b;line-height:1;">${topPct}%</div>
-            <div style="font-size:0.95rem;color:#888;margin-top:0.2rem;">${labels[0] || ''}</div>
+            <div style="font-size:1.7rem;font-weight:800;color:#1e293b;line-height:1;">${topPct}%</div>
+            <div style="font-size:1.05rem;color:#64748b;margin-top:0.2rem;">${labels[0] || ''}</div>
           </div>
         </div>
       </div>
     </div>`;
 
-    // Match Device Breakdown card sizes exactly
+    // Compact 2-col channel cards so Row 4 never stretches vertically
     document.getElementById('g_ch_list').innerHTML = entries.map(([k, v], i) => {
         const pct = totalClicks > 0 ? (( v.click || 0) / totalClicks * 100).toFixed(1) : '0';
-        const sub = _fmtShort(v.cost || 0);
         return `
-        <div style="padding:1rem 1.2rem;border-radius:12px;border:1px solid #f0f0f0;
-                    background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-          <div style="display:flex;align-items:center;gap:0.7rem;font-weight:600;
-                      color:#555;font-size:1rem;margin-bottom:0.3rem;">
-            <i class="fa-solid ${CH_ICONS[k] || 'fa-circle'}" style="color:${colors[i]};font-size:1.1rem;"></i>
-            <span>${k}</span>
+        <div style="padding:0.9rem 1.1rem;border-radius:12px;border:1px solid #f0f0f0;
+                    background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.05);min-width:0;">
+          <div style="display:flex;align-items:center;gap:0.6rem;font-weight:600;
+                      color:#555;font-size:1.1rem;margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            <i class="fa-solid ${CH_ICONS[k] || 'fa-circle'}" style="color:${colors[i]};font-size:1.1rem;flex-shrink:0;"></i>
+            <span style="overflow:hidden;text-overflow:ellipsis;">${k}</span>
           </div>
-          <div style="font-weight:800;font-size:1.5rem;color:#1e293b;padding-left:1.8rem;">
+          <div style="font-weight:800;font-size:1.4rem;color:#1e293b;padding-left:1.7rem;">
             ${fmt(_dimVal(v, metric))}
           </div>
-          <div style="font-size:1rem;color:#94a3b8;padding-left:1.8rem;">
+          <div style="font-size:1.05rem;color:#94a3b8;padding-left:1.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
             ${pct}% — ${_fmtShort(v.cost)}
           </div>
         </div>`;
@@ -2229,7 +2347,7 @@ function _buildLocationChart(agg, metric) {
         if (!subEl) {
             subEl = document.createElement('p');
             subEl.className = 'g_loc_metric_sub';
-            subEl.style.cssText = 'font-size:0.82rem;color:#94a3b8;margin:-0.3rem 0 0.8rem;font-weight:500;';
+            subEl.style.cssText = 'font-size:1.15rem;color:#94a3b8;margin:-0.2rem 0 0.8rem;font-weight:500;';
             const fixedP = locCard.querySelector('p:not(.g_loc_metric_sub)');
             const h2 = locCard.querySelector('h2');
             if (fixedP) fixedP.after(subEl); else if (h2) h2.after(subEl);
@@ -2251,7 +2369,7 @@ function _buildLocationChart(agg, metric) {
     gradGray.addColorStop(0, 'rgba(210,210,210,0.9)');
     gradGray.addColorStop(1, 'rgba(160,160,160,0.4)');
     const bgColors = values.map((_, i) => i === maxIdx ? gradGold : gradGray);
-    ctx.parentElement.style.height = Math.max(200, sorted.length * 40 + 40) + 'px';
+    ctx.parentElement.style.height = Math.min(360, Math.max(220, sorted.length * 32 + 32)) + 'px';
     // â”€â”€ Update in-place for smooth animation â”€â”€
     if (G_CHARTS.location && G_CHARTS.location.canvas === ctx) {
         const c = G_CHARTS.location;
@@ -2300,22 +2418,22 @@ function _renderDistanceChart(data) {
     _buildDistanceChart(cumAgg, _gDevFilter || 'conv');
 }
 function _buildDistanceChart(cumAgg, metric) {
-    if (!cumAgg) return;
+    const wrap = document.getElementById('g_distance_chart_wrap');
+    let ctx = document.getElementById('g_distance_chart');
+    if (!wrap) return;
     if (metric === 'spent') metric = 'cost'; // alias
-    const ctx = document.getElementById('g_distance_chart');
-    if (!ctx) return;
     if (G_CHARTS.distance) { G_CHARTS.distance.destroy(); G_CHARTS.distance = null; }
     _destroyChart('g_distance_chart', 'distance');
     const metInfo = DIM_METRICS[metric] || DIM_METRICS.conv;
 
     // Update metric subtitle in the card
-    const distCard = ctx.closest('.dom_inner');
+    const distCard = wrap.closest('.dom_inner');
     if (distCard) {
         let subEl = distCard.querySelector('.g_dist_metric_sub');
         if (!subEl) {
             subEl = document.createElement('p');
             subEl.className = 'g_dist_metric_sub';
-            subEl.style.cssText = 'font-size:0.82rem;color:#94a3b8;margin:-0.3rem 0 0.8rem;font-weight:500;';
+            subEl.style.cssText = 'font-size:1.15rem;color:#94a3b8;margin:-0.2rem 0 0.8rem;font-weight:500;';
             const h2 = distCard.querySelector('h2');
             const fixedP = distCard.querySelector('p:not(.g_dist_metric_sub)');
             if (fixedP) fixedP.after(subEl); else if (h2) h2.after(subEl);
@@ -2323,13 +2441,12 @@ function _buildDistanceChart(cumAgg, metric) {
         subEl.innerHTML = `Theo: <strong style="color:#475569;">${metInfo.label}</strong>`;
     }
 
-    const buckets = _DIST_ORDER.filter(d => cumAgg[d]);
+    const buckets = cumAgg ? _DIST_ORDER.filter(d => cumAgg[d]) : [];
     const allIncr = buckets.map((b, i) => {
         const cur = cumAgg[b];
         const prev = i > 0 ? cumAgg[buckets[i - 1]] : null;
         let val;
         if (metric === 'cpc') {
-            // CPC per ring: incremental cost / incremental clicks
             const iCost  = cur.cost  - (prev ? prev.cost  : 0);
             const iClick = cur.click - (prev ? prev.click : 0);
             val = iClick > 0 ? Math.max(0, iCost / iClick) : 0;
@@ -2338,7 +2455,21 @@ function _buildDistanceChart(cumAgg, metric) {
         }
         return { label: _DIST_LABEL[b] || b, val };
     }).filter(d => d.val > 0);
-    if (!allIncr.length) return;
+
+    let emptyEl = wrap.querySelector('.g_dist_empty');
+    if (!allIncr.length) {
+        if (ctx) ctx.style.display = 'none';
+        if (!emptyEl) {
+            emptyEl = document.createElement('div');
+            emptyEl.className = 'g_dist_empty';
+            emptyEl.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.8rem;padding:2rem;text-align:center;color:#94a3b8;';
+            emptyEl.innerHTML = '<i class="fa-solid fa-location-crosshairs" style="font-size:2.6rem;color:#cbd5e1;"></i><div style="font-size:1.3rem;font-weight:700;color:#475569;">Chưa có dữ liệu bán kính</div><div style="font-size:1.15rem;max-width:24rem;line-height:1.5;">Áp dụng cho chiến dịch có gắn địa điểm cửa hàng (Location Extension).</div>';
+            wrap.appendChild(emptyEl);
+        }
+        return;
+    }
+    if (emptyEl) emptyEl.remove();
+    if (ctx) ctx.style.display = '';
 
     // Sort descending, keep top 7 highest
     const top7 = [...allIncr].sort((a, b) => b.val - a.val).slice(0, 7);
