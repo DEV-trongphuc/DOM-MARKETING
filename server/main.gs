@@ -1067,6 +1067,61 @@ function previewOfflineConversionsFromSheet() {
   return uploadOfflineConversionsFromSheet(true);
 }
 
+function _discoverCandidateLoginIds(targetCustomerId, devToken) {
+  const token = ScriptApp.getOAuthToken();
+  const candidates = [];
+  const addId = (id) => {
+    const clean = String(id || "").replace(/-/g, "").trim();
+    if (clean && !candidates.includes(clean)) candidates.push(clean);
+  };
+
+  try {
+    const listResp = UrlFetchApp.fetch(`${GADS_API_BASE}/customers:listAccessibleCustomers`, {
+      method: "get",
+      headers: {
+        "Authorization": "Bearer " + token,
+        "developer-token": devToken || CONFIG.DEVELOPER_TOKEN
+      },
+      muteHttpExceptions: true
+    });
+    if (listResp.getResponseCode() === 200) {
+      const listJson = JSON.parse(listResp.getContentText() || "{}");
+      const ids = (listJson.resourceNames || []).map(r => String(r).split("/").pop());
+      console.log("🔑 Accessible Google Ads IDs:", ids.join(", "));
+      // Check which accessible ID is a manager managing targetCustomerId
+      ids.forEach(accId => {
+        if (accId === targetCustomerId) { addId(accId); return; }
+        try {
+          const q = `SELECT customer_client.id, customer_client.manager FROM customer_client WHERE customer_client.id = ${targetCustomerId} LIMIT 1`;
+          const r = UrlFetchApp.fetch(`${GADS_API_BASE}/customers/${accId}/googleAds:searchStream`, {
+            method: "post",
+            headers: {
+              "Authorization": "Bearer " + token,
+              "developer-token": devToken || CONFIG.DEVELOPER_TOKEN,
+              "login-customer-id": accId,
+              "Content-Type": "application/json"
+            },
+            payload: JSON.stringify({ query: q }),
+            muteHttpExceptions: true
+          });
+          if (r.getResponseCode() === 200) {
+            const body = JSON.parse(r.getContentText() || "[]");
+            const hasMatch = (Array.isArray(body) ? body : [body]).some(b => (b.results || []).length > 0);
+            if (hasMatch) addId(accId);
+          }
+        } catch (_) {}
+      });
+      ids.forEach(addId);
+    }
+  } catch (e) {
+    console.warn("listAccessibleCustomers error:", e.message);
+  }
+
+  addId(CONFIG.LOGIN_CUSTOMER_ID);
+  addId(targetCustomerId);
+  return candidates;
+}
+
 /**
  * Đẩy toàn bộ lead có gclid/gbraid/wbraid chưa upload từ tab "website" lên Google Ads
  * thông qua Google Data Manager API v1 (events:ingest).
@@ -1089,12 +1144,29 @@ function uploadOfflineConversionsFromSheet(dryRun) {
   if (!actionId) throw new Error("Không lấy được Conversion Action ID.");
 
   const customerId = OFFLINE_CONVERSION_CONFIG.CUSTOMER_ID.replace(/-/g, "");
-  const loginId = (CONFIG.LOGIN_CUSTOMER_ID || "").replace(/-/g, "") || customerId;
   const endpoint = "https://datamanager.googleapis.com/v1/events:ingest";
+  const token = ScriptApp.getOAuthToken();
   const authHeaders = {
-    "Authorization": "Bearer " + ScriptApp.getOAuthToken(),
+    "Authorization": "Bearer " + token,
     "Content-Type": "application/json"
   };
+
+  // Kiểm tra nhanh token hiện tại đã có scope datamanager chưa
+  try {
+    const ti = UrlFetchApp.fetch("https://oauth2.googleapis.com/tokeninfo?access_token=" + encodeURIComponent(token), { muteHttpExceptions: true });
+    if (ti.getResponseCode() === 200) {
+      const scopeStr = JSON.parse(ti.getContentText() || "{}").scope || "";
+      console.log("🔐 Token scopes:", scopeStr);
+      if (!scopeStr.includes("datamanager")) {
+        throw new Error('Token OAuth chưa có quyền "https://www.googleapis.com/auth/datamanager". Hãy kiểm tra appsscript.json đã lưu đúng scope và chạy revokeOAuth() rồi chạy lại để cấp quyền mới.');
+      }
+    }
+  } catch (scopeErr) {
+    if (scopeErr.message && scopeErr.message.includes("datamanager")) throw scopeErr;
+  }
+
+  const candidateLogins = [null, ..._discoverCandidateLoginIds(customerId)];
+  console.log("🔍 Thử các loginAccount:", candidateLogins.map(x => x || "(none)").join(", "));
 
   let uploadedCount = 0;
   let failedCount = 0;
@@ -1108,7 +1180,6 @@ function uploadOfflineConversionsFromSheet(dryRun) {
       else if (l.gbraid) adIds.gbraid = l.gbraid;
       else if (l.wbraid) adIds.wbraid = l.wbraid;
 
-      // Data Manager API dùng chuẩn RFC 3339 (có chữ T giữa ngày và giờ)
       const rfc3339Ts = String(l.conversionDateTime).replace(" ", "T");
       return {
         eventTimestamp: rfc3339Ts,
@@ -1120,30 +1191,34 @@ function uploadOfflineConversionsFromSheet(dryRun) {
       };
     });
 
-    const buildPayload = (loginAccId) => ({
-      destinations: [{
+    const buildPayload = (loginAccId) => {
+      const dest = {
         operatingAccount: { accountType: "GOOGLE_ADS", accountId: customerId },
-        loginAccount: { accountType: "GOOGLE_ADS", accountId: loginAccId },
         productDestinationId: String(actionId)
-      }],
-      validateOnly: isDry,
-      events: events
-    });
+      };
+      if (loginAccId) {
+        dest.loginAccount = { accountType: "GOOGLE_ADS", accountId: loginAccId };
+      }
+      return {
+        destinations: [dest],
+        validateOnly: isDry,
+        events: events
+      };
+    };
 
-    let resp = UrlFetchApp.fetch(endpoint, {
-      method: "post",
-      headers: authHeaders,
-      payload: JSON.stringify(buildPayload(loginId)),
-      muteHttpExceptions: true
-    });
-
-    if ((resp.getResponseCode() === 403 || resp.getResponseCode() === 400) && loginId !== customerId) {
+    let resp = null;
+    for (const loginOpt of candidateLogins) {
       resp = UrlFetchApp.fetch(endpoint, {
         method: "post",
         headers: authHeaders,
-        payload: JSON.stringify(buildPayload(customerId)),
+        payload: JSON.stringify(buildPayload(loginOpt)),
         muteHttpExceptions: true
       });
+      if (resp.getResponseCode() === 200) {
+        console.log(`✅ Khớp loginAccount: ${loginOpt || "(none)"}`);
+        break;
+      }
+      if (resp.getResponseCode() !== 403) break;
     }
 
     const code = resp.getResponseCode();
